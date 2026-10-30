@@ -8,10 +8,13 @@
 | GADIS Local Path | 대화 기반 재구성 | 경로 선택 로직, Pure Pursuit, U-turn 처리 기록 | Python 4개 통과, ROS 빌드 미확인 |
 | Capstone 혼잡도 예측 | 원본 확인 후 개정 | [팀 저장소 Jongp](https://github.com/ahffkrmsidQKffl/Jongp) ai/src/train.py, score.py | Python 8개 통과, 실제 데이터 검증 미완료 |
 | Beyless 인턴 — LIO-SAM | 실제 작업 원본 | 매핑·평가 코드, 실행 로그, 결과 지표 (rosbag 제외) | Python 77개 통과, 리포트 수치 78개 출처 검증, ROS 2 Humble 실행 |
-| MORAI·Beyless 인턴 (그 외) | 문서만 | 이력서와 과거 개발 기록 | 소스 미등록 |
+| MORAI OpenSCENARIO | 대화 기반 재구성 | 2025.02 대화의 이벤트·파라미터 구조, OpenSCENARIO 예제 | XML·로컬 참조 검사, Python 12개 통과, XSD/ScenarioRunner 미검증 |
+| Beyless 인턴 — 논문 리뷰 | 문서만 | 이력서와 과거 개발 기록 | 소스 미등록 |
 | Beyless 정규직 | 폴더만 | 프로젝트 분류 | 소스 미등록 |
 | 기타 경진대회 | 폴더만 | 참가 내역 | 자료 추가 전 |
 
 캡스톤의 기존 랜덤 분할, 초기 점유율 70% 가정, 미래 시각 입·출차량 사용 문제는 그대로 가져오지 않았다. 수정 내용은 [Capstone README](01_university/Capstone/parking-congestion-prediction/README.md)에 적었다.
+
+MORAI 예제의 검사 범위와 맵·시뮬레이터 미검증 항목은 [검증 기록](02_internships/MORAI/openscenario-safety-validation/VALIDATION.md)에 남겼다.
 
 실차나 시뮬레이터 실행 여부는 Python 단위 테스트와 별도로 관리한다. 회사 관련 자료는 공개 권한을 확인하기 전까지 올리지 않는다.
