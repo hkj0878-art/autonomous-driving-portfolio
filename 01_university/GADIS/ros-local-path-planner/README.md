@@ -1,32 +1,23 @@
-# ROS Local Path Planner — GADIS (Reconstruction)
+# Local Path 선택 및 경로 추종
 
-**과거 대화의 설계와 오류 수정 내용을 참고해 새로 작성한 예제이며, 원본 실차 코드가 아닙니다.**
+주행 구간에 따라 입력 경로를 전환하는 ROS 노드와 Pure Pursuit 수식을 정리했다. 일반 주행, U-turn, 주차 미션에서 경로를 선택하고 필요하면 기존 경로로 복귀하는 구조다.
 
-## What is included
+## 코드 구성
 
-- `ros1_ws/src/gadis_local_path/src/localpath_pub.cpp`: ROS1 주행 상태에 따른 Path selection 및 빈 경로/frame mismatch 가드 예제
-- `gadis_core/control.py`: Pure Pursuit steering 계산, Menger curvature, 곡률 기반 Lookahead Distance
-- `gadis_core/planning.py`: 테스트용 공통 `Pose2D` 및 좌표 변환 코드 (Parking과 일부 중복)
-- `tests/`: 조향 방향, LD bounds, 곡률 및 좌표 변환 검증
+- ros1_ws/src/gadis_local_path/src/localpath_pub.cpp — 경로 후보 선택 및 빈 경로/frame 검사
+- gadis_core/control.py — Pure Pursuit, 세 점 곡률(Menger curvature), 곡률에 따른 LD 조절
+- tests/ — 조향 방향·곡률·LD·좌표계 변환 검사
 
-### ROS1 example interfaces (unverified integration)
-
-| Topic | Message | Role |
-| --- | --- | --- |
-| `/global_path`, `/lane_path`, `/uturn_path`, `/avoidance_path`, `/parking_path` | `nav_msgs/Path` | 경로 후보 입력 |
-| `/gps_utm_odom` | `nav_msgs/Odometry` | 차량 위치 입력 |
-| `/region` | `std_msgs/String` | 주행 상태(`go`, `parking_1`~`parking_4`, `stop`, `uturn`) |
-| `/local_path`, `/selected_path` | `nav_msgs/Path` | 선택된 참조 경로 출력 |
-| `/parking_path_number` | `std_msgs/Int32` | 정지/주차 관련 코드 예시 출력 |
-| `/parking_gear` | `std_msgs/String` | 기어 상태 예시 출력 |
-
-**주의:** 거리 기반의 회피 경로 선택은 실제 장애물 충돌 판단을 대체하지 않습니다. 주차 노드와 동일한 `/parking_gear`를 발행할 경우 다중 Publisher 충돌 가능성이 있습니다. 실제 통합 시 단일 소유자 또는 명시적 arbitration이 필수입니다.
-
-## Offline validation
-
-```bash
-python -m pip install pytest
+~~~bash
 PYTHONPATH=. python -m pytest -q tests
-```
+~~~
 
-Python 3.13.5에서 오프라인 테스트를 수행했습니다. 코드 문법은 Python 3.9+를 대상으로 합니다. ROS1 Noetic + catkin이 설치된 별도 시스템에서 `cd ros1_ws && catkin_make`를 사용해 빌드 검증이 필요합니다. 실제 차량 제어 출력으로 사용해서는 안 됩니다.
+Python 오프라인 테스트 4개가 통과했다. ROS1 노드는 아직 실제 Noetic 환경에서 빌드·연동 검증을 하지 못했다.
+
+## 입력과 주의사항
+
+C++ 예제는 /global_path, /lane_path, /uturn_path, /avoidance_path, /parking_path에서 경로를 받고 /region 상태를 참고한다. 선택 결과는 /local_path로 발행한다.
+
+이 코드는 당시 대화에서 확인된 역할을 바탕으로 다시 구현한 것이다. 특히 장애물 회피 경로를 선택하는 부분은 후보 경로와의 거리 기준 예제이며, 충돌 위험을 판단하는 완성된 회피 Planner가 아니다.
+
+주차 경로 노드와 /parking_gear 발행 역할이 겹치므로 실제 시스템에 통합할 때 단일 기어 명령 주체를 정해야 한다. 자세한 검증 범위는 [GADIS 검증 기록](../VALIDATION.md)에 적었다.
