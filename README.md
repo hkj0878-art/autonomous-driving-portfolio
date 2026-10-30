@@ -22,9 +22,9 @@ GADIS 소스는 이전 작업 기록을 참고해 다시 작성했다. ROS1 C++�
 | --- | --- |
 | [MORAI](02_internships/MORAI/openscenario-safety-validation/) | OpenSCENARIO 차선 변경·정지 이벤트, 속도 파라미터 스윕 (재구성 XML·테스트) |
 | [Beyless — SLAM](02_internships/Beyless/lio-sam-integration/) | LIO-SAM 매핑, RTK GNSS 기준 ATE 0.31 m, 지도 기반 재주행 위치추정 (코드·결과 정리) |
-| [Beyless — 논문 리뷰](02_internships/Beyless/e2e-paper-reviews/) | MTR, DistillDrive, E2E 모델 구조 분석 |
+| [Beyless — 논문 리뷰](02_internships/Beyless/e2e-paper-reviews/) | MTR/MTR++, HiVT, DistillDrive 구조 및 공개 코드 분석 (리뷰 문서 정리) |
 
-SLAM 폴더에는 직접 작성한 파이프라인 코드와 결과를 올렸고, 원본 주행 데이터는 포함하지 않았다. MORAI 폴더에는 대화 기록을 참고해 다시 작성한 XML과 검증 스크립트를 올렸다. MORAI 시뮬레이터 실행은 확인하지 못했다. 논문 리뷰 폴더는 아직 정리 전이다.
+SLAM 폴더에는 직접 작성한 파이프라인 코드와 결과를 올렸고, 원본 주행 데이터는 포함하지 않았다. MORAI 폴더에는 대화 기록을 참고해 다시 작성한 XML과 검증 스크립트를 올렸다. MORAI 시뮬레이터 실행은 확인하지 못했다. 논문 리뷰 폴더에는 공개 논문·공식 저장소 분석과 입력 데이터 파이프라인 점검 내용을 정리했으며, 회사 내부 코드는 포함하지 않았다.
 
 ## 정규직 경력 — Beyless
 
