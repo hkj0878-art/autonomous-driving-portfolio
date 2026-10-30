@@ -27,7 +27,7 @@ python -m pip install pytest
 PYTHONPATH=. python -m pytest -q tests
 ```
 
-Python 3.9+에서 테스트했습니다. `ros1_ws`는 ROS1 Noetic/catkin이 설치된 별도 환경에서 다음과 같이 빌드 확인이 필요합니다.
+Python 3.13.5에서 오프라인 테스트를 수행했습니다. 코드 문법은 Python 3.9+를 대상으로 합니다. `ros1_ws`는 ROS1 Noetic/catkin이 설치된 별도 환경에서 다음과 같이 빌드 확인이 필요합니다.
 
 ```bash
 cd ros1_ws
