@@ -1,12 +1,16 @@
-# Source Recovery Ledger
+# 코드 정리 기록
 
-현재 GADIS의 두 프로젝트에는 대화 기반 재구성 코드와 테스트가 업로드되어 있습니다. 다른 프로젝트는 폴더 및 설명 문서만 준비되어 있습니다.
+이 저장소의 코드는 두 가지 경로로 정리하고 있다. 실제 원본을 찾은 경우는 그 출처를 연결하고, 원본 파일이 없는 경우는 당시 대화에서 확인되는 동작을 기준으로 새로 작성한다. 두 경우를 같은 '최종 원본'으로 취급하지 않는다.
 
-- **Original:** 당시의 실제 파일 및 버전이 확인된 코드
-- **Reconstructed:** 과거 대화/설명 기반으로 신규 구현한 코드
-- **Planned:** 분류용 폴더만 준비한 상태
+| 프로젝트 | 현재 상태 | 확인한 자료 | 검증 |
+| --- | --- | --- | --- |
+| GADIS 자율주차 | 대화 기반 재구성 | 주차 목표점, Hybrid A*/Bézier, 상태 전환 기록 | Python 8개 통과, ROS 빌드 미확인 |
+| GADIS Local Path | 대화 기반 재구성 | 경로 선택 로직, Pure Pursuit, U-turn 처리 기록 | Python 4개 통과, ROS 빌드 미확인 |
+| Capstone 혼잡도 예측 | 원본 확인 후 개정 | [팀 저장소 Jongp](https://github.com/ahffkrmsidQKffl/Jongp) ai/src/train.py, score.py | Python 8개 통과, 실제 데이터 검증 미완료 |
+| MORAI·Beyless 인턴 | 문서만 | 이력서와 과거 개발 기록 | 소스 미등록 |
+| Beyless 정규직 | 폴더만 | 프로젝트 분류 | 소스 미등록 |
+| 기타 경진대회 | 폴더만 | 참가 내역 | 자료 추가 전 |
 
-- **Reconstructed + Offline Tested:** GADIS autonomous-parking-planner (8 Python tests), ros-local-path-planner (4 Python tests). ROS1 빌드/통합 및 실차 검증 **미완료**.
-- **Planned:** Capstone, MORAI, Beyless 인턴 및 정규직 프로젝트, 기타 대회.
+캡스톤의 기존 랜덤 분할, 초기 점유율 70% 가정, 미래 시각 입·출차량 사용 문제는 그대로 가져오지 않았다. 수정 내용은 [Capstone README](01_university/Capstone/parking-congestion-prediction/README.md)에 적었다.
 
-자세한 검증 범위와 복구 한계는 [GADIS VALIDATION.md](01_university/GADIS/VALIDATION.md)를 참조합니다. 프로젝트마다 최종 원본, 사용 조건, 코드 소유권과 검증 수준을 확인 후 상태를 변경합니다.
+실차나 시뮬레이터 실행 여부는 Python 단위 테스트와 별도로 관리한다. 회사 관련 자료는 공개 권한을 확인하기 전까지 올리지 않는다.
