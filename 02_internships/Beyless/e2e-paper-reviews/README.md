@@ -1,7 +1,7 @@
-# E2E Paper Reviews
+# E2E / Motion Prediction 논문 정리
 
-**구분:** Beyless 인턴십
+인턴 기간 중 읽고 실험에 참고했던 Motion Prediction 논문과 구현 구조를 정리할 공간이다.
 
-MTR, DistillDrive 등 Motion Prediction 및 End-to-End Driving 관련 논문, 모델 아키텍처 및 데이터 입력 파이프라인 분석 기록을 정리합니다.
+MTR, DistillDrive의 입력 데이터 구성, 모델 구조, 학습 단계를 중심으로 자료를 모을 예정이다.
 
-**상태:** 리뷰 저장소의 초기 구조만 만들었습니다. 추후 논문별 요약과 공개된 출처만 추가할 예정입니다.
+현재는 폴더만 마련했다. 논문 요약 및 공개 코드 분석은 검토 후 추가한다.
