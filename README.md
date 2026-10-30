@@ -1,69 +1,44 @@
-# Autonomous Driving & AI Engineering Portfolio
+# 자율주행 개발 프로젝트
 
-자율주행 개발 관련 학부 프로젝트, 인턴십, 정규직 경력 및 경진대회 기록을 정리한 포트폴리오입니다.
+학교에서 진행한 자율주행 프로젝트부터 인턴십, 현재 업무까지 개발 경험을 정리하는 저장소입니다. 경로 계획과 제어, 센서 기반 위치 추정, 학습 기반 주행 모델을 중심으로 작성하고 있습니다.
 
-> **현재 상태: GADIS의 Parking / Local Path 재구성 코드를 업로드했고, Python 오프라인 테스트 12개가 통과했습니다.** ROS1 빌드·통합·실차 시험은 아직 진행하지 않았습니다. 나머지 프로젝트는 문서·폴더만 준비되어 있습니다. 재구성 코드는 실제 최종 원본과 구분합니다.
+전체 프로젝트가 모두 공개된 상태는 아닙니다. 학교에서 작성한 코드는 원본을 확인하거나 다시 정리한 뒤 추가하고, 회사 업무는 공개 가능한 범위의 설명만 우선 남깁니다.
 
-## 01 — University (대학생 활동)
+## 대학생 활동
 
-[GADIS 소스 및 검증 기록](01_university/GADIS/VALIDATION.md) — Python 핵심 알고리즘·ROS1 예제·테스트 포함 (재구성본, 실차 사용 불가).
-
-| 구분 | 프로젝트 | 내용 |
+| 프로젝트 | 주요 내용 | 정리 상태 |
 | --- | --- | --- |
-| GADIS | [Autonomous Parking Planner](01_university/GADIS/autonomous-parking-planner/README.md) | Hybrid A*, Bézier, 전/후진 주차 경로 계획 |
-| GADIS | [ROS Local Path Planner](01_university/GADIS/ros-local-path-planner/README.md) | Path Arbitration, 장애물 회피, U-turn, Pure Pursuit |
-| Capstone | [Parking Congestion Prediction](01_university/Capstone/parking-congestion-prediction/README.md) | XGBoost 기반 주차장 혼잡도 예측 |
+| [GADIS — 자율주차](01_university/GADIS/autonomous-parking-planner/) | Hybrid A*, Bézier, 전·후진 주차 | 코드·테스트 정리 |
+| [GADIS — Local Path](01_university/GADIS/ros-local-path-planner/) | 주행 상태별 경로 선택, Pure Pursuit | 코드·테스트 정리 |
+| [Capstone — 주차장 혼잡도 예측](01_university/Capstone/parking-congestion-prediction/) | XGBoost, 시간별 주차 데이터, 추천 점수 | 코드·테스트 정리 |
 
-## 02 — Internships (인턴 활동)
+GADIS 소스는 이전 작업 기록을 참고해 다시 작성했다. ROS1 C++은 아직 빌드 및 차량 연동까지 검증한 상태는 아니다.
 
-| 소속 | 프로젝트 | 내용 |
-| --- | --- | --- |
-| MORAI | [OpenSCENARIO Safety Validation](02_internships/MORAI/openscenario-safety-validation/README.md) | ASAM OpenSCENARIO 테스트 시나리오 |
-| Beyless | [LIO-SAM Integration](02_internships/Beyless/lio-sam-integration/README.md) | LiDAR–IMU–GNSS, Mapping / Localization |
-| Beyless | [E2E Paper Reviews](02_internships/Beyless/e2e-paper-reviews/README.md) | MTR / DistillDrive 논문 및 구조 분석 |
+캡스톤은 [기존 팀 저장소](https://github.com/ahffkrmsidQKffl/Jongp)에서 실제 Python 코드를 확인해 학습/추론 부분을 다시 정리했다. 원본 데이터를 이용한 성능 재평가는 아직 진행하지 않았다.
 
-## 03 — Career (Beyless)
+## 인턴십
 
-정규직 경력 프로젝트는 **주제별 작업 공간만 구성**했습니다. 소스코드와 내부 실험 자료는 공개 범위를 검토한 뒤 추가합니다.
+| 소속 | 내용 |
+| --- | --- |
+| [MORAI](02_internships/MORAI/openscenario-safety-validation/) | OpenSCENARIO 기반 주행 검증 시나리오 |
+| [Beyless — SLAM](02_internships/Beyless/lio-sam-integration/) | LIO-SAM, LiDAR–IMU–GNSS, ROS1/ROS2 |
+| [Beyless — 논문 리뷰](02_internships/Beyless/e2e-paper-reviews/) | MTR, DistillDrive, E2E 모델 구조 분석 |
 
-- [Alpamayo Action Expert](03_career/Beyless/alpamayo-action-expert/README.md) — Flow Matching / Consistency Distillation / Step Reduction
-- [E2E Vehicle Integration](03_career/Beyless/e2e-vehicle-integration/README.md) — Trajectory 및 차량 제어 연동
-- [GRPO Trajectory Optimization](03_career/Beyless/grpo-trajectory-optimization/README.md) — Reward 및 경로 평가
-- [MPC Evaluation Agent](03_career/Beyless/mpc-evaluation-agent/README.md) — 제어 성능 평가와 실험 자동화
+현재는 작업 내용을 정리할 폴더만 만들어 두었다. 회사 코드와 내부 데이터는 올리지 않았다.
 
-## 04 — Other Competitions (기타 자율주행 대회)
+## 정규직 경력 — Beyless
 
-[대회별 참여 기록](04_other_competitions/README.md)을 정리할 공간입니다. GADIS와 중복되는 코드는 연결만 유지합니다.
+- [Alpamayo Action Expert](03_career/Beyless/alpamayo-action-expert/)
+- [E2E Vehicle Integration](03_career/Beyless/e2e-vehicle-integration/)
+- [GRPO Trajectory Optimization](03_career/Beyless/grpo-trajectory-optimization/)
+- [MPC Evaluation Agent](03_career/Beyless/mpc-evaluation-agent/)
 
-## Repository tree
+각 폴더는 주제별로 분류하기 위한 공간이다. 자료는 공개 범위를 확인하면서 추가할 계획이다.
 
-```text
-autonomous-driving-portfolio/
-├── 01_university/
-│   ├── GADIS/
-│   │   ├── autonomous-parking-planner/
-│   │   └── ros-local-path-planner/
-│   └── Capstone/
-│       └── parking-congestion-prediction/
-├── 02_internships/
-│   ├── MORAI/
-│   │   └── openscenario-safety-validation/
-│   └── Beyless/
-│       ├── lio-sam-integration/
-│       └── e2e-paper-reviews/
-├── 03_career/
-│   └── Beyless/
-│       ├── alpamayo-action-expert/
-│       ├── e2e-vehicle-integration/
-│       ├── grpo-trajectory-optimization/
-│       └── mpc-evaluation-agent/
-└── 04_other_competitions/
-```
+## 기타 대회
 
-## Source verification policy
+[대회 참가 기록](04_other_competitions/)은 프로젝트 구현과 중복되지 않도록 결과 자료 위주로 정리할 예정이다.
 
-- **Original:** 실제 최종 원본과 버전을 확인한 소스
-- **Reconstructed:** 이전 작업 기록에서 알고리즘을 바탕으로 새로 구현한 예제
-- **Planned:** 구조와 문서만 마련한 프로젝트
-- 단위 테스트 통과와 ROS 빌드/시뮬레이션/실차 검증을 구분합니다.
-- 회사의 비공개 코드, 데이터, 고객 정보, 모델 가중치 및 인증정보를 업로드하지 않습니다.
+---
+
+코드의 출처와 검증 상태는 [정리 기록](RECOVERY_LEDGER.md)에 남겼다. 단위 테스트 통과 여부와 ROS 빌드·실차 검증 여부는 별도로 표시한다.
