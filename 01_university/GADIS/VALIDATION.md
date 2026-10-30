@@ -10,7 +10,7 @@
 - [x] Hybrid A* 입력 파라미터 검증 보강 및 시작·목표 점유 셀 처리 보강
 - [x] 주차 상태 머신 임계치 검증 보강
 - [x] ROS1 주차 C++의 명시적인 `<algorithm>` 헤더 및 catkin C++14 컴파일 옵션 추가
-- [x] Python 오프라인 단위 테스트: Parking 8개 / Local Path 4개
+- [x] Python 3.13.5 + pytest 9.0.2 오프라인 단위 테스트: Parking 8개 / Local Path 4개
 - [x] Python 소스 Syntax/Compileall 검사
 - [x] ROS `package.xml` 구문 검사 및 패키지/프로젝트명 일치 확인
 - [ ] ROS1 Noetic `catkin_make` 실제 컴파일: **미실시 (현재 실행 환경에 ROS가 없음)**
