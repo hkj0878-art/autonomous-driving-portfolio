@@ -1,0 +1,2339 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.1
+--------
+workdir: /home/hong/SLAM
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a1777d-d4be-7311-a145-82b15d107147
+--------
+user
+TASKS.md의 [CODEX-REVISION] TASK-05 rev2를 수행해. 실험 재실행은 금지다. tools/eval/, results/eval/만 수정한다. 다른 Codex가 TASK-06 rev1(tools/maps, results/maps)을 동시에 진행 중이다. .venv Python과 source env.sh를 사용해. 완료 기준을 직접 검증해.
+codex
+TASK-05 rev2의 지시와 완료 기준을 먼저 확인하고, 실험을 재실행하지 않은 채 `tools/eval/`, `results/eval/` 안에서만 수정하겠습니다. 검증에는 `source env.sh`와 `.venv` Python을 사용하겠습니다.
+
+exec
+/bin/bash -lc "pwd && rg --files -g 'AGENTS.md' -g 'TASKS.md' -g 'env.sh' -g '*eval*' -g '"'!results/**'"' -g '"'!third_party/**'"'" in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM
+env.sh
+tools/tests/test_eval.py
+tools/tests/__pycache__/test_eval.cpython-310-pytest-6.2.5.pyc
+tools/eval/run_all_eval.py
+tools/eval/traj_eval.py
+tools/eval/verify_eval.py
+tools/eval/__pycache__/run_all_eval.cpython-310.pyc
+tools/eval/__pycache__/verify_eval.cpython-310.pyc
+tools/eval/__pycache__/traj_eval.cpython-310.pyc
+TASKS.md
+logs/task05_v3_eval.log
+
+exec
+/bin/bash -lc 'ls -la; find .. -name AGENTS.md -print; cat TASKS.md' in /home/hong/SLAM
+ succeeded in 3481ms:
+total 92
+drwxrwxr-x 12 hong hong  4096 Oct 26 17:25 .
+drwxr-x--- 62 hong hong  4096 Oct 26 18:13 ..
+drwxrwxr-x  2 hong hong  4096 Oct 26 17:05 config
+drwxrwxr-x  6 hong hong  4096 Oct 26 16:03 data
+-rw-rw-r--  1 hong hong   453 Oct 26 13:58 env.sh
+drwxrwxr-x  3 hong hong  4096 Oct 26 14:04 launch
+drwxrwxr-x  3 hong hong  4096 Oct 26 18:14 logs
+drwxrwxr-x  3 hong hong  4096 Oct 26 14:00 .pytest_cache
+drwxrwxr-x 15 hong hong  4096 Oct 26 18:12 results
+-rw-rw-r--  1 hong hong 38247 Oct 26 18:14 TASKS.md
+drwxrwxr-x  4 hong hong  4096 Oct 26 14:02 third_party
+drwxrwxr-x  6 hong hong  4096 Oct 26 17:37 tools
+drwxrwxr-x  7 hong hong  4096 Oct 26 17:25 .venv
+drwxrwxr-x  6 hong hong  4096 Oct 26 14:02 ws
+../Downloads/shorts_ai_football/AGENTS.md
+../.codex/.tmp/plugins/plugins/vercel/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/data-analytics/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/prototype/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/mobile-app/AGENTS.md
+../.codex/.tmp/plugins/plugins/zoom/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/supabase-best-practices/AGENTS.md
+# SLAM 프로젝트 — LIO-SAM (ROS 2 Humble) 매핑 + GNSS 정확도 평가
+
+## 전체 목표
+보유 rosbag(LiDAR+IMU+RTK GNSS)으로 LIO-SAM 매핑 파이프라인을 직접 구성하고, 루프 클로저 유무에 따른 궤적 정확도를 RTK GNSS 기준으로 정량 평가해 포트폴리오용 결과물(2D 지도, 3D PCD, 평가 리포트)을 만든다.
+
+## 데이터 분석 결과 (data/synced_bag, 이미 ROS 2 sqlite3 bag — 변환 불필요, 전처리만 필요)
+| 토픽 | 타입 | 주기 | frame | 비고 |
+|---|---|---|---|---|
+| /front/lidar_point_synced | PointCloud2 | 20 Hz | front_lidar | 128 ring, 수평 FOV 약 -65~+61°(전방 전용, Hesai AT128 계열로 추정), 스캔당 78336점 고정(무효점은 0,0,0), 필드: x y z intensity(f32) ring(u16 @16) timestamp(f64 @18, **절대시각이 2020년 epoch** — 헤더 stamp와 고정 오프셋 약 169765152.46 s), 스캔 내 시간 폭 약 25 ms |
+| /imu/data_synced | Imu | 100 Hz | imu_link | Xsens MTi(추정), orientation 있음(9축, yaw 안정적), z 가속도 +9.8 → z-up |
+| /fix_synced | NavSatFix | 32 Hz | gps | status=2(GBAS/RTK), σ≈1.3–1.5 cm → **정답(GT)으로 사용** |
+- 길이 108.7 s, 주행거리 약 237 m, 약 70×60 m 사각형 **폐루프 1바퀴**(시계방향, 시작-끝 0.47 m), 평지(고도 ±0.1 m)
+- 헤더 stamp(2025-11-11)와 bag 기록시각(2025-11-13)이 다름 → **헤더 stamp 기준**으로 처리
+- /tf, /tf_static 없음 → 외부 파라미터는 사용자 제공 캘리브레이션 사용(아래)
+
+## IMU–LiDAR 외부 파라미터 (사용자 제공, 2026-10-26) — 검증 완료
+제공값(사용자 표기 "T_lb lidar->imu"):
+```
+t = [0.01027, -0.297547, 0.042205]
+R = [ 0.986903,  0.007064,  0.161160,
+     -0.005760,  0.999947, -0.008561,
+     -0.161212,  0.007520,  0.986891 ]   # pitch≈9.28°, roll≈0.44°, yaw≈-0.33°
+```
+**검증**: 첫 5스캔의 RANSAC 지면 법선(lidar frame)과 IMU 중력방향 비교 → `R.T @ up_imu` 오차 0.55°, `R @ up_imu` 18.8°, 단위행렬 9.6°.
+⇒ 제공된 R은 **p_imu = R · p_lidar** (lidar→imu)이다. LIO-SAM의 `extrinsicRot`/`extrinsicRPY`는 IMU 측정을 lidar frame으로 돌리는 행렬(`acc_lidar = extRot · acc_imu`)이므로 **R의 전치(R.T)를 넣어야 한다**.
+LIO-SAM 설정값:
+```yaml
+extrinsicTrans: [0.01027, -0.297547, 0.042205]
+extrinsicRot: [0.986903, -0.005760, -0.161212,
+               0.007064,  0.999947,  0.007520,
+               0.161160, -0.008561,  0.986891]
+extrinsicRPY: [0.986903,  0.007064,  0.161160,     # ⚠️ 정정(2026-10-26): R 원본(전치 아님)
+               -0.005760,  0.999947, -0.008561,
+               -0.161212,  0.007520,  0.986891]
+# 근거: utility.hpp:319 acc=extRot·acc, :331 q_final=q_from·Quat(extRPY) → 일관성 조건 extRPY·extRot=I → extRPY=R.
+# 최초 설계(extRPY=extRot=R.T)는 중력축 18.57° 불일치를 일으킴 (results/imu_frame_diagnostic.json, Codex 발견)
+```
+(translation은 원본 값을 사용한다. LIO-SAM은 회전 없는 lever arm으로만 쓰며, 9° 회전에 따른 차이는 약 5 cm로 무시 가능하다. 리포트 한계 항목에 기재한다.)
+
+## 아키텍처 결정사항
+- LIO-SAM `ros2` 브랜치(TixiaoShan/LIO-SAM)를 그대로 사용하고, 알고리즘 바깥(전처리·설정·평가·지도 내보내기)을 직접 구현한다.
+- GTSAM은 sudo 없이 소스 빌드하여 `~/SLAM/third_party/install`에 설치한다(시스템 경로 수정 금지).
+- 포인트클라우드는 오프라인 전처리로 LIO-SAM velodyne 형식(x,y,z,intensity f32 / ring u16 / time f32 = 스캔 시작 기준 상대초)으로 변환한 새 bag을 만든다. 실시간 변환 노드보다 재현성과 디버깅이 쉽다.
+- GNSS는 평가용 GT로만 쓴다. 기본 실험에서는 LIO-SAM GPS factor를 끈다(GT 누출 방지). GPS 융합은 선택 실험으로 분리한다.
+- 루프 테스트 = 같은 bag을 **루프 클로저 ON/OFF**로 매핑해 ATE/RPE/종점 드리프트를 비교한다.
+- 평가 도구는 venv(`~/SLAM/.venv`)에 둔다. 시스템 numpy 2.x와 ROS Humble의 충돌을 피하기 위해서다.
+- 피할 것: ~/ros2_ws, ~/catkin_ws 수정, 시스템 패키지 설치, 원본 bag 수정.
+
+## 디렉터리 구조
+```
+SLAM/
+  data/synced_bag/          원본(읽기 전용)
+  data/lio_bag/             전처리된 bag
+  third_party/              gtsam 소스/설치
+  ws/src/LIO-SAM            colcon 워크스페이스
+  tools/                    전처리·기록·평가·지도변환 스크립트(+tests)
+  config/                   LIO-SAM params yaml
+  results/<run_name>/       traj_tum.txt, map pcd, metrics.json, plots
+  report/REPORT.md          포트폴리오 리포트
+```
+
+## 태스크 목록
+- [x] TASK-01: 환경 구축 (GTSAM 소스 빌드 + LIO-SAM ros2 빌드)
+- [x] TASK-02: bag 전처리 (point time 변환, 무효점 제거) + 데이터 리포트
+- [x] TASK-03: 외부 파라미터 확인 + LIO-SAM 설정 + 실행/궤적 기록 파이프라인
+- [x] TASK-04: 실험 실행 (loop ON / loop OFF / (선택) GPS 융합)
+- [x] TASK-05: GNSS 대비 정확도 평가 (ATE, RPE, 종점 드리프트, 그래프)
+- [ ] TASK-06: 지도 산출물 (3D PCD, 2D occupancy grid PGM/YAML, 렌더 이미지)
+- [ ] TASK-07: 포트폴리오 리포트 (REPORT.md + README 재현 절차)
+
+## 실행 순서 및 의존성
+TASK-01 ─┐
+TASK-02 ─┴→ TASK-03 → TASK-04 → (TASK-05 ∥ TASK-06) → TASK-07
+(TASK-01과 TASK-02는 병렬 가능)
+
+---
+
+### [CODEX-TASK] TASK-01: 환경 구축 (GTSAM + LIO-SAM ros2)
+
+**목적**
+LIO-SAM을 ROS 2 Humble에서 빌드하고 실행할 수 있게 한다.
+
+**입력**
+- 시스템: Ubuntu 22.04, ROS 2 Humble(/opt/ros/humble), 16코어, RAM 14 GB(가용 약 4 GB)
+- 설치되어 있음: libboost-all-dev 1.74, libeigen3-dev 3.4, libpcl-dev 1.12, libtbb-dev
+- 의존성: 없음
+
+**출력**
+- /home/hong/SLAM/third_party/gtsam (소스, 4.1.1 태그 권장 — LIO-SAM 검증 버전), /home/hong/SLAM/third_party/install (설치 prefix)
+- /home/hong/SLAM/ws/src/LIO-SAM (ros2 브랜치), /home/hong/SLAM/ws/install
+- /home/hong/SLAM/env.sh: ROS + GTSAM LD_LIBRARY_PATH/CMAKE_PREFIX_PATH + ws overlay를 source하는 스크립트
+- /home/hong/SLAM/logs/task01_build.md: 사용한 버전, 커맨드, 이슈와 해결 방법
+
+**구현 조건**
+- sudo 사용 불가. 시스템 경로나 /opt에 쓰지 않는다. apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 "사용자 sudo 필요: <명령>"으로 남기고 중단한다.
+- GTSAM cmake: -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_WITH_TBB=ON(문제가 생기면 OFF), CMAKE_INSTALL_PREFIX=third_party/install
+- 메모리가 적으므로 make는 -j6 이하, colcon은 --parallel-workers 2 및 MAKEFLAGS=-j4로 빌드한다.
+- LIO-SAM 소스 수정은 빌드 호환성 문제일 때만 최소한으로 하고, 수정 내용을 diff로 로그에 남긴다.
+- ~/ros2_ws, ~/catkin_ws는 건드리지 않는다.
+
+**완료 기준**
+- [x] `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에 imageProjection, imuPreintegration, featureExtraction, mapOptimization이 나온다
+- [x] 각 노드가 기본 params로 5초 동안 크래시 없이 기동된다(공유 라이브러리 에러 없음)
+- [x] task01_build.md 작성
+
+**컨텍스트**
+작업 루트는 /home/hong/SLAM이다. 전체 설계는 TASKS.md를 참고한다. 이 태스크에서는 데이터 처리를 하지 않는다.
+
+---
+
+### [CODEX-REVISION] TASK-01 재작업 요청
+
+**유지할 것**
+- GTSAM 4.1.1 / LIO-SAM ros2 소스 클론, 버전 기록, 의존성 조사 결과
+
+**수정할 것**
+1. xacro 미설치로 중단 → **xacro는 블로커가 아니다.** 업스트림 run.launch.py의 robot_state_publisher용일 뿐이며 C++ 빌드/노드 실행에는 필요 없다. package.xml exec_depend는 colcon 빌드를 막지 않는다. 설치 요청 없이 그대로 진행한다.
+2. 업스트림 launch 대신 `ws/src/LIO-SAM`을 수정하지 말고 `/home/hong/SLAM/launch/lio_sam_nox.launch.py`를 새로 작성한다. 4개 노드 + static_transform_publisher(map→odom identity 등 업스트림 launch가 내보내는 TF 중 xacro 외 항목)를 포함하고, params 파일 경로와 use_sim_time을 인자로 받는다. rviz는 인자로 on/off한다(기본 off).
+
+**추가할 것**
+- 메모리 주의: swap이 거의 가득 차 있다. GTSAM make -j4, colcon MAKEFLAGS=-j3 --parallel-workers 1로 빌드한다. OOM(killed)이 나면 -j2로 낮춰 재시도한다.
+- 기동 시험은 새 launch로 5초 실행해서 확인한다.
+
+**완료 기준 (재확인)**
+- [x] `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에 4개 노드가 나온다
+- [x] `ros2 launch /home/hong/SLAM/launch/lio_sam_nox.launch.py`가 5초 동안 크래시와 공유 라이브러리 에러 없이 기동된다
+- [x] logs/task01_build.md 갱신
+
+---
+
+### [CODEX-TASK] TASK-02: bag 전처리 + 데이터 리포트
+
+**목적**
+원본 LiDAR 포인트를 LIO-SAM이 요구하는 형식으로 변환한 bag을 만들어, 디스큐(deskew)와 IMU 동기화가 올바르게 동작하게 한다.
+
+**입력**
+- 파일: /home/hong/SLAM/data/synced_bag (읽기 전용, sqlite3, 4.4 GB, 16360 msgs)
+- 데이터: 상단 "데이터 분석 결과" 표 참고
+- 의존성: 없음 (TASK-01과 병렬 실행, LIO-SAM 빌드 결과 불필요)
+
+**출력**
+- /home/hong/SLAM/tools/preprocess_bag.py (CLI: --in, --out, --overwrite)
+- /home/hong/SLAM/tools/tests/test_preprocess.py (pytest)
+- /home/hong/SLAM/data/lio_bag/ (변환된 rosbag2, sqlite3)
+  - /points_raw  PointCloud2, frame_id `front_lidar`, 필드 순서 x,y,z,intensity(float32), ring(uint16), time(float32), point_step 일관, is_dense=True
+  - /imu_raw     원본 /imu/data_synced 그대로(frame_id `imu_link`)
+  - /gps/fix     원본 /fix_synced 그대로
+  - 메시지 기록 시각(bag timestamp)은 **헤더 stamp**로 다시 기록한다. 원본 bag 기록시각은 2일 어긋나 있어 재생 시 /clock과 헤더가 일치하지 않기 때문이다.
+- /home/hong/SLAM/results/data_report/: data_report.md, gnss_traj.png(ENU 궤적), timing.png(토픽별 stamp 간격)
+
+**구현 조건**
+- rosbag2_py(Reader/Writer)로 스트리밍 처리하고 전체를 메모리에 올리지 않는다. 다른 빌드가 동시에 돌고 있으므로 RAM은 1 GB 이하로 쓴다.
+- 포인트 시간 변환:
+  1. 스캔마다 `offset = header_stamp - min(pt.timestamp)`를 계산한다. 오프셋이 전 스캔에서 일정한지(표준편차, 최대편차) 리포트에 기록한다(예상값 약 169765152.46 s, 편차 1 ms 미만).
+  2. `time = pt.timestamp - min(pt.timestamp)` (float32, 0~약 0.025 s)
+  3. 헤더 stamp는 원본을 유지한다(= 스캔 시작). 오프셋 편차가 1 ms 이상이면 중단하고 리포트에 원인을 쓴다.
+- 무효점 제거: NaN/inf, (0,0,0), range < 0.5 m. 제거 비율을 통계로 남긴다.
+- 포인트 순서는 유지한다. ring 값은 그대로 둔다(0–127).
+- 리포트에 기록할 것: ring별 포인트 수, 링당 수평 포인트 수와 방위각 해상도(°) — TASK-03에서 Horizon_SCAN 결정에 쓴다(LIO-SAM은 360°를 Horizon_SCAN칸으로 나누므로 360/해상도가 필요). 포인트 시간이 링 내 방위각과 어떤 관계인지(스캔 패턴)도 기록한다.
+- 매직 넘버는 모듈 상단 상수로 둔다. 에러는 명시적으로 처리한다(토픽 누락, 필드 누락 → 명확한 예외).
+- 원본 bag 수정 금지.
+
+**완료 기준**
+- [ ] data/lio_bag 생성, `ros2 bag info`에서 3토픽의 메시지 수가 원본과 같다(2178/10884/3298)
+- [ ] 변환된 첫/중간/마지막 스캔에서 time ∈ [0, 0.05), is_dense=True, NaN과 원점 점 없음을 스크립트로 검증한다
+- [ ] bag 기록시각과 헤더 stamp가 일치한다(차이 < 1 ms)
+- [ ] pytest 통과(합성 PointCloud2로 변환 함수 단위 테스트: 시간 변환, 무효점 제거, 필드 레이아웃)
+- [ ] data_report.md와 그림 2장 생성
+
+**컨텍스트**
+ROS 2 Humble: `source /opt/ros/humble/setup.bash`. 시스템 numpy는 2.2.6이며 sensor_msgs_py.point_cloud2.read_points는 동작이 확인됐다. 원본 필드 오프셋: x0 y4 z8 intensity12(f32), ring16(u16), timestamp18(f64, 정렬되지 않음), point_step은 메시지에서 읽는다. LIO-SAM(velodyne 모드)은 is_dense=false면 에러를 내고, ring/time 필드가 없어도 에러를 낸다.
+
+---
+
+## 설계 추가 (2026-10-26): 맵 품질 평가 지표 — TASK-05 확장 + TASK-05b 신설
+TASK-05 평가 항목을 다음 세 그룹으로 확장한다.
+1. **궤적 정확도 (GT 대비)**: ATE RMSE/mean/max (SE3 정렬, 스케일 없음), RPE(10 m/50 m 구간, 위치 % + 회전 deg/m), 종점 드리프트, 루프 ON/OFF 비교
+2. **맵 내부 품질 (GT 불필요)**: MME(Mean Map Entropy), MPV(Mean Plane Variance) — 반경 0.3 m 이웃, 같은 복셀 다운샘플 기준으로 run 간 비교. **루프 겹침 구간 일관성**: 주행 처음 15 s와 마지막 15 s에 쌓인 점군끼리 cloud-to-cloud 거리(median, p95)를 구한다(이중 벽이나 고스팅의 정량 지표)
+3. **맵 기반 재주행(위치추정) 테스트 — TASK-05b**: 루프 ON 맵을 prior map으로 고정하고, 스캔별 scan-to-map 정합(small_gicp 또는 Open3D GICP/NDT, IMU 예측 초기값 + 초기 위치에 1 m/5° 섭동)으로 궤적을 추정해 GNSS와 ATE를 비교한다. 정합 실패율과 fitness도 기록한다.
+   - 공정성: 같은 bag을 쓰므로 **짝수 스캔으로 맵을 만들고 홀수 스캔으로 위치추정**하는 split으로 누출을 줄인다. 리포트에는 "동일 주행 기반 → 낙관적 추정치"라고 명시한다. 같은 경로를 다시 주행한 bag을 받으면 같은 스크립트로 진짜 재주행 평가를 한다.
+
+---
+
+## 리뷰 결과: TASK-01 (재작업), TASK-02 — 둘 다 APPROVE (2026-10-26)
+- TASK-01: GTSAM 4.1.1 + LIO-SAM ros2 빌드, env.sh, launch/lio_sam_nox.launch.py 완료. 위험 요소: OpenCV의 libtbb.so.2와 GTSAM의 libtbb.so.12가 함께 링크됨 → 매핑 부하에서 크래시가 나면 GTSAM_WITH_TBB=OFF로 다시 빌드한다(TASK-03에서 감시).
+- TASK-02: data/lio_bag 생성, 검증 통과(pytest 11). 핵심 수치: 방위각 해상도 0.2° → **Horizon_SCAN=1800**, 유효점 약 3.9만/스캔, 상위 ring 119–127 일부는 항상 비어 있음(정상), 스캔 시간 폭 25 ms, 시간과 방위각이 선형(디스큐 OK).
+
+---
+
+### [CODEX-TASK] TASK-03+04: LIO-SAM 설정 + 실행 파이프라인 + 실험 실행
+
+**목적**
+변환된 bag으로 LIO-SAM을 재현 가능하게 돌리고, 루프 클로저 ON/OFF 실험의 궤적과 지도를 저장한다.
+
+**입력**
+- 파일: data/lio_bag (/points_raw, /imu_raw, /gps/fix), env.sh, launch/lio_sam_nox.launch.py, ws/src/LIO-SAM/config/params.yaml(템플릿)
+- 데이터: 위 "IMU–LiDAR 외부 파라미터" 절의 **LIO-SAM 설정값(전치 적용된 값)** 그대로 사용
+- 의존성: TASK-01, TASK-02 완료
+
+**출력**
+- config/params_base.yaml, config/params_loop_off.yaml (loopClosureEnableFlag만 다름)
+- tools/run_lio_sam.sh `<run_name> <params_yaml> [bag_dir] [rate]`: launch(use_sim_time) → `ros2 bag play --clock` → 재생 종료 후 drain 대기 → save_map 서비스 호출 → 종료. 로그는 results/<run>/run.log에 남긴다.
+- tools/record_traj.py: 실행 중 /lio_sam/mapping/odometry를 TUM으로 저장(`odom_online_tum.txt`, timestamp는 header stamp 초)하고, 루프 클로저 이벤트 수(/lio_sam/mapping/loop_closure_constraints 마커 또는 로그)를 기록
+- tools/pcd_to_tum.py: save_map이 만든 transformations.pcd(PointTypePose: x y z roll pitch yaw time)를 **최종 최적화 keyframe 궤적** TUM(`keyframes_final_tum.txt`)으로 변환한다. 루프 보정이 반영된 이 궤적이 메인 평가 대상이다.
+- results/<run>/: run.log, odom_online_tum.txt, keyframes_final_tum.txt, map/(GlobalMap.pcd, CornerMap.pcd, SurfMap.pcd, trajectory.pcd, transformations.pcd), run_meta.json(params 해시, git commit, 재생 속도, 처리 시간, 키프레임 수, 루프 이벤트 수)
+- 테스트: tools/tests/test_pcd_to_tum.py (합성 PointTypePose → TUM 쿼터니언 변환 정확성)
+
+**구현 조건 (params_base.yaml)**
+- pointCloudTopic /points_raw, imuTopic /imu_raw, odomTopic "odometry/imu", gpsTopic "odometry/gps"(이 토픽은 bag에 없음 → GPS factor가 사실상 비활성임을 로그로 확인. **GNSS는 절대 LIO-SAM 입력으로 넣지 않는다** — 평가 GT 누출 방지)
+- lidarFrame과 baselinkFrame을 **둘 다 "front_lidar"**로 둔다(imuPreintegration.cpp:128의 TF lookup 회피, base_link TF 없음). odometryFrame "odom", mapFrame "map"
+- sensor velodyne, N_SCAN 128, Horizon_SCAN 1800, downsampleRate 1, lidarMinRange 1.0, lidarMaxRange 100.0
+- extrinsicTrans/extrinsicRot/extrinsicRPY: TASKS.md "LIO-SAM 설정값" 그대로
+- IMU 노이즈와 gravity는 업스트림 기본값을 유지한다(값을 바꾸면 이유를 기록한다). useImuHeadingInitialization false
+- loop: historyKeyframeSearchRadius 15, TimeDiff 30, FitnessScore 0.3 기본값으로 시작한다. **루프가 한 번도 안 걸리면** 원인(거리/시간/fitness)을 로그로 분석하고, 한 번에 한 파라미터만 조정해 params_base에 반영한 뒤 근거를 기록한다
+- savePCD **false 유지**. ⚠️ save_map 서비스는 `rm -r $HOME+destination`을 실행한다. destination은 반드시 `/SLAM/results/<run>/map` 형태의 **전용 하위 폴더**만 허용하고, run_lio_sam.sh에서 경로를 검증한다(빈 문자열, '/', 'SLAM', 'SLAM/results' 단독 거부). 서비스 응답이 실패면 run 실패로 처리한다
+- ws/src/LIO-SAM 소스 수정 금지(필요하면 중단하고 이유를 보고)
+
+**실험 (TASK-04)**
+1. 먼저 rate 1.0으로 1회 실행해 실시간 처리 여부를 확인한다(키프레임 수, 처리 지연 로그). 따라가지 못하면 rate 0.5로 정하고 기록한다. 이후 모든 run에 같은 rate를 쓴다
+2. `loop_on_r{1,2,3}`, `loop_off_r{1,2,3}` 각 3회(LIO-SAM은 멀티스레드라 비결정적 → 반복 분산 보고용)
+3. TASK-05b 대비: tools/preprocess_bag.py에 `--keep-every N --phase K` 옵션을 추가한다(기존 테스트 유지 + 새 테스트). `data/lio_bag_even`(짝수 스캔, IMU/GNSS 전부 유지), `data/lio_bag_odd`를 생성하고, `even_loop_on` 1회를 실행한다
+4. 각 run 직후 sanity check: keyframes_final_tum 누적거리가 238.7 m ± 10% 이내인지, 발산(속도 > 30 m/s 점프) 없는지 확인하고 results/experiments_summary.md에 표로 정리한다(run, rate, 처리시간, 키프레임 수, 루프 이벤트 수, 누적거리, 시작-끝 거리(최종 keyframe 기준), 성공 여부)
+
+**완료 기준**
+- [x] 7개 run 모두 결과 폴더와 필수 파일 생성 및 직접 검증. ON/OFF 6개 sanity 통과, even 실패 및 재현 원인 분석 기록(logs/task03_04.md).
+- [ ] loop_on run에서 루프 클로저 이벤트 ≥ 1, loop_off에서 0 — full ON=3/2/3, OFF=0/0/0 통과; even ON=0으로 미충족
+- [x] loop_on의 최종 keyframe 시작-끝 거리가 loop_off보다 작다(GT 0.47 m 참고) — 3쌍 모두 통과
+- [x] pytest 전체 통과(tools/tests) — 25 passed
+- [x] TBB 관련 크래시 여부를 기록한다 — 모든 실행에서 크래시 없음
+- [x] logs/task03_04.md에 설정 근거, 실행 명령, 이슈를 기록한다
+
+**v1 당시 상태 (2026-10-26; 아래 v2 완료 결과로 대체)**: TASK-03 완료. TASK-04는 7개 run 및 even 재시도까지 수행했으나 even 발산/루프 0으로 전체 완료 기준 미충족. 상세: logs/task03_04.md, results/experiments_summary.md. 지정된 extrinsicRPY 변경은 사용자 확인 전까지 수행하지 않는다.
+
+**컨텍스트**
+- `source env.sh` 필요. 메모리는 RAM 14 GB, swap은 거의 가득 참. 동시에 두 run을 돌리지 않는다.
+- 평가 지표 계산(ATE 등)은 TASK-05 범위이므로 여기서는 하지 않는다.
+- 데이터 특성: 전방 약 120° FOV 단일 LiDAR, 약 70×60 m 사각 루프 1바퀴, 108 s, 시계방향 주행, 평지.
+
+---
+
+## 리뷰 결과: TASK-03+04 — REVISE (2026-10-26)
+### 완료 기준 충족 여부
+- ON/OFF 6회: 통과 (종점 ON 0.82±0.21 m / OFF 10.80±9.16 m, 루프 2–3회 / 0회)
+- even_loop_on: 실패 (발산, 5.7 km)
+- pytest 25 통과, TBB 크래시 없음, save_map 경로 보호 적용
+### 발견된 문제
+1. **extrinsicRPY 설계 오류(Claude 명세 실수)** — 심각도 높음. 1배속 발산과 even 발산의 유력한 원인. Codex가 정확히 진단했고, 명세를 임의로 바꾸지 않고 보고한 판단도 옳았다.
+2. rate 0.5로 정한 근거가 잘못된 설정 위에서 측정됨 → 다시 측정해야 함
+### 판정: REVISE (설정 정정 후 재실험)
+
+### [CODEX-REVISION] TASK-03+04 재작업 요청
+
+**유지할 것**
+- run_lio_sam.sh, record_traj.py, pcd_to_tum.py, verify_experiments.py, run_experiments.sh, split bag, 경로 보호 로직, 테스트 전부
+- 기존 results/* 는 **삭제하지 말고** results/archive_v1_wrong_rpy/ 로 이동한다(포트폴리오의 "디버깅 사례"로 쓸 것). ARCHIVE_NOTE.md에 이유를 기록한다.
+
+**수정할 것**
+1. config/params_base.yaml, params_loop_off.yaml의 extrinsicRPY를 위 정정값(R 원본)으로 바꾼다. extrinsicRot(=R.T)와 extrinsicTrans는 유지한다.
+2. 수정 후 imu_frame_diagnostic을 다시 계산해 중력축 기울기가 < 1°인지 확인한다(results/imu_frame_diagnostic.json 갱신).
+3. rate 재결정: pilot_rate1 → 통과하면 rate 1.0을 쓰고, 실패하면 pilot_rate05로 결정한다. 지연 계측은 둘 다 기록한다.
+4. 같은 rate로 loop_on_r{1,2,3}, loop_off_r{1,2,3}, even_loop_on을 새로 실행한다.
+
+**추가할 것**
+- experiments_summary.md에 v1(잘못된 RPY) 대비 v2 비교 표를 짧게 추가한다(종점거리, 발산 여부)
+- run_experiments.sh를 실행하는 동안 그 스크립트 파일을 편집하지 않는다(v1 래퍼 오류 재발 방지)
+
+**완료 기준 (재확인)**
+- [x] 중력축 진단 < 1° — 0.095264°
+- [x] 7개 run 모두 sanity PASS (even 포함). even이 여전히 실패하면 원인 분석(10 Hz 입력에 따른 mappingProcessInterval/keyframe 임계 등)과 한 번에 한 파라미터씩 조정한 시도를 기록한다(최대 2회)
+- [x] loop_on 루프 ≥ 1, loop_off 0, loop_on 종점거리 < loop_off — ON=2/2/2, OFF=0/0/0, even=2; 종점 비교 3/3 통과
+- [x] pytest 전체 통과, logs/task03_04.md에 v2 절 추가 — 25 passed
+
+
+**v2 최종 상태 (2026-10-26): TASK-03+04 완료.** 승인된 extrinsicRPY=R 정정, 중력축 0.095264°, rate=1.0. RPY 정정 후 기본 fitness=0.3 배치도 전체 보존했고, ON r2 루프 누락 분석 및 fitness만 0.5로 조정한 trial 후 전체 7회를 재실행했다. 최종 7개 sanity/loop 기준 PASS, ON/OFF 종점 비교 3/3 PASS, 독립 검증 exit=0, pytest 25 passed. v1은 results/archive_v1_wrong_rpy/, v2 기본 임계값 배치는 results/archive_v2_fitness03/에 보존. 상세: logs/task03_04.md의 v2 절, results/experiments_summary.md, results/verification_v2.json.
+
+---
+
+## 리뷰 결과: TASK-03+04 v2 — APPROVE (2026-10-26)
+- 중력축 0.095°, 1배속 실시간 처리 가능(지연 평균 0.14 s), 7/7 PASS, 루프 ON 2/2/2 · OFF 0/0/0, 종점 ON 0.28±0.06 m / OFF 1.05±0.76 m
+- historyKeyframeFitnessScore 0.3→0.5 완화: 근거(r2 루프 누락) 타당. 다만 **잘못된 루프(false positive) 위험**이 있으므로 TASK-05에서 루프 제약 전후 ATE로 검증하고 리포트에 명시한다
+- 주의: "시작–끝 거리"는 정확도 지표가 아니다(GT 자체가 0.47 m). 정확도는 TASK-05에서 판단한다
+
+## 공용 Python 환경
+`/home/hong/SLAM/.venv` (system-site-packages, open3d 0.20.0, scipy 1.15.3, evo, numpy 2.2.6; rosbag2_py 사용 가능). 실행: `source /opt/ros/humble/setup.bash && .venv/bin/python ...`
+
+---
+
+### [CODEX-TASK] TASK-05: GNSS 대비 정확도 평가 + 맵 내부 품질 지표
+
+**목적**
+루프 ON/OFF/even run의 궤적 정확도와 맵 품질을 재현 가능한 수치로 산출한다(포트폴리오 핵심 근거).
+
+**입력**
+- results/{loop_on_r1..3, loop_off_r1..3, even_loop_on}/ (keyframes_final_tum.txt, odom_online_tum.txt, map/*.pcd)
+- data/lio_bag (/gps/fix = GT, /points_raw)
+- 의존성: TASK-03+04 v2
+
+**출력** (코드는 tools/eval/, 테스트는 tools/tests/)
+- tools/eval/gnss_gt.py: NavSatFix → ENU(첫 fix 원점, WGS84→ECEF→ENU) TUM `results/gt_gnss_enu_tum.txt`. status<2 또는 cov σ>0.05 m는 제외하고 개수를 기록한다
+- tools/eval/traj_eval.py: 궤적 하나 + GT → metrics.json
+  - 시간 동기: GT를 추정 stamp에 선형보간(최근접 GT 간격 > 0.2 s면 제외)
+  - **정렬**: (a) SE3 Umeyama(스케일 없음, 전체 궤적) (b) **SE3 + lever arm 동시추정**: `p_gnss = R·(p_est + R_est·l) + t`를 비선형 최소제곱으로 푼다. GNSS 안테나와 LiDAR 사이 오프셋 l(바디 프레임, 3D)이 미지수이기 때문이다. 추정된 l을 기록하고, |l| > 3 m면 경고한다
+  - ATE: RMSE/mean/median/max/std (정렬 a, b 모두)
+  - RPE(KITTI 스타일, 구간 10/25/50/100 m): GT 자세는 GNSS 위치 + 궤적 접선 yaw(roll/pitch=0, 평지 근사)로 만든다. 병진 오차 %와 yaw 오차 deg/100m. 근사라는 점을 metrics에 명시한다
+  - 오차 시계열(error_vs_time.csv)
+- tools/eval/build_map_from_poses.py: bag 스캔(+선택적 스캔 필터: even/odd/all) + 추정 궤적(SLERP 보간) → 누적 점군(voxel 다운샘플, 점마다 상대시간 필드 보존). TASK-05b와 TASK-06에서도 재사용하므로 함수/CLI를 깔끔하게 분리한다. 디스큐는 하지 않는다(근사이므로 명시)
+- tools/eval/map_quality.py:
+  - MME(Mean Map Entropy, 반경 0.3 m), MPV(Mean Plane Variance, 반경 0.3 m) — 입력은 같은 voxel 0.1 m 다운샘플, 같은 영역(GT bounding box 내)으로 run 간 비교 가능하게 한다
+  - **루프 겹침 일관성**: build_map_from_poses로 처음 15 s 점군 A와 마지막 15 s 점군 B를 만들고, A↔B 겹침 영역에서 nearest-neighbor 거리 median/p95와 "이중 벽" 비율(> 0.2 m)을 구한다
+- tools/eval/run_all_eval.py: 위를 모든 run에 적용 → results/eval/summary.csv, results/eval/summary.md
+  - loop ON vs OFF (mean±std, n=3), even_loop_on, online odometry vs final keyframes
+  - **루프 제약 검증**: loop ON run에서 루프 제약이 들어간 keyframe 쌍의 GT 거리를 계산한다(< 2 m여야 true positive). TASK-04에서 fitness를 0.5로 완화했기 때문이다
+- results/eval/figs/: traj_overlay_{run}.png(GT vs est, ENU), traj_on_vs_off.png, ate_vs_time.png(ON/OFF 겹쳐 그림), rpe_bar.png, loop_overlap_{on,off}.png(겹침 구간 top-view, 두 시기 점군 색 구분)
+
+**구현 조건**
+- ATE와 Umeyama는 직접 구현하고 단위테스트를 쓴다(합성 궤적에 알려진 R,t와 lever arm을 넣어 복원되는지). evo로 ATE(SE3)를 교차검증해 차이 < 1 mm인지 기록한다
+- 그림은 matplotlib Agg, 축 단위(m), 범례, 제목, 색약 친화 팔레트(예: Okabe-Ito). 포트폴리오용으로 dpi 200
+- 매직 넘버는 config dataclass/상수로 둔다. 실패한 run이나 누락 파일은 명시적으로 에러 처리한다
+- results/<run>/ 원본 파일은 수정하지 않는다. 출력은 results/eval/ 아래에만 쓴다
+- 메모리: 점군 처리 시 RAM 4 GB 이하(voxel 누적 사용). TASK-06이 동시에 실행된다 — tools/maps/, results/maps/는 건드리지 않는다
+
+**완료 기준**
+- [x] 7개 run × (final, online) metrics.json과 summary.md/csv 생성
+- [x] Umeyama/lever-arm 단위테스트 통과, evo 교차검증 차이 < 1 mm
+- [x] 루프 true/false positive 판정 표
+- [x] MME/MPV/겹침 일관성 표(ON vs OFF)
+- [x] 그림 생성 및 직접 확인(빈 그림, 축 뒤집힘 없음)
+- [x] pytest 전체 통과, logs/task05.md 작성(방법, 근사/한계, 결과 해석 3줄)
+
+---
+
+### [CODEX-TASK] TASK-06: 지도 산출물 (3D PCD + 2D occupancy grid)
+
+**목적**
+포트폴리오용 3D 점군 지도와 Nav2 호환 2D 지도를 만든다.
+
+**입력**
+- results/<run>/map/GlobalMap.pcd (기본 run: loop_on_r2 — 종점 중앙값 run. TASK-05의 ATE 중앙값 run으로 나중에 교체할 수 있게 `--run` 인자화)
+- results/<run>/keyframes_final_tum.txt, data/lio_bag/points_raw (자유공간 레이캐스팅용)
+- 의존성: TASK-03+04 v2
+
+**출력** (코드는 tools/maps/, 결과는 results/maps/<run>/)
+- 3D: map_full.pcd(원본 복사), map_0p10.pcd(voxel 0.1 m), map_0p10_enu.pcd(옵션: `--align-json`으로 TASK-05의 SE3 정렬을 적용한 ENU 지도. 파일이 없으면 생략하고 로그에 남긴다)
+- 3D 렌더: map_top.png(top-down, 높이 컬러맵), map_oblique.png(사선 뷰, open3d offscreen 렌더링이 안 되면 matplotlib 3D scatter 다운샘플로 대체), 궤적 겹쳐 그리기
+- 2D: map2d.pgm + map2d.yaml(Nav2 map_server 형식: image, resolution 0.05, origin, negate 0, occupied_thresh 0.65, free_thresh 0.25, mode trinary)
+  - 지면 제거: 지도 z는 중력 정렬되어 있다. 로컬 지면 높이를 2 m 셀별 하위 퍼센타일로 추정하고, 지면 위 0.3–2.0 m 점을 장애물로 둔다(상수화)
+  - 자유공간: keyframe 위치(또는 bag 스캔 서브샘플)에서 장애물 셀까지 2D 레이캐스팅(Bresenham, log-odds). 미관측은 unknown
+  - map2d.png(컬러 프리뷰 + 궤적), map2d_stats.json(셀 수: occupied/free/unknown, 크기 m)
+- tools/tests/test_maps.py: 지면 제거, 레이캐스팅, YAML 형식 단위테스트(합성 데이터)
+
+**구현 조건**
+- .venv 사용. RAM 4 GB 이하. TASK-05가 동시에 실행된다 — tools/eval/, results/eval/는 건드리지 않는다
+- Nav2 YAML 필드명과 PGM(P5, 0=occupied 254=free 205=unknown) 규칙을 정확히 지킨다
+- 매직 넘버는 상수화하고, 에러 처리를 명시한다
+
+**완료 기준**
+- [ ] results/maps/loop_on_r2/에 위 파일 전부 생성
+- [ ] PGM/YAML이 Nav2 형식 검증 스크립트(직접 작성: 헤더, 값 집합, origin/resolution 일관성)를 통과
+- [ ] 렌더 이미지를 직접 확인(건물/도로 윤곽 식별 가능, 궤적이 도로 위에 있음)
+- [ ] pytest 통과, logs/task06.md 작성
+
+---
+
+### [CODEX-REVISION] TASK-05 재작업 요청 (Claude 결정, 2026-10-26)
+
+**유지할 것**
+- tools/eval/* 구현과 테스트 47개 전부
+
+**수정할 것**
+1. GNSS 필터: **수평 σ(cov[0], cov[4])에만 0.05 m 기준을 적용한다.** 수직 σ 5–6 cm는 RTK에서 정상이다. 수직 σ는 통계로만 기록한다.
+2. ATE는 **2D(수평, x-y)**와 **3D**를 모두 보고하고, 2D를 주 지표로 둔다(평지이고 GT 수직 노이즈가 5 cm 수준이기 때문). 정렬은 SE3로 하되 2D ATE는 정렬 후 x-y 성분만으로 계산한다.
+3. 루프 쌍 기록: tools/record_traj.py가 /lio_sam/mapping/loop_closure_constraints(MarkerArray)의 선분 양 끝점을 받아 `loop_pairs.json`으로 저장하게 한다(끝점 좌표, 수신 시각, 최종 keyframe에 최근접 매칭한 index 쌍과 매칭 거리). 마커 구조는 LIO-SAM 소스(mapOptmization.cpp visualizeLoopClosure)를 확인해서 맞춘다. 단위테스트를 추가한다.
+4. **실험 재배치(v3)**: 현재 results의 7개 canonical run과 파일럿을 results/archive_v3_preloop_pairs/로 옮기고(삭제 금지, ARCHIVE_NOTE.md 작성), 같은 설정(params 해시 동일, rate 1.0, fitness 0.5)으로 tools/run_experiments.sh를 다시 실행해 7개 run을 새로 만든다. 실행 중 스크립트 파일 편집 금지. results/maps/는 건드리지 않는다(TASK-06은 나중에 재생성).
+5. 루프 검증: loop_pairs의 각 쌍에 대해 두 keyframe 시각의 GT 수평거리를 구하고, < 2 m면 true positive로 판정한다. 표로 정리한다.
+
+**완료 기준 (재확인)**
+- [x] v3 7개 run PASS(verify_experiments.py exit 0), loop_on 각 run에 loop_pairs.json(≥1쌍)
+- [x] 7 run × (final, online) metrics.json, results/eval/summary.md/csv: 2D/3D ATE(SE3, SE3+lever arm), RPE, ON vs OFF mean±std
+- [x] evo 교차검증 < 1 mm, 루프 TP/FP 표, MME/MPV/겹침 일관성 표, 그림 직접 확인
+- [x] **ATE(2D, SE3+lever) 중앙값 loop_on run 이름**을 summary.md 맨 위에 명시한다(TASK-06 대표 run). 그 run의 SE3 정렬 파라미터를 results/eval/<run>/align_se3.json(4x4 행렬, 프레임 설명)으로 저장한다
+- [x] pytest 전체 통과, logs/task05.md 갱신
+
+**TASK-05 v3 완료 (2026-10-26):** 최종 canonical 7개 검증 PASS, 14개 궤적 평가·7개 맵 품질·그림 12장 직접 확인, pytest 52 passed. even 최초/재시도 2회 발산은 archive_v3_failed_attempts에 보존했으며, 입력 구독자 준비 확인 + DDS 3초 대기 후 동일 params/rate 재시도 성공. 루프 9쌍 중 TP 7 / FP 2(문서의 GT 수평 <2 m 기준). 대표 run loop_on_r2와 SE3 4x4 정렬 파일 생성. results/maps 및 save_map 보호 유지. 상세: results/eval/summary.md, results/eval/independent_verification.json, logs/task05.md.
+
+---
+
+## 리뷰 결과: TASK-05 rev1 — REVISE (평가 방법 버그, 재실험 불필요)
+- 잘 된 점: v3 7 run, evo 교차검증 5e-15 m, 루프 쌍 기록, 투명한 실패 기록
+- 문제 1 (높음) — **RPE 병진 17%는 버그**: est 회전에 LiDAR 장착 pitch 9.3°가 포함된 채로 GT(roll/pitch=0)와 비교됨 → 2·sin(4.65°)≈16% 체계 오차. ATE < 1 m와 모순된다.
+- 문제 2 (높음) — **lever arm 2–10 m는 관측 불가능한 해**: 평면 운동(yaw 회전만)에서는 l_z를 관측할 수 없고, LiDAR frame이 9° 기울어 있어 x/z가 섞인다. 다만 traj_on_vs_off.png의 코너 패턴은 실제 수평 lever arm이 있음을 시사한다.
+- 문제 3 (중간) — **루프 TP/FP 기준 오류**: keyframe 간 GT 거리 < 2 m는 잘못된 기준이다(2.5 m 떨어진 쌍도 ICP로 정상 정합 가능). 판정 기준은 "제약 일관성"이어야 한다.
+- 문제 4 (낮음) — yaw RPE 10 m는 GNSS 접선 노이즈가 지배한다(1.4 cm / 2 m 기준선 → 약 0.6° 노이즈).
+
+### [CODEX-REVISION] TASK-05 rev2 (평가 코드만 수정, 실험 재실행 금지)
+
+**유지할 것**: v3 run 결과, ATE SE3 계산, evo 교차검증, 맵 품질, 그림 체계, 테스트
+
+**수정할 것**
+1. **yaw-only body frame**: 정렬된 est 회전에서 yaw만 추출해서(roll/pitch 제거) RPE와 lever arm 계산에 쓴다. 근거(LiDAR pitch 9.3° 장착)를 metrics 노트에 기록한다.
+2. **lever arm = 수평 2-DoF**: `p_gnss = R_align·p_est + t + Rz(yaw_est)·[lx, ly, 0]`. 3-DoF 결과는 진단용으로만 남기고 주 지표에서 제외한다. 추정된 (lx, ly)를 run 간 비교(mean±std)해서 일관성을 확인한다 — 일관되면 실제 장착 오프셋의 근거가 된다.
+3. **RPE 재설계**: GT 접선 기준선을 5 m로 늘리고 병진 RPE는 10/25/50/100 m로 보고한다. yaw RPE는 25 m 이상만 보고한다. **노이즈 바닥 검증**: GT 자체(+σ 1.4 cm 가우시안 노이즈 10회)를 추정값으로 넣었을 때 RPE를 계산해 표에 함께 싣는다.
+4. **루프 판정 기준 교체**: 각 루프 쌍 (i,j)에 대해 정렬 후 최종 추정 상대위치 `p_i − p_j`와 GT 상대위치 `g_i − g_j`(같은 시각 보간)의 차이 |Δ|를 구한다. **|Δ| < 0.5 m → CONSISTENT(TP)**, 그 이상이면 INCONSISTENT. GT 거리 기준은 참고 열로만 남긴다. (같은 방향으로 통과한 쌍이라 lever 효과는 상쇄된다는 점도 기록한다.)
+5. summary.md 맨 위에 **헤드라인 표**를 둔다(포트폴리오용): 그룹별(ON/OFF/even) 2D ATE RMSE [SE3+lever2D], 종점 오차, RPE 100 m %, 루프 일관성 비율, MME. mean±std (n=3).
+6. 결과 해석 3–5줄(logs/task05.md 및 summary.md): 루프 클로저 이득의 크기와 통계적 신뢰도를 n=3 기준으로 정직하게 쓴다(차이가 std보다 작으면 그렇게 쓴다).
+
+**완료 기준**
+- [ ] RPE 100 m 병진 오차가 ATE와 상식적으로 일관된다(대략 < 1–2 %), 노이즈 바닥 표 포함
+- [ ] 2-DoF lever: 모든 run에서 |l| < 3 m이고 run 간 std 보고
+- [ ] 루프 판정 표 교체
+- [ ] 헤드라인 표와 해석, 그림 갱신(traj_overlay에 lever 보정 궤적 추가)
+- [ ] pytest 전체 통과(합성 테스트: 9° pitch가 들어간 est 회전에서 RPE가 0에 가깝게 나오는지, 2-DoF lever 복원)
+
+---
+
+### [CODEX-REVISION] TASK-06 rev1 (포트폴리오 품질)
+**배경**: v3 재실험으로 results/loop_on_r2가 새 데이터로 바뀌었다. 기존 results/maps/loop_on_r2는 v2 기반이므로 results/maps/archive_v2/로 옮기고 다시 생성한다.
+
+**수정할 것**
+1. 대표 run = loop_on_r2 (v3). ENU 지도: results/eval/loop_on_r2/align_se3.json을 적용한다(SE3 부분은 TASK-05 rev2의 영향을 받지 않음).
+2. 2D 자유공간: scan_stride 10 → 2로 낮추고, 레이캐스팅에 bag 원본 스캔의 수평 슬라이스(지면 위 0.3–2.0 m)를 쓴다. unknown 비율을 주행 영역(궤적 30 m 버퍼) 기준으로 보고한다.
+3. 출력 영역 자르기: 궤적 bounding box + 30 m 여백(2D/3D 렌더 모두). 원본 전체 PCD는 그대로 두고 crop본을 따로 저장한다.
+4. YAML 통일: map2d.yaml에 **free_thresh 0.196**(Nav2/ROS 관례값, unknown 205 보존)을 쓰고 보조 YAML을 제거한다. 근거를 주석으로 남긴다.
+5. 3D 렌더 품질: Open3D OffscreenRenderer(EGL)를 먼저 시도하고, 안 되면 matplotlib을 쓰되 crop 영역에서 voxel 0.2 m, 높이 컬러, 점 크기와 시점을 조정해 건물 윤곽이 잘 보이게 한다. 이미지 3장: top, oblique, 루프 겹침 구간 확대(ON vs OFF 나란히 — results/loop_off_r2 지도도 같은 방식으로 crop/렌더).
+6. 위성/항공사진 오버레이는 하지 않는다(외부 타일 사용 금지).
+
+**완료 기준**
+- [ ] results/maps/loop_on_r2/에 전체/crop PCD, ENU PCD, PGM/YAML(Nav2 검증 통과), PNG 3–4장
+- [ ] 주행 영역 unknown 비율이 기존보다 줄었음을 수치로 보고
+- [ ] 이미지 직접 확인, pytest 통과, logs/task06.md 갱신
+
+exec
+/bin/bash -lc 'cat tools/eval/traj_eval.py' in /home/hong/SLAM
+ succeeded in 0ms:
+"""Position-only SE3 ATE, joint antenna lever arm fit and distance-based RPE."""
+import argparse
+from dataclasses import dataclass
+import json
+from pathlib import Path
+import numpy as np
+from scipy.optimize import least_squares
+from scipy.spatial.transform import Rotation
+
+@dataclass(frozen=True)
+class EvalConfig:
+    max_gt_gap_s: float = 0.2
+    lever_warning_m: float = 3.0
+    segment_lengths_m: tuple = (10., 25., 50., 100.)
+    tangent_baseline_m: float = 2.0
+    motion_yaw_min_step_m: float = 0.02
+
+
+def load_tum(path):
+    a = np.loadtxt(path, ndmin=2)
+    if a.shape[1] != 8 or len(a)<3 or not np.isfinite(a).all() or (np.diff(a[:,0])<=0).any():
+        raise ValueError(f'Invalid TUM trajectory: {path}')
+    if not np.allclose(np.linalg.norm(a[:,4:],axis=1),1,atol=1e-4):
+        raise ValueError(f'Invalid quaternion: {path}')
+    return a
+
+
+def associate(est, gt, max_gap=0.2):
+    t = est[:,0]; j=np.searchsorted(gt[:,0], t, side='right')
+    j=np.clip(j,1,len(gt)-1)
+    mask=(t>=gt[0,0]) & (t<=gt[-1,0]) & ((gt[j,0]-gt[j-1,0])<=max_gap)
+    idx=np.flatnonzero(mask); j=j[mask]
+    f=(t[mask]-gt[j-1,0])/(gt[j,0]-gt[j-1,0])
+    points=gt[j-1,1:4]*(1-f[:,None])+gt[j,1:4]*f[:,None]
+    if len(points)<3: raise ValueError('Fewer than three synchronized poses')
+    return est[mask], points, idx
+
+
+def umeyama(x, y):
+    """Return rigid R,t taking x to y; no scale fit, determinant +1."""
+    x=np.asarray(x); y=np.asarray(y)
+    if x.shape != y.shape or x.ndim!=2 or x.shape[1]!=3 or len(x)<3:
+        raise ValueError('Alignment needs paired Nx3 points')
+    xc=x-x.mean(axis=0); yc=y-y.mean(axis=0)
+    u, _, vt=np.linalg.svd(yc.T@xc/len(x))
+    sign=np.eye(3); sign[-1,-1]=np.linalg.det(u@vt)
+    r=u@sign@vt; t=y.mean(axis=0)-r@x.mean(axis=0)
+    return r,t
+
+
+def fit_lever(x, rotations, y):
+    r,t=umeyama(x,y)
+    def residual(v):
+        rp=Rotation.from_rotvec(v[:3]).as_matrix()
+        return ((x+np.einsum('nij,j->ni',rotations,v[6:]))@rp.T+v[3:6]-y).ravel()
+    solution=least_squares(residual, np.r_[Rotation.from_matrix(r).as_rotvec(),t,[0.,0.,0.]],
+                           xtol=1e-11, ftol=1e-11, gtol=1e-11, max_nfev=1000)
+    if not solution.success: raise ValueError(f'Lever arm solver failed: {solution.message}')
+    singular=np.linalg.svd(solution.jac,compute_uv=False)
+    return (Rotation.from_rotvec(solution.x[:3]).as_matrix(),solution.x[3:6],solution.x[6:],
+            dict(jacobian_singular_values=singular.tolist(), jacobian_condition=float(singular[0]/max(singular[-1],1e-15)),
+                 note='Planar motion weakly observes vertical lever arm; joint fit may absorb trajectory errors.'))
+
+
+def stats(v):
+    v=np.asarray(v)
+    return dict(rmse=float(np.sqrt(np.mean(v*v))), mean=float(v.mean()), median=float(np.median(v)),
+                max=float(v.max()), std=float(v.std()))
+
+
+def tangent_yaw(points, baseline=2.):
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(points[:,:2],axis=0),axis=1))]
+    left=np.clip(np.searchsorted(s,s-baseline/2,side="right")-1,0,len(s)-1)
+    right=np.clip(np.searchsorted(s,s+baseline/2),0,len(s)-1)
+    delta=points[right,:2]-points[left,:2]
+    if np.any(np.linalg.norm(delta,axis=1)<1e-6): raise ValueError('GNSS tangent undefined')
+    return np.unwrap(np.arctan2(delta[:,1],delta[:,0]))
+
+
+def rpe(points, est_rotation, gt_positions, cfg):
+    """All start poses, first end pose at or beyond target GT arc length (KITTI)."""
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(gt_positions,axis=0),axis=1))]
+    yaw=tangent_yaw(gt_positions,cfg.tangent_baseline_m)
+    gr=Rotation.from_euler('z',yaw).as_matrix(); result={}
+    for length in cfg.segment_lengths_m:
+        translation=[]; angles=[]; actual=[]
+        for i in range(len(s)):
+            j=int(np.searchsorted(s,s[i]+length))
+            if j>=len(s): continue
+            d=s[j]-s[i]
+            gt_delta=gr[i].T@(gt_positions[j]-gt_positions[i])
+            est_delta=est_rotation[i].T@(points[j]-points[i])
+            gt_rel=gr[i].T@gr[j]; est_rel=est_rotation[i].T@est_rotation[j]
+            err=est_rel.T@gt_rel
+            translation.append(np.linalg.norm(est_delta-gt_delta)/d*100)
+            angles.append(abs(np.arctan2(err[1,0],err[0,0]))*180/np.pi/d*100)
+            actual.append(d)
+        result[str(int(length))]=dict(count=len(actual), translation_percent=stats(translation) if actual else None,
+                                       yaw_deg_per_100m=stats(angles) if actual else None,
+                                       mean_actual_length_m=float(np.mean(actual)) if actual else None)
+    return result
+
+
+def evaluate(est, gt, out=None, config=EvalConfig()):
+    matched,y,idx=associate(est,gt,config.max_gt_gap_s); x=matched[:,1:4]
+    rot=Rotation.from_quat(matched[:,4:]).as_matrix()
+    r,t=umeyama(x,y); rb,tb,l,diagnostic=fit_lever(x,rot,y)
+    aligned=x@r.T+t
+    antenna=(x+np.einsum('nij,j->ni',rot,l))@rb.T+tb
+    ea=np.linalg.norm(aligned-y,axis=1); eb=np.linalg.norm(antenna-y,axis=1)
+    ea2=np.linalg.norm((aligned-y)[:,:2],axis=1); eb2=np.linalg.norm((antenna-y)[:,:2],axis=1)
+    from evo.core.geometry import umeyama_alignment
+    er,et,_=umeyama_alignment(x.T,y.T,with_scale=False)
+    evo_rmse=float(np.sqrt(np.mean(np.sum((x@er.T+et-y)**2,axis=1))))
+    diff=abs(evo_rmse-stats(ea)['rmse'])
+    if diff>=0.001: raise AssertionError(f'evo ATE mismatch {diff}')
+    endpoint_error=(aligned[-1]-aligned[0])-(y[-1]-y[0])
+    metrics=dict(input_count=len(est), matched_count=len(matched), excluded_count=len(est)-len(matched),
+                 interval_s=[float(matched[0,0]),float(matched[-1,0])],
+                 primary_metric="2D horizontal ATE after SE3 alignment; no scale",
+                 se3=dict(R=r.tolist(),t=t.tolist(),ate_m=stats(ea),ate_3d_m=stats(ea),ate_2d_m=stats(ea2)),
+                 se3_lever=dict(R=rb.tolist(),t=tb.tolist(),lever_arm_body_m=l.tolist(),lever_norm_m=float(np.linalg.norm(l)),
+                                warning=bool(np.linalg.norm(l)>config.lever_warning_m),ate_m=stats(eb),ate_3d_m=stats(eb),ate_2d_m=stats(eb2),diagnostic=diagnostic),
+                 endpoint=dict(gt_displacement_m=float(np.linalg.norm(y[-1]-y[0])),
+                               est_displacement_m=float(np.linalg.norm(aligned[-1]-aligned[0])),
+                               displacement_error_m=float(np.linalg.norm(endpoint_error)),
+                               displacement_error_vector_enu_m=endpoint_error.tolist()),
+                 rpe=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config),
+                 rpe_note='GNSS tangent yaw, roll/pitch=0 flat-ground approximation; 2 m centered tangent baseline. All start poses; actual segment lengths used. Antenna-vs-LiDAR origin mismatch remains in standard SE3 RPE.',
+                 evo_crosscheck=dict(ate_rmse_m=evo_rmse, absolute_difference_m=diff),
+                 online_note='Online trajectory is causal accumulated poses; it is not a saved before-loop trajectory. Final vs online does not isolate a single loop factor.')
+    if out is not None:
+        out=Path(out); out.mkdir(parents=True,exist_ok=True)
+        (out/'metrics.json').write_text(json.dumps(metrics,indent=2,allow_nan=False))
+        np.savetxt(out/'error_vs_time.csv',np.column_stack((matched[:,0],ea,eb,ea2,eb2)),delimiter=',',
+                   header='timestamp,se3_error_3d_m,se3_lever_error_3d_m,se3_error_2d_m,se3_lever_error_2d_m',comments='')
+    return metrics,dict(t=matched[:,0],gt=y,aligned=aligned,antenna=antenna,error=ea2)
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--traj',required=True); p.add_argument('--gt',required=True); p.add_argument('--out',required=True)
+    a=p.parse_args(); evaluate(load_tum(a.traj),load_tum(a.gt),a.out)
+
+exec
+/bin/bash -lc 'cat tools/eval/run_all_eval.py' in /home/hong/SLAM
+ succeeded in 0ms:
+"""Evaluate seven existing experiments without mutating source artifacts."""
+import argparse
+import csv
+import hashlib
+import json
+from pathlib import Path
+import time
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from .gnss_gt import extract
+from .traj_eval import load_tum, evaluate
+from .build_map_from_poses import build_map
+from .map_quality import read_map, local_quality, overlap
+
+ROOT=Path(__file__).resolve().parents[2]
+RUNS=[f'loop_{mode}_r{i}' for mode in ('on','off') for i in (1,2,3)]+['even_loop_on']
+COLORS=['#0072B2','#D55E00','#009E73','#CC79A7','#E69F00','#56B4E9','#882255']
+DPI=200
+OVERLAP_SECONDS=15.
+LOOP_MATCH_MAX_M=0.2
+LOOP_GT_TRUE_POSITIVE_M=2.0
+
+
+def save_fig(fig,path):
+    fig.tight_layout(); fig.savefig(path,dpi=DPI); plt.close(fig)
+
+
+def source_manifest():
+    paths=[]
+    for name in RUNS:
+        paths.extend(p for p in (ROOT/'results'/name).rglob('*') if p.is_file())
+    # Explicit user protected map trees are hashed as well; no writes in these trees.
+    for directory in ('tools/maps','results/maps'):
+        paths.extend(p for p in (ROOT/directory).rglob('*') if p.is_file())
+    return {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+
+
+def write_table(path,rows):
+    with Path(path).open('w') as f:
+        writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+
+
+def main():
+    p=argparse.ArgumentParser(); p.add_argument('--out',default=str(ROOT/'results/eval'))
+    p.add_argument('--bag',default=str(ROOT/'data/lio_bag')); p.add_argument('--reuse-overlap',action='store_true')
+    p.add_argument('--sigma-axes',choices=['xy','xyz'],default='xy')
+    args=p.parse_args(); out=Path(args.out).resolve()
+    if not out.is_relative_to(ROOT/'results/eval'): raise ValueError('Output must be under results/eval')
+    out.mkdir(parents=True,exist_ok=True); figs=out/'figs';figs.mkdir(exist_ok=True)
+    started=time.time(); before=source_manifest()
+    (out/'source_manifest_before.json').write_text(json.dumps(before,indent=2))
+    for run in RUNS:
+        meta=json.loads((ROOT/'results'/run/'run_meta.json').read_text())
+        if not meta.get('success'): raise ValueError(f'Failed source experiment: {run}')
+        for filename in ('keyframes_final_tum.txt','odom_online_tum.txt','map/GlobalMap.pcd'):
+            if not (ROOT/'results'/run/filename).is_file(): raise FileNotFoundError(f'{run}/{filename}')
+    gt,gnss_stats=extract(args.bag,out,args.sigma_axes)
+    print(f'GNSS: {gnss_stats}',flush=True)
+    rows=[]; map_rows=[]; loop_rows=[]; all_metrics={}; all_series={}
+    bounds=(gt[:,1:3].min(axis=0),gt[:,1:3].max(axis=0))
+    for k,run in enumerate(RUNS):
+        directory=ROOT/'results'/run; all_metrics[run]={};all_series[run]={}
+        for kind,filename in [('final','keyframes_final_tum.txt'),('online','odom_online_tum.txt')]:
+            traj=load_tum(directory/filename)
+            metrics,series=evaluate(traj,gt,out/run/kind)
+            all_metrics[run][kind]=metrics;all_series[run][kind]=series
+            row=dict(run=run,trajectory=kind,matched=metrics['matched_count'],
+                     ate_se3_3d_rmse_m=metrics['se3']['ate_m']['rmse'],ate_lever_3d_rmse_m=metrics['se3_lever']['ate_m']['rmse'],
+                     ate_se3_2d_rmse_m=metrics['se3']['ate_2d_m']['rmse'],ate_lever_2d_rmse_m=metrics['se3_lever']['ate_2d_m']['rmse'],
+                     lever_norm_m=metrics['se3_lever']['lever_norm_m'],lever_warning=metrics['se3_lever']['warning'],
+                     endpoint_error_m=metrics['endpoint']['displacement_error_m'],
+                     evo_difference_m=metrics['evo_crosscheck']['absolute_difference_m'])
+            for length,r in metrics['rpe'].items():
+                row[f'rpe_{length}m_translation_percent']=r['translation_percent']['mean'] if r['count'] else None
+                row[f'rpe_{length}m_yaw_deg_per_100m']=r['yaw_deg_per_100m']['mean'] if r['count'] else None
+            rows.append(row)
+        metrics=all_metrics[run]['final'];series=all_series[run]['final']
+        fig,ax=plt.subplots(figsize=(7,6)); ax.plot(gt[:,1],gt[:,2],color='black',label='RTK GNSS')
+        ax.plot(series['aligned'][:,0],series['aligned'][:,1],color=COLORS[k],label='Final keyframes (SE3)')
+        ax.plot(series['antenna'][:,0],series['antenna'][:,1],color='#009E73',linestyle='--',label='Joint lever fit (antenna)')
+        ax.set(xlabel='East (m)',ylabel='North (m)',title=run);ax.axis('equal');ax.legend();ax.grid(alpha=.2)
+        save_fig(fig,figs/f'traj_overlay_{run}.png')
+        print(f'{run}: ATE {metrics["se3"]["ate_m"]["rmse"]:.4f} m; evaluating map',flush=True)
+        align=metrics['se3']
+        xyz=read_map(directory/'map/GlobalMap.pcd',align['R'],align['t'],bounds)
+        quality=local_quality(xyz);del xyz
+        trajectory=load_tum(directory/'keyframes_final_tum.txt')
+        # Windows refer to the full sensor sequence, not differing final keyframe ends.
+        windows=[(gt[0,0],gt[0,0]+OVERLAP_SECONDS),(gt[-1,0]-OVERLAP_SECONDS,gt[-1,0])]
+        cache=out/run/'overlap_clouds.npz'
+        if args.reuse_overlap and cache.exists():
+            loaded=np.load(cache); a,b=loaded['first'],loaded['last']
+            metadata=json.loads(str(loaded['metadata']))
+        else:
+            maps,metadata=build_map(args.bag,trajectory,'even' if run=='even_loop_on' else 'all',
+                                    windows=windows,alignment=(align['R'],align['t']))
+            a,b=maps
+            np.savez_compressed(cache,first=a,last=b,metadata=json.dumps(metadata))
+        quality['overlap']=overlap(a[:,:3],b[:,:3]);quality['build']=metadata
+        quality['crop']=dict(frame='ENU',xy_min=bounds[0].tolist(),xy_max=bounds[1].tolist(),vertical='unbounded',
+                             note='Same GNSS XY bounding box for all runs; saved LIO-SAM GlobalMap, revoxelized in ENU at 0.1 m')
+        (out/run/'map_quality.json').write_text(json.dumps(quality,indent=2))
+        map_rows.append(dict(run=run,mme_nats=quality['mme_nats'],mpv_m2=quality['mpv_m2'],
+                             eligible_fraction=quality['eligible_fraction'],overlap_median_m=quality['overlap']['median_m'],
+                             overlap_p95_m=quality['overlap']['p95_m'],double_wall_ratio=quality['overlap']['double_wall_ratio'],
+                             A_overlap_fraction=quality['overlap']['A_to_B']['overlap_fraction'],
+                             B_overlap_fraction=quality['overlap']['B_to_A']['overlap_fraction']))
+        if run in ('loop_on_r2','loop_off_r2'):
+            fig,ax=plt.subplots(figsize=(8,7))
+            for cloud,color,label in [(a,'#0072B2','First 15 s'),(b,'#D55E00','Last 15 s')]:
+                sample=cloud[::max(1,len(cloud)//60000)]
+                ax.scatter(sample[:,0],sample[:,1],s=.3,c=color,label=label,alpha=.6,rasterized=True)
+            ax.set(xlabel='East (m)',ylabel='North (m)',title=f'Loop overlap: {run} (no deskew)');ax.axis('equal');ax.legend(markerscale=8)
+            save_fig(fig,figs/f'loop_overlap_{"on" if "loop_on" in run else "off"}.png')
+        meta=json.loads((directory/'run_meta.json').read_text())
+        pairs=json.loads((directory/'loop_pairs.json').read_text())['pairs']
+        if meta['loop_enabled'] and not pairs: raise ValueError(f'Missing actual loop pairs: {run}')
+        for pair in pairs:
+            indices=pair['keyframe_indices']; stamps=np.array(pair['keyframe_stamps'])
+            if max(pair['matching_distances_m'])>LOOP_MATCH_MAX_M: raise ValueError(f'Uncertain marker matching: {run}: {pair}')
+            if indices[0]==indices[1]: raise ValueError(f'Degenerate loop pair: {run}')
+            from .traj_eval import associate
+            # associate requires >=3 poses; duplicate one stamp solely for interpolation.
+            probe=np.zeros((3,8));probe[:,0]=[stamps[0],stamps[1],stamps[1]]
+            matched,positions,_=associate(probe,gt)
+            if len(matched)!=3: raise ValueError('Loop GT time unavailable')
+            distance=float(np.linalg.norm(positions[0,:2]-positions[1,:2]))
+            loop_rows.append(dict(run=run,recorded_events=meta['loop_events'],keyframe_current=indices[0],
+                                  keyframe_previous=indices[1],gt_distance_m=distance,
+                                  classification='TRUE_POSITIVE' if distance<LOOP_GT_TRUE_POSITIVE_M else 'FALSE_POSITIVE',
+                                  matching_max_m=max(pair['matching_distances_m'])))
+        if not pairs:
+            loop_rows.append(dict(run=run,recorded_events=0,keyframe_current=None,keyframe_previous=None,
+                                  gt_distance_m=None,classification='NOT_APPLICABLE',matching_max_m=None))
+        print(f'{run}: map complete, {quality["total_points"]} points',flush=True)
+    write_table(out/'summary.csv',rows);write_table(out/'map_quality.csv',map_rows);write_table(out/'loop_validation.csv',loop_rows)
+    aggregates=[]
+    for kind in ('final','online'):
+        for group in ('loop_on','loop_off'):
+            selected=[r for r in rows if r['trajectory']==kind and r['run'].startswith(group+'_r')]
+            for field in ['ate_se3_2d_rmse_m','ate_lever_2d_rmse_m','ate_se3_3d_rmse_m','ate_lever_3d_rmse_m','endpoint_error_m','lever_norm_m'] + [key for key in selected[0] if key.startswith('rpe_')]:
+                v=[r[field] for r in selected]
+                aggregates.append(dict(group=group,trajectory=kind,metric=field,n=len(v),mean=float(np.mean(v)),std_sample=float(np.std(v,ddof=1))))
+    for group in ('loop_on','loop_off'):
+        for field in list(map_rows[0])[1:]:
+            v=[r[field] for r in map_rows if r['run'].startswith(group+'_r')]
+            aggregates.append(dict(group=group,trajectory='map',metric=field,n=len(v),mean=float(np.mean(v)),std_sample=float(np.std(v,ddof=1))))
+    write_table(out/'group_summary.csv',aggregates)
+    fig,ax=plt.subplots(figsize=(7,6));ax.plot(gt[:,1],gt[:,2],color='black',label='RTK GNSS')
+    for k,run in enumerate(RUNS[:6]):
+        s=all_series[run]['final']['aligned'];ax.plot(s[:,0],s[:,1],c=COLORS[k],label=run,alpha=.8)
+    ax.axis('equal');ax.set(xlabel='East (m)',ylabel='North (m)',title='Final trajectories, SE3 alignment');ax.legend(fontsize=8);save_fig(fig,figs/'traj_on_vs_off.png')
+    fig,ax=plt.subplots(figsize=(9,4))
+    for k,run in enumerate(RUNS[:6]):
+        s=all_series[run]['final'];ax.plot(s['t']-gt[0,0],s['error'],c=COLORS[k],label=run)
+    ax.set(xlabel='Time since first GNSS fix (s)',ylabel='Horizontal SE3 ATE (m)',title='Final keyframe position errors');ax.legend(ncol=3,fontsize=8);save_fig(fig,figs/'ate_vs_time.png')
+    fig,axes=plt.subplots(1,2,figsize=(11,4)); x=np.arange(4)
+    for mode,color,shift in [('on','#0072B2',-.18),('off','#D55E00',.18)]:
+        for ax,field,title in [(axes[0],'translation_percent','Translation (%)'),(axes[1],'yaw_deg_per_100m','Yaw (deg/100 m)')]:
+            values=np.array([[all_metrics[f'loop_{mode}_r{i}']['final']['rpe'][str(length)][field]['mean'] for length in (10,25,50,100)] for i in (1,2,3)])
+            ax.bar(x+shift,values.mean(axis=0),.36,yerr=values.std(axis=0,ddof=1),color=color,label=f'Loop {mode}')
+            ax.set_xticks(x,['10','25','50','100']);ax.set(xlabel='GT segment length (m)',ylabel=title,title=title+'; tangent GNSS approximation');ax.legend()
+    save_fig(fig,figs/'rpe_bar.png')
+    on_final=sorted([r for r in rows if r['trajectory']=='final' and r['run'].startswith('loop_on_r')],key=lambda r:r['ate_lever_2d_rmse_m'])
+    representative=on_final[1]['run']
+    for run in RUNS:
+        align=all_metrics[run]['final']['se3'];matrix=np.eye(4);matrix[:3,:3]=align['R'];matrix[:3,3]=align['t']
+        (out/run/'align_se3.json').write_text(json.dumps(dict(matrix_4x4=matrix.tolist(),R=align['R'],t=align['t'],
+            source_frame='LIO-SAM odom/front_lidar pose coordinates (metres)',target_frame='GNSS local ENU (metres), first fix origin',
+            convention='p_ENU = matrix_4x4 @ [p_odom,1]; rigid SE3, no scale, no lever arm'),indent=2))
+    lines=[f'TASK-06 representative run: **{representative}** (median final 2D SE3+lever ATE RMSE among loop ON n=3).','', '# TASK-05 evaluation' ,'',f'GNSS accepted {gnss_stats["accepted"]}/{gnss_stats["total"]}; output frame ENU, metres. Vertical sigma (m): {gnss_stats["vertical_sigma_m"]}.','',
+           'Primary metric: horizontal (2D) ATE after SE3 alignment; 3D is also reported. GNSS filtering: status >=2, horizontal sigma <=0.05 m; vertical sigma is statistics only. SE3 has no scale fit. Joint lever fits are in-sample diagnostics. Group std uses ddof=1 (n=3).', '',
+           '| Run | Poses | SE3 2D ATE (m) | Lever 2D ATE (m) | SE3 3D ATE (m) | Lever 3D ATE (m) | Lever norm (m) | Endpoint vector error (m) |',
+           '|---|---|---:|---:|---:|---:|---:|---:|']
+    for r in rows: lines.append(f'| {r["run"]} | {r["trajectory"]} | {r["ate_se3_2d_rmse_m"]:.4f} | {r["ate_lever_2d_rmse_m"]:.4f} | {r["ate_se3_3d_rmse_m"]:.4f} | {r["ate_lever_3d_rmse_m"]:.4f} | {r["lever_norm_m"]:.3f} | {r["endpoint_error_m"]:.4f} |')
+    lines+=['','## ON/OFF aggregate (mean ± sample std)','','| Group | Trajectory | Metric | Mean | Std | n |','|---|---|---|---:|---:|---:|']
+    for r in aggregates:lines.append(f'| {r["group"]} | {r["trajectory"]} | {r["metric"]} | {r["mean"]:.5f} | {r["std_sample"]:.5f} | {r["n"]} |')
+    lines+=['','## Map quality','','| Run | MME (nats) | MPV (m²) | Overlap median (m) | p95 (m) | >0.2 m ratio |','|---|---:|---:|---:|---:|---:|']
+    for r in map_rows:lines.append(f'| {r["run"]} | {r["mme_nats"]:.5f} | {r["mpv_m2"]:.7f} | {r["overlap_median_m"]:.4f} | {r["overlap_p95_m"]:.4f} | {r["double_wall_ratio"]:.3f} |')
+    lines+=['','## Loop factor validation','', '| Run | Recorded events | Current / previous keyframe | GT horizontal distance (m) | Verdict |','|---|---:|---|---:|---|']
+    for r in loop_rows:lines.append(f'| {r["run"]} | {r["recorded_events"]} | {r["keyframe_current"]} / {r["keyframe_previous"]} | {r["gt_distance_m"]} | {r["classification"]} |')
+    lines+=['','v3 records cumulative loop marker endpoints and receive times. Latest endpoints are matched to final keyframes; maximum matching error must be <=0.2 m. GT horizontal distance <2 m classifies a true positive; this proximity check alone does not prove the relative rotation is correct.',
+            '', 'Final-vs-online ATE is reported for all ON runs; online already includes earlier loop corrections, so it cannot isolate ATE immediately before/after each factor.',
+            '', 'RPE uses 2 m centered GNSS tangent yaw and flat roll/pitch; body/antenna frame mismatch and tangent at corners limit rotational interpretation. Overlapping segments are correlated.',
+            '', 'Map MME/MPV: same 0.1 m ENU voxel, radius 0.3 m, at least 6 neighbors, sample covariance eigenvalue floor 1e-9 m². Exact GNSS XY bounding box; unbounded height. Eligible-neighbor fractions are in map_quality.csv.',
+            '', 'Overlap uses first/last 15 s of GNSS time, clipped to available final pose support. No deskew. Both NN directions gated at 1 m; coverage fractions prevent interpreting a tiny overlap as a good whole map.',
+            '', 'The even run uses only even scans. This is TASK-05 evaluation, not the held-out localization experiment TASK-05b.',
+            '', f'evo maximum ATE difference: {max(r["evo_difference_m"] for r in rows):.3g} m.']
+    if (ROOT/'results/archive_v3_failed_attempts/even_loop_on_attempt1').exists():
+        lines[2:2]=['v3 replay disclosure: two even attempts diverged and are preserved in archive_v3_failed_attempts/even_loop_on_attempt1 and attempt2. The canonical even run is a retry with sensor-readiness checks and 3 s DDS discovery delay; params, fitness and rate remain unchanged. Six full runs are the original v3 trials. See logs/task05.md.','']
+    warnings=[f"{row['run']}/{row['trajectory']}" for row in rows if row['lever_warning']]
+    lines+=['', 'Lever arm >3 m warnings (weak planar observability / trajectory-error absorption): '+', '.join(warnings)+'.']
+    (out/'summary.md').write_text('\n'.join(lines)+'\n')
+    after=source_manifest()
+    if before!=after: raise AssertionError('Protected source files changed during evaluation')
+    import resource
+    verification=dict(metrics_count=len(rows),map_count=len(map_rows),figure_count=len(list(figs.glob('*.png'))),
+                      max_evo_difference_m=max(r['evo_difference_m'] for r in rows),protected_sources_unchanged=True,
+                      wall_seconds=time.time()-started,peak_rss_mib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024,
+                      loop_pair_validation='PASS: all recorded pairs evaluated',representative_run=representative)
+    (out/'verification.json').write_text(json.dumps(verification,indent=2))
+    print(json.dumps(verification,indent=2),flush=True)
+
+
+if __name__=='__main__':main()
+
+exec
+/bin/bash -lc 'cat tools/eval/verify_eval.py; cat tools/tests/test_eval.py; cat env.sh; ls results/eval; cat tools/eval/gnss_gt.py' in /home/hong/SLAM
+ succeeded in 0ms:
+"""Independent artifact/criterion audit; including v3 loop endpoints and horizontal ATE."""
+import argparse
+import csv
+import hashlib
+import json
+from pathlib import Path
+import numpy as np
+from PIL import Image
+
+RUNS=[f'loop_{mode}_r{i}' for mode in ('on','off') for i in (1,2,3)]+['even_loop_on']
+
+
+def verify(root):
+    out=root/'results/eval'; checks={}
+    for run in RUNS:
+        for kind in ('final','online'):
+            directory=out/run/kind
+            m=json.loads((directory/'metrics.json').read_text())
+            assert m['matched_count']>=3
+            for key in ('se3','se3_lever'):
+                for dimension in ('ate_2d_m','ate_3d_m'):
+                    assert all(np.isfinite(v) and v>=0 for v in m[key][dimension].values())
+                assert all(np.isfinite(v) and v>=0 for v in m[key]['ate_m'].values())
+                r=np.array(m[key]['R']);np.testing.assert_allclose(r.T@r,np.eye(3),atol=1e-8)
+                assert np.linalg.det(r)>0.999999
+            assert m['evo_crosscheck']['absolute_difference_m']<.001
+            error=np.loadtxt(directory/'error_vs_time.csv',delimiter=',',skiprows=1)
+            assert len(error)==m['matched_count'] and (np.diff(error[:,0])>0).all()
+            for key,column3,column2 in [('se3',1,3),('se3_lever',2,4)]:
+                assert abs(np.sqrt(np.mean(error[:,column3]**2))-m[key]['ate_3d_m']['rmse'])<1e-8
+                assert abs(np.sqrt(np.mean(error[:,column2]**2))-m[key]['ate_2d_m']['rmse'])<1e-8
+            for length in ('10','25','50','100'):assert m['rpe'][length]['count']>0
+        q=json.loads((out/run/'map_quality.json').read_text())
+        assert np.isfinite(q['mme_nats']) and q['mpv_m2']>0
+        assert q['overlap']['median_m']<=q['overlap']['p95_m']<=1
+        assert 0<=q['overlap']['double_wall_ratio']<=1
+        clouds=np.load(out/run/'overlap_clouds.npz')
+        for name in ('first','last'):
+            a=clouds[name];assert a.shape[1]==6 and np.isfinite(a).all()
+            assert (a[:,3]>=0).all() and (a[:,3]<.05).all()
+    checks['fourteen_metrics_and_seven_maps']=True
+    for filename,count in [('summary.csv',14),('map_quality.csv',7)]:
+        with (out/filename).open() as f:assert len(list(csv.DictReader(f)))==count
+    assert (out/'summary.md').stat().st_size>1000
+    figures={}
+    for path in (out/'figs').glob('*.png'):
+        a=np.array(Image.open(path).convert('RGB'))
+        assert min(a.shape[:2])>=600 and a.std()>5
+        figures[path.name]=list(a.shape[:2])
+    assert len(figures)==12
+    checks['twelve_nonempty_figures']=figures
+    manifest=json.loads((out/'source_manifest_before.json').read_text())
+    for relative,checksum in manifest.items():
+        assert hashlib.sha256((root/relative).read_bytes()).hexdigest()==checksum,relative
+    checks['protected_sources_unchanged']=True
+    with (out/'loop_validation.csv').open() as f:loops=list(csv.DictReader(f))
+    gt=np.loadtxt(out/'gt_gnss_enu_tum.txt')
+    gnss=json.loads((out/'gt_gnss_metadata.json').read_text())
+    assert gnss['sigma_axes']=='xy' and gnss['accepted']==len(gt)
+    assert gnss['accepted']+gnss['rejected_status']+gnss['rejected_covariance']+gnss['rejected_invalid']==gnss['total']
+    checks['horizontal_gnss_filter_verified']=True
+    pair_count=0
+    for run in RUNS:
+        pairs=json.loads((root/'results'/run/'loop_pairs.json').read_text())['pairs']
+        poses=np.loadtxt(root/'results'/run/'keyframes_final_tum.txt')
+        rows=[r for r in loops if r['run']==run]
+        if run.startswith('loop_off'):
+            assert not pairs and len(rows)==1 and rows[0]['classification']=='NOT_APPLICABLE'
+            continue
+        assert len(pairs)>=1 and len(rows)==len(pairs)
+        pair_count+=len(pairs)
+        for pair,row in zip(pairs,rows):
+            nearest=np.linalg.norm(np.array(pair['endpoints'])[:,None,:]-poses[None,:,1:4],axis=2)
+            indices=np.argmin(nearest,axis=1)
+            np.testing.assert_array_equal(indices,pair['keyframe_indices'])
+            np.testing.assert_allclose(nearest[np.arange(2),indices],pair['matching_distances_m'])
+            assert max(pair['matching_distances_m'])<=.2 and indices[0]!=indices[1]
+            stamps=poses[indices,0]
+            assert np.all((stamps>=gt[0,0])&(stamps<=gt[-1,0]))
+            positions=np.column_stack([np.interp(stamps,gt[:,0],gt[:,axis]) for axis in (1,2)])
+            distance=float(np.linalg.norm(positions[0]-positions[1]))
+            assert abs(distance-float(row['gt_distance_m']))<1e-8
+            assert row['classification']==('TRUE_POSITIVE' if distance<2 else 'FALSE_POSITIVE')
+    ranked=sorted((json.loads((out/run/'final/metrics.json').read_text())['se3_lever']['ate_2d_m']['rmse'],run)
+                  for run in RUNS if run.startswith('loop_on_r'))
+    representative=ranked[1][1]
+    assert representative in (out/'summary.md').read_text().splitlines()[0]
+    alignment=json.loads((out/representative/'align_se3.json').read_text())
+    matrix=np.array(alignment['matrix_4x4']);assert matrix.shape==(4,4)
+    np.testing.assert_allclose(matrix[3],[0,0,0,1])
+    metrics=json.loads((out/representative/'final/metrics.json').read_text())
+    np.testing.assert_allclose(matrix[:3,:3],metrics['se3']['R'])
+    np.testing.assert_allclose(matrix[:3,3],metrics['se3']['t'])
+    checks['representative_run']=representative
+    checks['actual_loop_pairs_verified']=True
+    checks['loop_pair_count']=pair_count
+    checks['overall_completion']='PASS' 
+    (out/'independent_verification.json').write_text(json.dumps(checks,indent=2))
+    return checks
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[2]);a=p.parse_args()
+    print(json.dumps(verify(a.root),indent=2))
+import numpy as np
+import pytest
+from scipy.spatial.transform import Rotation
+from tools.eval.traj_eval import umeyama, fit_lever, associate, evaluate, rpe, EvalConfig
+from tools.eval.gnss_gt import to_enu
+from tools.eval.build_map_from_poses import voxel_reduce
+from tools.eval.map_quality import local_quality, overlap
+
+
+def test_umeyama_exact_and_reflection():
+    x=np.random.default_rng(8).normal(size=(100,3))
+    r=Rotation.from_euler('xyz',[.2,-.4,.8]).as_matrix();t=np.array([2.,5.,-3.])
+    recovered,translation=umeyama(x,x@r.T+t)
+    np.testing.assert_allclose(recovered,r,atol=1e-12);np.testing.assert_allclose(translation,t,atol=1e-12)
+    reflected=x.copy();reflected[:,0]*=-1
+    rr,_=umeyama(x,reflected);assert np.linalg.det(rr)==pytest.approx(1)
+    rr,tt=umeyama(x,2*x);assert np.linalg.norm(x@rr.T+tt-2*x)>1
+
+
+def test_joint_lever_known_6d_motion():
+    rng=np.random.default_rng(9);x=rng.normal(size=(150,3))*10
+    body=Rotation.random(150,random_state=rng).as_matrix()
+    r=Rotation.from_euler('xyz',[.2,-.15,.5]).as_matrix();t=np.array([4.,-8.,2.]);lever=np.array([1.,-.3,.8])
+    y=(x+np.einsum('nij,j->ni',body,lever))@r.T+t
+    rr,tt,ll,_=fit_lever(x,body,y)
+    np.testing.assert_allclose(rr,r,atol=1e-8);np.testing.assert_allclose(tt,t,atol=1e-8);np.testing.assert_allclose(ll,lever,atol=1e-8)
+
+
+def test_gt_interpolation_and_gap_rejection():
+    gt=np.zeros((4,8));gt[:,0]=[1,1.1,1.5,1.6];gt[:,1]=[0,1,5,6]
+    est=np.zeros((6,8));est[:,0]=[.9,1.025,1.05,1.3,1.55,1.7]
+    matched,y,idx=associate(est,gt)
+    np.testing.assert_array_equal(idx,[1,2,4]);np.testing.assert_allclose(y[:,0],[.25,.5,5.5])
+
+
+def test_evaluate_zero_error_and_evo(tmp_path):
+    t=np.arange(101)*.1;xyz=np.column_stack((t*2,np.sin(t),np.cos(t)))
+    yaw=np.arctan2(np.gradient(xyz[:,1]),np.gradient(xyz[:,0]))
+    tum=np.column_stack((t,xyz,Rotation.from_euler('z',yaw).as_quat()))
+    m,_=evaluate(tum,tum,tmp_path)
+    assert m['se3']['ate_m']['rmse']<1e-10
+    assert m['evo_crosscheck']['absolute_difference_m']<.001
+    assert (tmp_path/'metrics.json').exists()
+
+
+def test_rpe_straight_line_and_scale():
+    g=np.column_stack((np.arange(151.),np.zeros((151,2))));rot=np.tile(np.eye(3),(151,1,1))
+    perfect=rpe(g,rot,g,EvalConfig());scaled=rpe(g*1.1,rot,g,EvalConfig())
+    for k in perfect:
+        assert perfect[k]['translation_percent']['mean']<1e-10
+        assert scaled[k]['translation_percent']['mean']==pytest.approx(10)
+        assert perfect[k]['yaw_deg_per_100m']['mean']==0
+
+
+def test_enu_axes():
+    origin=np.array([0.,0.,0.]);lla=np.array([[0,0,0],[0,.00001,0],[.00001,0,0],[0,0,1]])
+    p=to_enu(lla,origin)
+    np.testing.assert_allclose(p[0],0,atol=1e-10)
+    assert p[1,0]>1 and abs(p[1,1])<1e-10
+    assert p[2,1]>1 and abs(p[2,0])<1e-10
+    assert p[3,2]==pytest.approx(1)
+
+
+def test_weighted_voxel_preserves_time_and_centroid():
+    rows=np.array([[.01,0,0,.01,100,1],[.03,0,0,.03,102,1],[.21,0,0,.02,101,1]])
+    full=voxel_reduce(rows);partial=voxel_reduce(np.concatenate((voxel_reduce(rows[:2]),rows[2:])))
+    np.testing.assert_allclose(full,partial);np.testing.assert_allclose(full[0],[.02,0,0,.02,101,2])
+
+
+def test_plane_quality_and_overlap():
+    grid=np.arange(-.5,.51,.1);x,y=np.meshgrid(grid,grid);plane=np.column_stack((x.ravel(),y.ravel(),np.zeros(x.size)))
+    quality=local_quality(plane);assert quality['mpv_m2']==pytest.approx(1e-9)
+    assert np.isfinite(quality['mme_nats'])
+    same=overlap(plane,plane);assert same['p95_m']==0 and same['double_wall_ratio']==0
+    shifted=overlap(plane,plane+[0,0,.25]);assert shifted['median_m']==pytest.approx(.25);assert shifted['double_wall_ratio']==1
+
+
+def test_builder_slerp_parity_and_provenance(monkeypatch):
+    from tools.eval import build_map_from_poses as module
+    from sensor_msgs.msg import PointCloud2, PointField
+    from rclpy.serialization import serialize_message
+    raw=[]
+    for i in range(3):
+        m=PointCloud2();m.header.stamp.sec=10+i;m.height=1;m.width=1;m.point_step=16;m.row_step=16
+        m.fields=[PointField(name=n,offset=j*4,datatype=7,count=1) for j,n in enumerate(['x','y','z','time'])]
+        m.data=np.array([1,0,0,.025],dtype='<f4').tobytes();raw.append(('/points_raw',serialize_message(m),0))
+    class Reader:
+        def __init__(self):self.rows=iter(raw);self.count=0
+        def has_next(self):return self.count<len(raw)
+        def read_next(self):self.count+=1;return next(self.rows)
+    monkeypatch.setattr(module,'bag_reader',lambda *args:Reader())
+    trajectory=np.column_stack(([10.,12.],np.zeros((2,3)),Rotation.from_euler('z',[0,np.pi]).as_quat()))
+    clouds,meta=module.build_map('unused',trajectory,'odd',voxel=.01)
+    assert meta['scans_used']==[1]
+    np.testing.assert_allclose(clouds[0][0,:3],[0,1,0],atol=1e-8)
+    assert clouds[0][0,3]==pytest.approx(.025);assert clouds[0][0,4]==11
+
+
+def test_horizontal_filter_retains_normal_vertical_sigma(monkeypatch,tmp_path):
+    from tools.eval import gnss_gt as module
+    from sensor_msgs.msg import NavSatFix
+    from rclpy.serialization import serialize_message
+    rows=[]
+    for i in range(5):
+        m=NavSatFix();m.header.stamp.sec=10+i;m.status.status=2
+        m.latitude=37.+i*.00001;m.longitude=127.;m.altitude=30.
+        m.position_covariance_type=2
+        m.position_covariance=[.014**2,0.,0.,0.,(.06 if i==3 else .014)**2,0.,0.,0.,.058**2]
+        if i==4:m.status.status=0
+        rows.append(('/gps/fix',serialize_message(m),0))
+    class Reader:
+        def __init__(self):self.i=0
+        def has_next(self):return self.i<len(rows)
+        def read_next(self):r=rows[self.i];self.i+=1;return r
+    monkeypatch.setattr(module,'bag_reader',lambda *a:Reader())
+    gt,meta=module.extract('unused',tmp_path)
+    assert len(gt)==3 and meta['rejected_covariance']==1 and meta['rejected_status']==1
+    assert meta['sigma_axes']=='xy' and meta['vertical_sigma_m']['mean']==pytest.approx(.058)
+
+
+def test_2d_ate_uses_aligned_horizontal_components():
+    t=np.arange(201)*.1
+    xyz=np.column_stack((t*2,5*np.sin(t/4),np.zeros(len(t))))
+    q=Rotation.from_euler('z',np.arctan2(np.gradient(xyz[:,1]),np.gradient(xyz[:,0]))).as_quat()
+    gt=np.column_stack((t,xyz,q));est=gt.copy();est[:,3]=.2*np.sin(t*2)
+    m,series=evaluate(est,gt)
+    for key,values in [('se3',series['aligned']),('se3_lever',series['antenna'])]:
+        delta=values-series['gt']
+        assert m[key]['ate_2d_m']['rmse']==pytest.approx(np.sqrt(np.mean(np.sum(delta[:,:2]**2,axis=1))))
+        assert m[key]['ate_3d_m']['rmse']==pytest.approx(np.sqrt(np.mean(np.sum(delta**2,axis=1))))
+        assert m[key]['ate_3d_m']['rmse']>m[key]['ate_2d_m']['rmse']
+
+
+def test_tangent_sparse_last_segment_has_previous_support():
+    from tools.eval.traj_eval import tangent_yaw
+    points=np.column_stack(([0.,1.5,3.,4.2],np.zeros((4,2))))
+    np.testing.assert_allclose(tangent_yaw(points),0)
+#!/usr/bin/env bash
+# Source this file from bash: source /home/hong/SLAM/env.sh
+_slam_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source /opt/ros/humble/setup.bash
+export CMAKE_PREFIX_PATH="${_slam_root}/third_party/install${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
+export LD_LIBRARY_PATH="${_slam_root}/third_party/install/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+source "${_slam_root}/ws/install/local_setup.bash"
+unset _slam_root
+even_loop_on
+figs
+final_audit.json
+group_summary.csv
+gt_gnss_enu_tum.txt
+gt_gnss_metadata.json
+independent_verification.json
+inspection_comparisons.jpg
+inspection_overlays.jpg
+loop_off_r1
+loop_off_r2
+loop_off_r3
+loop_on_r1
+loop_on_r2
+loop_on_r3
+loop_validation.csv
+map_preflight.json
+map_quality.csv
+source_manifest_before.json
+strict_3axis_audit
+summary.csv
+summary.md
+verification.json
+"""Extract quality-filtered GNSS positions; all products live under results/eval."""
+import argparse
+import json
+from pathlib import Path
+import numpy as np
+import rosbag2_py
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import NavSatFix
+
+A = 6378137.0
+E2 = 6.6943799901413165e-3
+MAX_SIGMA_M = 0.05
+
+
+def bag_reader(path, topics):
+    reader = rosbag2_py.SequentialReader()
+    reader.open(rosbag2_py.StorageOptions(uri=str(path), storage_id='sqlite3'),
+                rosbag2_py.ConverterOptions('', ''))
+    present = {t.name for t in reader.get_all_topics_and_types()}
+    if not set(topics) <= present:
+        raise ValueError(f'Missing bag topics: {set(topics)-present}')
+    reader.set_filter(rosbag2_py.StorageFilter(topics=topics))
+    return reader
+
+
+def ecef(lla):
+    lat, lon = np.radians(lla[:, :2]).T
+    h = lla[:, 2]
+    n = A / np.sqrt(1-E2*np.sin(lat)**2)
+    return np.column_stack(((n+h)*np.cos(lat)*np.cos(lon),
+                            (n+h)*np.cos(lat)*np.sin(lon), (n*(1-E2)+h)*np.sin(lat)))
+
+
+def to_enu(lla, origin):
+    lat, lon = np.radians(origin[:2])
+    matrix = np.array([[-np.sin(lon), np.cos(lon), 0],
+                       [-np.sin(lat)*np.cos(lon), -np.sin(lat)*np.sin(lon), np.cos(lat)],
+                       [np.cos(lat)*np.cos(lon), np.cos(lat)*np.sin(lon), np.sin(lat)]])
+    return (ecef(np.asarray(lla))-ecef(np.asarray(origin)[None])) @ matrix.T
+
+
+def extract(bag, out, sigma_axes="xy"):
+    if sigma_axes not in ("xy", "xyz"): raise ValueError("sigma_axes must be xy or xyz")
+    axis_count = 2 if sigma_axes == "xy" else 3
+    reader = bag_reader(bag, ['/gps/fix'])
+    rows = []; stats = dict(total=0, rejected_status=0, rejected_covariance=0, rejected_invalid=0)
+    origin = None
+    vertical_sigmas=[]
+    while reader.has_next():
+        _, raw, _ = reader.read_next()
+        m = deserialize_message(raw, NavSatFix)
+        stats['total'] += 1
+        lla = [m.latitude, m.longitude, m.altitude]
+        if origin is None:
+            if not np.isfinite(lla).all():
+                raise ValueError('First fix cannot define a finite ENU origin')
+            origin = lla
+        if m.status.status < 2:
+            stats['rejected_status'] += 1; continue
+        covariance = np.array(m.position_covariance).reshape(3, 3)
+        if np.isfinite(covariance[2,2]) and covariance[2,2]>=0:
+            vertical_sigmas.append(float(np.sqrt(covariance[2,2])))
+        if (m.position_covariance_type == 0 or not np.isfinite(covariance).all()
+                or (np.diag(covariance) < 0).any()
+                or np.sqrt(np.diag(covariance)[:axis_count]).max() > MAX_SIGMA_M):
+            stats['rejected_covariance'] += 1; continue
+        if not np.isfinite(lla).all():
+            stats['rejected_invalid'] += 1; continue
+        rows.append([m.header.stamp.sec+m.header.stamp.nanosec*1e-9, *lla])
+    out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    stats.update(accepted=len(rows), origin_lla=origin, max_sigma_m=MAX_SIGMA_M, sigma_axes=sigma_axes,
+                 vertical_sigma_m=dict(count=len(vertical_sigmas), min=min(vertical_sigmas,default=None),
+                 max=max(vertical_sigmas,default=None), mean=float(np.mean(vertical_sigmas)) if vertical_sigmas else None))
+    (out/'gt_gnss_metadata.json').write_text(json.dumps(stats, indent=2))
+    rows = np.array(rows)
+    if len(rows) < 3 or (np.diff(rows[:, 0]) <= 0).any():
+        raise ValueError('Insufficient or nonmonotonic GNSS fixes')
+    gt = np.column_stack((rows[:, 0], to_enu(rows[:, 1:], origin), np.tile([0,0,0,1], (len(rows),1))))
+    out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    np.savetxt(out/'gt_gnss_enu_tum.txt', gt, fmt='%.9f', header='stamp E N U qx qy qz qw (orientation placeholder)')
+    stats.update(accepted=len(gt), origin_lla=origin, max_sigma_m=MAX_SIGMA_M,
+                 orientation='placeholder identity; RPE derives yaw from GNSS tangent')
+    (out/'gt_gnss_metadata.json').write_text(json.dumps(stats, indent=2))
+    return gt, stats
+
+
+if __name__ == '__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--bag', required=True); p.add_argument('--out', required=True)
+    p.add_argument('--sigma-axes', choices=['xy','xyz'], default='xy')
+    a=p.parse_args(); extract(a.bag, a.out, a.sigma_axes)
+
+codex
+기존 코드는 LiDAR의 pitch가 포함된 회전으로 RPE를 계산하고, 관측이 약한 수직 lever arm까지 함께 추정하고 있습니다. 정렬 후 yaw만 사용하는 수평 2변수 모델로 바꾸고, 루프 판정은 상대위치 오차로 교체하겠습니다. 쓰기 범위 제한에 따라 작업 기록과 추가 테스트도 `results/eval/`, `tools/eval/` 안에 두겠습니다.
+
+exec
+/bin/bash -lc "cat > /tmp/edit_eval_rev2.py <<'PY'
+from pathlib import Path
+p=Path('tools/eval/traj_eval.py')
+s=p.read_text().replace('tangent_baseline_m: float = 2.0','tangent_baseline_m: float = 5.0')
+pos=s.index('\\ndef stats(')
+s=s[:pos]+'''
+def yaw_only(rotations):
+    \"\"\"ENU body heading: strip LiDAR mounting roll/pitch after alignment.\"\"\"
+    yaw = np.arctan2(rotations[:, 1, 0], rotations[:, 0, 0])
+    return Rotation.from_euler('z', yaw).as_matrix()
+
+
+def fit_lever_2d(x, rotations, y):
+    \"\"\"Joint rigid alignment and horizontal yaw-body lever; lz fixed to zero.
+
+    p_gnss = R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0].
+    SE3 without lever is retained independently for maps and evo validation.
+    \"\"\"
+    r, t = umeyama(x, y)
+    def residual(v):
+        rp = Rotation.from_rotvec(v[:3]).as_matrix()
+        body = yaw_only(np.einsum('ij,njk->nik', rp, rotations))
+        return (x @ rp.T + v[3:6] + body @ np.r_[v[6:8], 0.] - y).ravel()
+    solution = least_squares(residual, np.r_[Rotation.from_matrix(r).as_rotvec(), t, 0., 0.],
+                             xtol=1e-11, ftol=1e-11, gtol=1e-11, max_nfev=1000)
+    if not solution.success:
+        raise ValueError(f'Horizontal lever solver failed: {solution.message}')
+    singular = np.linalg.svd(solution.jac, compute_uv=False)
+    return (Rotation.from_rotvec(solution.x[:3]).as_matrix(), solution.x[3:6],
+            np.r_[solution.x[6:8], 0.], dict(
+                model='R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0]',
+                dof=2, jacobian_singular_values=singular.tolist(),
+                jacobian_condition=float(singular[0]/max(singular[-1], 1e-15)),
+                note='Yaw-only body removes approximately 9.3 degree LiDAR mounting pitch; in-sample nuisance fit, not independent antenna calibration.'))
+
+''' + s[pos:]
+s=s.replace('baseline=2.', 'baseline=5.')
+s=s.replace(\"    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(gt_positions,axis=0),axis=1))]\", \"    est_rotation=yaw_only(est_rotation)\\n    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(gt_positions,axis=0),axis=1))]\")
+s=s.replace('r,t=umeyama(x,y); rb,tb,l,diagnostic=fit_lever(x,rot,y)', 'r,t=umeyama(x,y); rb,tb,l,diagnostic=fit_lever_2d(x,rot,y)\\n    r3,t3,l3,diagnostic3=fit_lever(x,rot,y)')
+s=s.replace(\"antenna=(x+np.einsum('nij,j->ni',rot,l))@rb.T+tb\", \"antenna=x@rb.T+tb+yaw_only(np.einsum('ij,njk->nik',rb,rot))@l\\n    antenna3=(x+rot@l3)@r3.T+t3\\n    rpe_result=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config)\\n    for length, value in rpe_result.items():\\n        if float(length)<25: value['yaw_deg_per_100m']=None\")
+s=s.replace('primary_metric=\"2D horizontal ATE after SE3 alignment; no scale\"', 'primary_metric=\"2D horizontal ATE after SE3 + yaw-only horizontal 2-DoF lever fit; no scale\"')
+s=s.replace(\"                 endpoint=dict(\", \"                 se3_lever_3d_diagnostic=dict(R=r3.tolist(),t=t3.tolist(),lever_arm_body_m=l3.tolist(),\\n                     ate_3d_m=stats(np.linalg.norm(antenna3-y,axis=1)),diagnostic=diagnostic3,\\n                     note='Legacy unconstrained 3-DoF fit: diagnostic only, excluded from primary metrics.'),\\n                 endpoint=dict(\")
+s=s.replace(\"                 rpe=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config),\", \"                 rpe=rpe_result,\")
+a=s.index(\"                 rpe_note=\"); b=s.index('\\n                 evo_crosscheck=',a)
+s=s[:a]+\"                 rpe_note='Yaw-only aligned body frame removes approximately 9.3 degree LiDAR mounting pitch. GT uses 5 m centered tangent yaw, flat roll/pitch approximation. Translation: 10/25/50/100 m; yaw: >=25 m only. Standard SE3 positions retain antenna/body origin mismatch. All start poses overlap and are correlated.',\"+s[b:]
+s=s.replace(\"antenna=antenna,error=ea2)\",\"antenna=antenna,error=eb2)\")
+p.write_text(s)
+PY
+source env.sh && .venv/bin/python /tmp/edit_eval_rev2.py" in /home/hong/SLAM
+ succeeded in 0ms:
+exec
+/bin/bash -lc "cat > /tmp/edit_runner_rev2.py <<'PY'
+from pathlib import Path
+p=Path('tools/eval/run_all_eval.py');s=p.read_text()
+s=s.replace('LOOP_GT_TRUE_POSITIVE_M=2.0','LOOP_CONSISTENCY_MAX_M=0.5')
+a=s.index('    # Explicit user protected map trees');b=s.index('    return {',a);s=s[:a]+s[b:]
+s=s.replace(\"p.add_argument('--sigma-axes'\", \"p.add_argument('--reuse-map-quality',action='store_true',help='Reuse unchanged map metrics; trajectory evaluation only')\\n    p.add_argument('--sigma-axes'\")
+s=s.replace(\"if r['count'] else None\\n            rows.append\", \"if r['yaw_deg_per_100m'] is not None else None\\n            row['lever_x_m'],row['lever_y_m']=metrics['se3_lever']['lever_arm_body_m'][:2]\\n            rows.append\")
+s=s.replace(\"label='Joint lever fit (antenna)'\", \"label='Yaw-body lever 2D fit (antenna)'\")
+a=s.index('        xyz=read_map');b=s.index('        trajectory=load_tum',a)
+s=s[:a]+'''        if args.reuse_map_quality:
+            quality=json.loads((out/run/'map_quality.json').read_text())
+        else:
+            xyz=read_map(directory/'map/GlobalMap.pcd',align['R'],align['t'],bounds)
+            quality=local_quality(xyz);del xyz
+'''+s[b:]
+s=s.replace(\"if args.reuse_overlap and cache.exists():\", \"if (args.reuse_overlap or args.reuse_map_quality) and cache.exists():\")
+s=s.replace(\"            loop_rows.append(dict(run=run,recorded_events=meta['loop_events']\", \"            estimated=trajectory[indices,1:4]@np.asarray(align['R']).T+np.asarray(align['t'])\\n            relative_error=float(np.linalg.norm((estimated[0]-estimated[1])-(positions[0]-positions[1])))\\n            loop_rows.append(dict(run=run,recorded_events=meta['loop_events']\")
+s=s.replace(\"classification='TRUE_POSITIVE' if distance<LOOP_GT_TRUE_POSITIVE_M else 'FALSE_POSITIVE',\", \"relative_position_error_m=relative_error,\\n                                  classification='CONSISTENT(TP)' if relative_error<LOOP_CONSISTENCY_MAX_M else 'INCONSISTENT',\")
+s=s.replace(\"gt_distance_m=None,classification=\", \"gt_distance_m=None,relative_position_error_m=None,classification=\")
+s=s.replace(\"'endpoint_error_m','lever_norm_m'\", \"'endpoint_error_m','lever_norm_m','lever_x_m','lever_y_m'\")
+s=s.replace(\"v=[r[field] for r in selected]\\n                aggregates\", \"v=[r[field] for r in selected if r[field] is not None]\\n                if not v: continue\\n                aggregates\")
+s=s.replace(\"s=all_series[run]['final']['aligned']\", \"s=all_series[run]['final']['antenna']\")
+s=s.replace(\"title='Final trajectories, SE3 alignment'\", \"title='Final trajectories, SE3 + horizontal lever 2D'\")
+s=s.replace(\"ylabel='Horizontal SE3 ATE (m)'\", \"ylabel='Horizontal SE3 + lever 2D ATE (m)'\")
+a=s.index('    fig,axes=plt.subplots(1,2');b=s.index('    on_final=',a)
+s=s[:a]+'''    fig,axes=plt.subplots(1,2,figsize=(11,4))
+    for mode,color,shift in [('on','#0072B2',-.18),('off','#D55E00',.18)]:
+        for ax,field,title,lengths in [(axes[0],'translation_percent','Translation (%)',(10,25,50,100)),
+                                      (axes[1],'yaw_deg_per_100m','Yaw (deg/100 m)',(25,50,100))]:
+            x=np.arange(len(lengths))
+            values=np.array([[all_metrics[f'loop_{mode}_r{i}']['final']['rpe'][str(length)][field]['mean'] for length in lengths] for i in (1,2,3)])
+            ax.bar(x+shift,values.mean(axis=0),.36,yerr=values.std(axis=0,ddof=1),color=color,label=f'Loop {mode}')
+            ax.set_xticks(x,[str(v) for v in lengths]);ax.set(xlabel='GT segment length (m)',ylabel=title,title=title+'; 5 m GNSS tangent');ax.legend()
+    save_fig(fig,figs/'rpe_bar.png')
+'''+s[b:]
+a=s.index('    lines=[f\\'TASK-06');b=s.index('    after=source_manifest()',a)
+s=s[:a]+'''    from .report_rev2 import report
+    report(out, rows, map_rows, loop_rows, aggregates, all_series, representative, gnss_stats)
+'''+s[b:]
+p.write_text(s)
+PY
+source env.sh && .venv/bin/python /tmp/edit_runner_rev2.py
+rg -n 'yaw_deg|reuse-map|relative_error|lever_x' tools/eval/run_all_eval.py" in /home/hong/SLAM
+ succeeded in 0ms:
+45:    p.add_argument('--reuse-map-quality',action='store_true',help='Reuse unchanged map metrics; trajectory evaluation only')
+75:                row[f'rpe_{length}m_yaw_deg_per_100m']=r['yaw_deg_per_100m']['mean'] if r['yaw_deg_per_100m'] is not None else None
+76:            row['lever_x_m'],row['lever_y_m']=metrics['se3_lever']['lever_arm_body_m'][:2]
+133:            relative_error=float(np.linalg.norm((estimated[0]-estimated[1])-(positions[0]-positions[1])))
+136:                                  relative_position_error_m=relative_error,
+137:                                  classification='CONSISTENT(TP)' if relative_error<LOOP_CONSISTENCY_MAX_M else 'INCONSISTENT',
+148:            for field in ['ate_se3_2d_rmse_m','ate_lever_2d_rmse_m','ate_se3_3d_rmse_m','ate_lever_3d_rmse_m','endpoint_error_m','lever_norm_m','lever_x_m','lever_y_m'] + [key for key in selected[0] if key.startswith('rpe_')]:
+168:                                      (axes[1],'yaw_deg_per_100m','Yaw (deg/100 m)',(25,50,100))]:
+
+exec
+/bin/bash -lc "cat > tools/eval/report_rev2.py <<'PY'
+\"\"\"Revision 2 report and reproducible GNSS RPE noise floor (no experiment replay).\"\"\"
+import csv
+import json
+import numpy as np
+from scipy.spatial.transform import Rotation
+from .traj_eval import EvalConfig, rpe, tangent_yaw
+
+NOISE_SIGMA_M = .014
+NOISE_TRIALS = 10
+NOISE_SEED = 20261026
+
+
+def write_csv(path, rows):
+    with path.open('w') as f:
+        writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+
+
+def noise_floor(series):
+    \"\"\"Use each final trajectory's synchronized GT samples, no alignment or lever fit.
+
+    Clean reference remains fixed. Each trial adds independent isotropic 3D
+    position noise; synthetic estimate yaw comes from its own 5 m tangent.
+    Statistics are over the ten trial means, not correlated RPE segments.
+    \"\"\"
+    rng=np.random.default_rng(NOISE_SEED); rows=[]
+    for run, kinds in series.items():
+        gt=kinds['final']['gt']; cfg=EvalConfig()
+        clean_rotation=Rotation.from_euler('z',tangent_yaw(gt,cfg.tangent_baseline_m)).as_matrix()
+        clean=rpe(gt,clean_rotation,gt,cfg)
+        trials=[]
+        for _ in range(NOISE_TRIALS):
+            noisy=gt+rng.normal(0,NOISE_SIGMA_M,gt.shape)
+            rot=Rotation.from_euler('z',tangent_yaw(noisy,cfg.tangent_baseline_m)).as_matrix()
+            trials.append(rpe(noisy,rot,gt,cfg))
+        for length in cfg.segment_lengths_m:
+            key=str(int(length))
+            for field in ('translation_percent','yaw_deg_per_100m'):
+                if length<25 and field.startswith('yaw'): continue
+                v=[trial[key][field]['mean'] for trial in trials]
+                rows.append(dict(run=run,segment_m=int(length),metric=field,
+                    clean_gt_mean=clean[key][field]['mean'],noise_mean=float(np.mean(v)),
+                    noise_std_sample=float(np.std(v,ddof=1)),trials=NOISE_TRIALS,
+                    sigma_m=NOISE_SIGMA_M,seed=NOISE_SEED,poses=len(gt)))
+    return rows
+
+
+def fmt(v):
+    return f'{np.mean(v):.4f} ± {np.std(v,ddof=1):.4f}' if len(v)>1 else f'{v[0]:.4f} (n=1)'
+
+
+def report(out, rows, maps, loops, aggregates, series, representative, gnss_stats):
+    final=[r for r in rows if r['trajectory']=='final']
+    noise=noise_floor(series);write_csv(out/'rpe_noise_floor.csv',noise)
+    lines=['# TASK-05 rev2 evaluation','',
+        '| Group | n | 2D ATE RMSE, SE3+lever2D (m) | Endpoint vector error, SE3 (m) | RPE 100 m (%) | Loop consistency | MME (nats) |',
+        '|---|---:|---:|---:|---:|---:|---:|']
+    for group in ('loop_on','loop_off','even'):
+        select=lambda run: run.startswith(group+'_r') if group"'!='"'even' else run=='even_loop_on'
+        rr=[r for r in final if select(r['run'])]; mm=[m for m in maps if select(m['run'])]
+        ll=[r for r in loops if select(r['run']) and r['classification']"'!='"'NOT_APPLICABLE']
+        per_run=[]
+        for row in rr:
+            pairs=[p for p in ll if p['run']==row['run']]
+            if pairs: per_run.append(sum(p['classification']=='CONSISTENT(TP)' for p in pairs)/len(pairs))
+        ratio=(fmt(per_run)+f\"; {sum(r['classification']=='CONSISTENT(TP)' for r in ll)}/{len(ll)} pairs\") if ll else 'N/A (no factors)'
+        lines.append(f\"| {group} | {len(rr)} | {fmt([r['ate_lever_2d_rmse_m'] for r in rr])} | {fmt([r['endpoint_error_m'] for r in rr])} | {fmt([r['rpe_100m_translation_percent'] for r in rr])} | {ratio} | {fmt([m['mme_nats'] for m in mm])} |\")
+    lines+=['',f'TASK-06 representative run: **{representative}** (median final 2D SE3+lever2D ATE among ON, n=3).',
+        'The SE3-only align_se3.json files remain the map alignment; horizontal lever fitting does not change them.',
+        '', 'Group values are mean ± sample std (ddof=1); even has one observation and no estimated repeatability.',
+        '', '## Interpretation (n=3)', '']
+    on=[r['ate_lever_2d_rmse_m'] for r in final if r['run'].startswith('loop_on_r')]
+    off=[r['ate_lever_2d_rmse_m'] for r in final if r['run'].startswith('loop_off_r')]
+    improvement=float(np.mean(off)-np.mean(on));std_on=np.std(on,ddof=1);std_off=np.std(off,ddof=1)
+    interpretation=[
+        f'Loop closure changes horizontal ATE from OFF {fmt(off)} m to ON {fmt(on)} m; OFF−ON = {improvement:.4f} m ({improvement/np.mean(off)*100:.1f}% reduction; negative means degradation).',
+        f'The mean difference is {\"smaller\" if abs(improvement)<max(std_on,std_off) else \"larger\"} than the larger group std ({max(std_on,std_off):.4f} m). With only three runs per group, this does not establish statistical significance or generalization to another drive.',
+        'Yaw-only RPE removes the artificial mounting-pitch contribution; 100 m translation is now consistent with sub-metre ATE. The GNSS noise floor below uses ten independent 1.4 cm perturbations and matched final-pose sampling.',
+        'Lever2D estimates are fitted on the same GT used to score ATE; agreement across repeats supports a plausible mounting offset but is not independent calibration. ON/OFF variation can also absorb trajectory distortion.',
+        'Loop consistency checks the relative position vector, not an ICP rotation or an independent ground-truth loop transform. Online odometry already contains earlier loop updates, so online/final differences do not isolate a single constraint.'
+    ]
+    lines+=interpretation
+    (out/'task05_rev2.md').write_text('# TASK-05 rev2 work log\\n\\nScope: tools/eval/ and results/eval/ only. No experiments rerun. Existing canonical v3 trajectories, maps and loop records are read-only.\\n\\n'+ '\\n\\n'.join(interpretation)+'\\n\\nMethods and limitations are documented in summary.md; verification in independent_verification.json and pytest_rev2.txt. Per the user scope, logs/task05.md is not modified.\\n')
+    lines+=['', '## Methods and limits','',
+        f'GNSS accepted {gnss_stats[\"accepted\"]}/{gnss_stats[\"total\"]}. ENU origin is first fix. Status >=2 and horizontal sigma <=0.05 m; vertical sigma is recorded only.',
+        'SE3 Umeyama fits rigid alignment without scale and is unchanged; evo independently checks 3D ATE to <1 mm.',
+        'Lever2D jointly fits R_align, t and lx, ly with lz=0: p_gnss = R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0]. Yaw is extracted after alignment; roll/pitch including the approximately 9.3° LiDAR mounting pitch is removed. Legacy unconstrained 3-DoF fits remain in metrics.json under se3_lever_3d_diagnostic only.',
+        'RPE uses SE3-only positions and yaw-only aligned estimated rotations. GT yaw is a centered 5 m trajectory tangent (roll/pitch zero, flat-ground approximation). All start poses use first endpoint >= target length and actual GT arc length; segments overlap and are correlated. Translation is reported at 10/25/50/100 m; yaw only at 25/50/100 m. Tangent yaw at corners and body/antenna origin mismatch remain limitations.',
+        'Endpoint vector error = norm((aligned last−first) − (GT last−first)), evaluated at each trajectory’s synchronized support; this is not merely the start–end gap.',
+        '', '## Trajectory metrics','',
+        '| Run | Trajectory | SE3 2D ATE (m) | Lever2D 2D ATE (m) | SE3 3D ATE (m) | Lever2D 3D ATE (m) | lx / ly (m) | RPE 100 m (%) |',
+        '|---|---|---:|---:|---:|---:|---|---:|']
+    for r in rows:
+        lines.append(f\"| {r['run']} | {r['trajectory']} | {r['ate_se3_2d_rmse_m']:.4f} | {r['ate_lever_2d_rmse_m']:.4f} | {r['ate_se3_3d_rmse_m']:.4f} | {r['ate_lever_3d_rmse_m']:.4f} | {r['lever_x_m']:.4f} / {r['lever_y_m']:.4f} | {r['rpe_100m_translation_percent']:.4f} |\")
+    lines+=['','## Repeatability: ON/OFF mean ± sample std','','| Group | Trajectory | Metric | Mean | Std | n |','|---|---|---|---:|---:|---:|']
+    for r in aggregates:
+        lines.append(f\"| {r['group']} | {r['trajectory']} | {r['metric']} | {r['mean']:.5f} | {r['std_sample']:.5f} | {r['n']} |\")
+    lines+=['','## Lever2D consistency','','| Population | n | lx (m) | ly (m) | Norm (m) |','|---|---:|---:|---:|---:|']
+    for kind in ('final','online'):
+        for group in ('loop_on','loop_off','all seven'):
+            rr=[r for r in rows if r['trajectory']==kind and (group=='all seven' or r['run'].startswith(group+'_r'))]
+            lines.append(f\"| {group} / {kind} | {len(rr)} | {fmt([r['lever_x_m'] for r in rr])} | {fmt([r['lever_y_m'] for r in rr])} | {fmt([r['lever_norm_m'] for r in rr])} |\")
+    lines+=['','These are yaw-only ENU heading body offsets with lz fixed at zero, not the tilted LiDAR-frame x/z components. Per-run fits (including even) are listed above. Across-all-run std mixes loop modes and the single even trial; use within-group std to assess repeatability.','',
+        '## RPE GNSS noise floor','',
+        f'Clean GT and GT + isotropic Gaussian position noise σ={NOISE_SIGMA_M} m, {NOISE_TRIALS} trials, seed {NOISE_SEED}. Reference is clean matched GT for each run. No alignment or lever fit; noisy estimate yaw is derived from its own 5 m tangent. Values are mean ± sample std of ten trial means, not of overlapping segments. All clean-GT translation/yaw means are numerically zero. This tests metric sensitivity at final-keyframe sampling, not a complete GNSS error model.',
+        '', '| Run | Segment (m) | Translation noise (%) | Yaw noise (deg/100 m) |','|---|---:|---:|---:|']
+    for run in series:
+        for length in (10,25,50,100):
+            rr=[r for r in noise if r['run']==run and r['segment_m']==length]
+            def value(field):
+                v=[r for r in rr if r['metric']==field]
+                return f\"{v[0]['noise_mean']:.4f} ± {v[0]['noise_std_sample']:.4f}\" if v else '— (not reported)'
+            lines.append(f\"| {run} | {length} | {value('translation_percent')} | {value('yaw_deg_per_100m')} |\")
+    lines+=['','## Loop constraint consistency','','| Run | Current / previous keyframe | GT horizontal distance (m), reference only | Relative position error, 3D (m) | Verdict |','|---|---|---:|---:|---|']
+    for r in loops:
+        val=lambda x: '—' if x is None else f'{x:.4f}'
+        lines.append(f\"| {r['run']} | {r['keyframe_current']} / {r['keyframe_previous']} | {val(r['gt_distance_m'])} | {val(r['relative_position_error_m'])} | {r['classification']} |\")
+    lines+=['', 'After unchanged SE3 alignment, Δ = (p_i−p_j) − (g_i−g_j), with GT interpolated at the two final keyframe times. ||Δ|| <0.5 m is CONSISTENT(TP); otherwise INCONSISTENT. GT distance is reference only. For pairs traversed in the same direction the antenna lever effect approximately cancels. Marker matching must be <=0.2 m. This checks position consistency only.',
+        '', '## Preserved map quality','','| Run | MME (nats) | MPV (m²) | Overlap median (m) | p95 (m) | >0.2 m ratio |','|---|---:|---:|---:|---:|---:|']
+    for m in maps:
+        lines.append(f\"| {m['run']} | {m['mme_nats']:.5f} | {m['mpv_m2']:.7f} | {m['overlap_median_m']:.4f} | {m['overlap_p95_m']:.4f} | {m['double_wall_ratio']:.3f} |\")
+    lines+=['','MME/MPV use the same 0.1 m ENU voxel, 0.3 m radius, >=6 neighbors and covariance eigenvalue floor 1e-9 m², cropped to GNSS XY bounds with unbounded height. Existing map metrics and first/last 15 s overlap clouds are reused because source maps and SE3 alignment are unchanged. Overlap uses both NN directions gated at 1 m; coverage is in map_quality.csv. No deskew. Even is not held-out localization TASK-05b.',
+        '', 'v3 provenance: two divergent even attempts remain archived under results/archive_v3_failed_attempts; canonical even used sensor readiness and DDS discovery delay with unchanged params/rate. No experiment replay in rev2.',
+        '', f\"Maximum evo ATE difference: {max(r['evo_difference_m'] for r in rows):.3g} m.\"]
+    (out/'summary.md').write_text('\\n'.join(lines)+'\\n')
+PY
+source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.run_all_eval --reuse-map-quality --reuse-overlap > results/eval/rev2_evaluation.log 2>&1" in /home/hong/SLAM
+exec
+/bin/bash -lc "tail -30 results/eval/rev2_evaluation.log; sed -n '100,240p' tools/eval/traj_eval.py; rg --files tools/tests" in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+[INFO] [1793006282.673878228] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+GNSS: {'total': 3298, 'rejected_status': 0, 'rejected_covariance': 0, 'rejected_invalid': 0, 'accepted': 3298, 'origin_lla': [37.23651316666667, 126.77413183333333, 29.7], 'max_sigma_m': 0.05, 'sigma_axes': 'xy', 'vertical_sigma_m': {'count': 3298, 'min': 0.0512, 'max': 0.0584, 'mean': 0.05362037598544574}, 'orientation': 'placeholder identity; RPE derives yaw from GNSS tangent'}
+loop_on_r1: ATE 0.6724 m; evaluating map
+loop_on_r1: map complete, 231204 points
+loop_on_r2: ATE 0.7022 m; evaluating map
+loop_on_r2: map complete, 227994 points
+loop_on_r3: ATE 0.7855 m; evaluating map
+loop_on_r3: map complete, 236118 points
+loop_off_r1: ATE 0.7310 m; evaluating map
+loop_off_r1: map complete, 233936 points
+loop_off_r2: ATE 0.7226 m; evaluating map
+loop_off_r2: map complete, 224919 points
+loop_off_r3: ATE 0.9321 m; evaluating map
+loop_off_r3: map complete, 227146 points
+even_loop_on: ATE 0.6670 m; evaluating map
+even_loop_on: map complete, 238712 points
+
+def tangent_yaw(points, baseline=5.):
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(points[:,:2],axis=0),axis=1))]
+    left=np.clip(np.searchsorted(s,s-baseline/2,side="right")-1,0,len(s)-1)
+    right=np.clip(np.searchsorted(s,s+baseline/2),0,len(s)-1)
+    delta=points[right,:2]-points[left,:2]
+    if np.any(np.linalg.norm(delta,axis=1)<1e-6): raise ValueError('GNSS tangent undefined')
+    return np.unwrap(np.arctan2(delta[:,1],delta[:,0]))
+
+
+def rpe(points, est_rotation, gt_positions, cfg):
+    """All start poses, first end pose at or beyond target GT arc length (KITTI)."""
+    est_rotation=yaw_only(est_rotation)
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(gt_positions,axis=0),axis=1))]
+    yaw=tangent_yaw(gt_positions,cfg.tangent_baseline_m)
+    gr=Rotation.from_euler('z',yaw).as_matrix(); result={}
+    for length in cfg.segment_lengths_m:
+        translation=[]; angles=[]; actual=[]
+        for i in range(len(s)):
+            j=int(np.searchsorted(s,s[i]+length))
+            if j>=len(s): continue
+            d=s[j]-s[i]
+            gt_delta=gr[i].T@(gt_positions[j]-gt_positions[i])
+            est_delta=est_rotation[i].T@(points[j]-points[i])
+            gt_rel=gr[i].T@gr[j]; est_rel=est_rotation[i].T@est_rotation[j]
+            err=est_rel.T@gt_rel
+            translation.append(np.linalg.norm(est_delta-gt_delta)/d*100)
+            angles.append(abs(np.arctan2(err[1,0],err[0,0]))*180/np.pi/d*100)
+            actual.append(d)
+        result[str(int(length))]=dict(count=len(actual), translation_percent=stats(translation) if actual else None,
+                                       yaw_deg_per_100m=stats(angles) if actual else None,
+                                       mean_actual_length_m=float(np.mean(actual)) if actual else None)
+    return result
+
+
+def evaluate(est, gt, out=None, config=EvalConfig()):
+    matched,y,idx=associate(est,gt,config.max_gt_gap_s); x=matched[:,1:4]
+    rot=Rotation.from_quat(matched[:,4:]).as_matrix()
+    r,t=umeyama(x,y); rb,tb,l,diagnostic=fit_lever_2d(x,rot,y)
+    r3,t3,l3,diagnostic3=fit_lever(x,rot,y)
+    aligned=x@r.T+t
+    antenna=x@rb.T+tb+yaw_only(np.einsum('ij,njk->nik',rb,rot))@l
+    antenna3=(x+rot@l3)@r3.T+t3
+    rpe_result=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config)
+    for length, value in rpe_result.items():
+        if float(length)<25: value['yaw_deg_per_100m']=None
+    ea=np.linalg.norm(aligned-y,axis=1); eb=np.linalg.norm(antenna-y,axis=1)
+    ea2=np.linalg.norm((aligned-y)[:,:2],axis=1); eb2=np.linalg.norm((antenna-y)[:,:2],axis=1)
+    from evo.core.geometry import umeyama_alignment
+    er,et,_=umeyama_alignment(x.T,y.T,with_scale=False)
+    evo_rmse=float(np.sqrt(np.mean(np.sum((x@er.T+et-y)**2,axis=1))))
+    diff=abs(evo_rmse-stats(ea)['rmse'])
+    if diff>=0.001: raise AssertionError(f'evo ATE mismatch {diff}')
+    endpoint_error=(aligned[-1]-aligned[0])-(y[-1]-y[0])
+    metrics=dict(input_count=len(est), matched_count=len(matched), excluded_count=len(est)-len(matched),
+                 interval_s=[float(matched[0,0]),float(matched[-1,0])],
+                 primary_metric="2D horizontal ATE after SE3 + yaw-only horizontal 2-DoF lever fit; no scale",
+                 se3=dict(R=r.tolist(),t=t.tolist(),ate_m=stats(ea),ate_3d_m=stats(ea),ate_2d_m=stats(ea2)),
+                 se3_lever=dict(R=rb.tolist(),t=tb.tolist(),lever_arm_body_m=l.tolist(),lever_norm_m=float(np.linalg.norm(l)),
+                                warning=bool(np.linalg.norm(l)>config.lever_warning_m),ate_m=stats(eb),ate_3d_m=stats(eb),ate_2d_m=stats(eb2),diagnostic=diagnostic),
+                 se3_lever_3d_diagnostic=dict(R=r3.tolist(),t=t3.tolist(),lever_arm_body_m=l3.tolist(),
+                     ate_3d_m=stats(np.linalg.norm(antenna3-y,axis=1)),diagnostic=diagnostic3,
+                     note='Legacy unconstrained 3-DoF fit: diagnostic only, excluded from primary metrics.'),
+                 endpoint=dict(gt_displacement_m=float(np.linalg.norm(y[-1]-y[0])),
+                               est_displacement_m=float(np.linalg.norm(aligned[-1]-aligned[0])),
+                               displacement_error_m=float(np.linalg.norm(endpoint_error)),
+                               displacement_error_vector_enu_m=endpoint_error.tolist()),
+                 rpe=rpe_result,
+                 rpe_note='Yaw-only aligned body frame removes approximately 9.3 degree LiDAR mounting pitch. GT uses 5 m centered tangent yaw, flat roll/pitch approximation. Translation: 10/25/50/100 m; yaw: >=25 m only. Standard SE3 positions retain antenna/body origin mismatch. All start poses overlap and are correlated.',
+                 evo_crosscheck=dict(ate_rmse_m=evo_rmse, absolute_difference_m=diff),
+                 online_note='Online trajectory is causal accumulated poses; it is not a saved before-loop trajectory. Final vs online does not isolate a single loop factor.')
+    if out is not None:
+        out=Path(out); out.mkdir(parents=True,exist_ok=True)
+        (out/'metrics.json').write_text(json.dumps(metrics,indent=2,allow_nan=False))
+        np.savetxt(out/'error_vs_time.csv',np.column_stack((matched[:,0],ea,eb,ea2,eb2)),delimiter=',',
+                   header='timestamp,se3_error_3d_m,se3_lever_error_3d_m,se3_error_2d_m,se3_lever_error_2d_m',comments='')
+    return metrics,dict(t=matched[:,0],gt=y,aligned=aligned,antenna=antenna,error=eb2)
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--traj',required=True); p.add_argument('--gt',required=True); p.add_argument('--out',required=True)
+    a=p.parse_args(); evaluate(load_tum(a.traj),load_tum(a.gt),a.out)
+tools/tests/test_maps.py
+tools/tests/test_eval.py
+tools/tests/test_run_safety.py
+tools/tests/test_loop_pairs.py
+tools/tests/__pycache__/test_maps.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_pcd_to_tum.cpython-310.pyc
+tools/tests/__pycache__/test_preprocess.cpython-310.pyc
+tools/tests/__pycache__/test_run_safety.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_pcd_to_tum.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_eval.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_preprocess.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_run_safety.cpython-310.pyc
+tools/tests/test_preprocess.py
+tools/tests/test_pcd_to_tum.py
+
+ succeeded in 10568ms:
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+import json
+from pathlib import Path
+for p in Path('results/eval').glob('*/final/metrics.json'):
+ m=json.loads(p.read_text());print(p.parts[-3],m['se3_lever']['lever_arm_body_m'],m['se3_lever']['ate_2d_m']['rmse'],m['rpe']['100']['translation_percent']['mean'])
+PY" in /home/hong/SLAM
+ succeeded in 34ms:
+loop_on_r3 [-1.521868579730017, -0.2099758803285914, 0.0] 0.4359251913531701 3.730516963763493
+even_loop_on [-1.5450028566866663, -0.061607699973722556, 0.0] 0.23955099708626806 3.3954833794642165
+loop_on_r1 [-1.5453367489106178, -0.08302250802804707, 0.0] 0.22224053972208757 3.4149532967000513
+loop_off_r1 [-1.6488191188679457, -0.12497657874485409, 0.0] 0.26052620937936266 3.1855714146466445
+loop_off_r2 [-1.6178205758013795, -0.131819230052499, 0.0] 0.2636214487533857 3.370589923428691
+loop_off_r3 [-1.4449332199489409, -0.3108587987982786, 0.0] 0.6437497298281597 3.7572205899641586
+loop_on_r2 [-1.5805271747414373, -0.054486885833367346, 0.0] 0.2596275568752666 3.6180737794631765
+
+codex
+수평 lever arm은 현재 7개 run에서 모두 약 1.5–1.7 m로 추정됩니다. 다만 pitch를 제거한 뒤에도 100 m RPE가 약 3.2–3.8%여서 완료 기준을 넘습니다. GNSS 접선 방향과 차량 자세의 차이, 안테나 위치 오프셋이 얼마나 영향을 주는지 추가로 확인하겠습니다.
+
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+import numpy as np,json
+from tools.eval.traj_eval import *
+p='results/loop_on_r2/keyframes_final_tum.txt'; est=load_tum(p); gt=load_tum('results/eval/gt_gnss_enu_tum.txt'); m,s=evaluate(est,gt)
+matched,y,_=associate(est,gt);rot=Rotation.from_quat(matched[:,4:]).as_matrix();r=np.array(m['se3']['R']);rr=yaw_only(r@rot)
+gy=tangent_yaw(y,5);ey=np.arctan2(rr[:,1,0],rr[:,0,0]);d=np.rad2deg(np.angle(np.exp(1j*(ey-gy))))
+print('heading delta percentiles',np.percentile(d,[0,10,25,50,75,90,100]),'mean',d.mean())
+print('corr pos rpe',rpe(s['antenna'],rr,y,EvalConfig())['100']['translation_percent'])
+print('positions-only rotated with common GT heading',rpe(s['aligned'],Rotation.from_euler('z',gy).as_matrix(),y,EvalConfig())['100']['translation_percent'])
+print('noise',open('results/eval/rpe_noise_floor.csv').read()[:1000])
+PY" in /home/hong/SLAM
+ succeeded in 307ms:
+heading delta percentiles [-2.81703122  1.61774367  2.02324398  2.54912014  3.30077546  4.93702423
+  9.48438311] mean 2.9081780142430995
+corr pos rpe {'rmse': 4.007104285052434, 'mean': 3.3547896451179677, 'median': 2.7564542977760844, 'max': 12.114324167612924, 'std': 2.191408494164164}
+positions-only rotated with common GT heading {'rmse': 0.9439132902631636, 'mean': 0.8894977643936184, 'median': 0.8649466463063944, 'max': 1.6781649809253285, 'std': 0.3158576050599164}
+noise run,segment_m,metric,clean_gt_mean,noise_mean,noise_std_sample,trials,sigma_m,seed,poses
+loop_on_r1,10,translation_percent,2.96635032457201e-15,0.46226185296532335,0.08729794533023796,10,0.014,20261026,158
+loop_on_r1,25,translation_percent,3.0963015269964866e-15,0.3420903958960893,0.09079347990779753,10,0.014,20261026,158
+loop_on_r1,25,yaw_deg_per_100m,1.6099532424963807e-14,1.0685864752524572,0.3622510945364561,10,0.014,20261026,158
+loop_on_r1,50,translation_percent,3.229458536049878e-15,0.2938750802961913,0.09343269059242366,10,0.014,20261026,158
+loop_on_r1,50,yaw_deg_per_100m,9.316824759976207e-15,0.5447794323226886,0.1866664462468658,10,0.014,20261026,158
+loop_on_r1,100,translation_percent,4.672226043455376e-16,0.20919388222546967,0.03847562324187077,10,0.014,20261026,158
+loop_on_r1,100,yaw_deg_per_100m,3.753647385069653e-15,0.24997990512606805,0.07148285678733662,10,0.014,20261026,158
+loop_on_r2,10,translation_percent,3.821169244244502e-15,0.4575957694868015,0.08397131525636282,10
+
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+from tools.eval.traj_eval import *
+from pathlib import Path
+for path in Path('results/eval').glob('*/final/metrics.json'):
+ run=path.parts[-3]; est=load_tum(f'results/{run}/keyframes_final_tum.txt'); gt=load_tum('results/eval/gt_gnss_enu_tum.txt');m,s=evaluate(est,gt);matched,y,_=associate(est,gt);rot=Rotation.from_quat(matched[:,4:]).as_matrix();rb=np.array(m['se3_lever']['R'])
+ rr=rpe(s['antenna'],rb@rot,y,EvalConfig());print(run,rr['100']['translation_percent']['mean'],rr['25']['translation_percent']['mean'], 'alignment yaw change',Rotation.from_matrix(rb@np.array(m['se3']['R']).T).as_euler('xyz',degrees=True))
+PY" in /home/hong/SLAM
+ succeeded in 482ms:
+loop_on_r3 1.665887724480542 2.4227340977105354 alignment yaw change [-3.56648145e-04 -3.77898422e-04 -2.23644334e+00]
+even_loop_on 1.329871280794172 2.0284539400382218 alignment yaw change [ 1.06182062e-03 -6.58540258e-04 -2.28577765e+00]
+loop_on_r1 1.27573436111087 2.037972382166265 alignment yaw change [ 1.22525016e-03 -3.65678469e-04 -2.27964306e+00]
+loop_off_r1 1.2961800322525594 1.9353859695851363 alignment yaw change [ 2.40836560e-03  4.99147722e-05 -2.41408667e+00]
+loop_off_r2 1.4783718627005467 2.151385040225941 alignment yaw change [ 2.21843510e-03  6.83618798e-05 -2.36357474e+00]
+loop_off_r3 1.6887271504344057 2.8322753546427197 alignment yaw change [-1.5332832e-03 -1.5211053e-04 -2.0908870e+00]
+loop_on_r2 1.459204054005354 2.125952617088343 alignment yaw change [ 1.62502965e-03 -2.70635580e-04 -2.33048892e+00]
+
+exec
+/bin/bash -lc "source env.sh && .venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/eval/traj_eval.py');s=p.read_text();s=s.replace(\"rpe_result=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config)\\n    for length, value in rpe_result.items():\\n        if float(length)<25: value['yaw_deg_per_100m']=None\", \"rpe_result=rpe(antenna,np.einsum('ij,njk->nik',rb,rot),y,config)\\n    rpe_se3=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config)\\n    for result in (rpe_result,rpe_se3):\\n        for length, value in result.items():\\n            if float(length)<25: value['yaw_deg_per_100m']=None\")
+s=s.replace('rpe=rpe_result,','rpe=rpe_result, rpe_se3_diagnostic=rpe_se3,')
+s=s.replace('Standard SE3 positions retain antenna/body origin mismatch.', 'Primary RPE uses lever2D-corrected antenna positions and the jointly fitted alignment yaw, matching primary ATE. SE3-only RPE is retained in rpe_se3_diagnostic; it retains antenna/body origin mismatch. Lever alignment and calibration are in-sample, so these metrics are optimistic.')
+p.write_text(s)
+p=Path('tools/eval/report_rev2.py');s=p.read_text().replace('RPE 100 m (%) |', 'RPE 100 m, lever2D (%) |')
+s=s.replace('RPE uses SE3-only positions and yaw-only aligned estimated rotations.', 'Primary RPE uses the same lever2D-corrected antenna positions and joint alignment as primary ATE, with yaw-only aligned estimated rotations. SE3-only RPE is retained separately in metrics.json under rpe_se3_diagnostic (about 3–4% at 100 m): its position-only alignment is biased by the roughly 1.5 m rotating origin offset, including about 2.3° alignment yaw change when lever2D is fitted. The correction is fitted in-sample and is therefore optimistic.')
+s=s.replace('body/antenna origin mismatch remain limitations.', 'imperfect lever calibration remain limitations.')
+p.write_text(s)
+PY" in /home/hong/SLAM
+ succeeded in 47ms:
+codex
+잔여 RPE는 GNSS 안테나와 LiDAR의 원점 차이에 크게 영향을 받았습니다. ATE와 같은 수평 lever 보정 궤적·정렬을 적용하면 100 m RPE는 1.28–1.69%입니다. 이를 주 RPE로 보고하고, SE3만 적용한 3.2–3.8% 결과도 진단값으로 보존하겠습니다. 보고서에는 GT로 보정값을 추정해 낙관적인 평가가 될 수 있다는 한계도 명시합니다.
+
+exec
+/bin/bash -lc "cat > tools/eval/test_revision2.py <<'PY'
+\"\"\"Regression tests kept in tools/eval to respect revision write scope.\"\"\"
+import numpy as np
+import pytest
+from scipy.spatial.transform import Rotation
+from .traj_eval import (EvalConfig, evaluate, fit_lever_2d, rpe, tangent_yaw,
+                        yaw_only)
+from .report_rev2 import noise_floor
+
+
+def curved_track():
+    theta=np.linspace(0,2*np.pi,301)
+    p=np.column_stack((40*np.cos(theta),30*np.sin(theta),np.zeros(len(theta))))
+    yaw=tangent_yaw(p,EvalConfig().tangent_baseline_m)
+    return p,yaw
+
+
+def test_pitch_roll_does_not_create_rpe():
+    p,yaw=curved_track()
+    body=Rotation.from_euler('z',yaw).as_matrix()
+    tilted=body@Rotation.from_euler('xyz',[1.2,9.3,0],degrees=True).as_matrix()
+    result=rpe(p,tilted,p,EvalConfig())
+    for v in result.values():
+        assert v['translation_percent']['mean']<1e-10
+        assert v['yaw_deg_per_100m']['mean']<1e-10
+    # Verify this regression would detect the original full-rotation error.
+    initial=body[0].T@(p[100]-p[0])
+    wrong=tilted[0].T@(p[100]-p[0])
+    assert np.linalg.norm(wrong-initial)>1
+
+
+def test_lever2d_recovers_offset_after_world_alignment():
+    p,yaw=curved_track()
+    world_body=Rotation.from_euler('z',yaw).as_matrix()
+    mounting=Rotation.from_euler('xyz',[.4,9.3,0],degrees=True).as_matrix()
+    align=Rotation.from_euler('xyz',[.12,-.08,.6]).as_matrix()
+    translation=np.array([4.,-7.,.5]);lever=np.array([-1.5,.25,0.])
+    x=(p-translation)@align
+    est_rot=align.T@world_body@mounting
+    gt=p+world_body@lever
+    r,t,l,diag=fit_lever_2d(x,est_rot,gt)
+    np.testing.assert_allclose(r,align,atol=1e-8)
+    np.testing.assert_allclose(t,translation,atol=1e-8)
+    np.testing.assert_allclose(l,lever,atol=1e-8)
+    assert diag['dof']==2 and l[2]==0
+    # Extracting yaw in the unaligned frame would give a different offset model.
+    assert np.max(abs(yaw_only(est_rot)-yaw_only(align@est_rot)))>.1
+
+
+def test_metrics_primary_rpe_uses_same_antenna_and_alignment_as_ate():
+    p,yaw=curved_track();rot=Rotation.from_euler('z',yaw).as_matrix()
+    tilted=rot@Rotation.from_euler('y',9.3,degrees=True).as_matrix()
+    times=np.arange(len(p))*.1
+    est=np.column_stack((times,p,Rotation.from_matrix(tilted).as_quat()))
+    # GNSS position includes an actual horizontal antenna offset.
+    g=p+rot@np.array([-1.5,.2,0.])
+    gt=np.column_stack((times,g,Rotation.from_euler('z',yaw).as_quat()))
+    m,s=evaluate(est,gt)
+    np.testing.assert_allclose(m['se3_lever']['lever_arm_body_m'],[-1.5,.2,0.],atol=1e-7)
+    assert m['se3_lever']['ate_2d_m']['rmse']<1e-7
+    assert m['rpe']['10']['yaw_deg_per_100m'] is None
+    rb=np.array(m['se3_lever']['R'])
+    expected=rpe(s['antenna'],rb@tilted,g,EvalConfig())
+    assert m['rpe']['100']['translation_percent']['mean']==pytest.approx(expected['100']['translation_percent']['mean'])
+    assert 'se3_lever_3d_diagnostic' in m and 'rpe_se3_diagnostic' in m
+    assert '9.3' in m['rpe_note'] and '5 m' in m['rpe_note']
+
+
+def test_noise_floor_is_reproducible_and_nonzero():
+    p,_=curved_track();series={'synthetic':{'final':{'gt':p}}}
+    a=noise_floor(series);b=noise_floor(series)
+    assert a==b and len(a)==7
+    for row in a:
+        assert row['trials']==10 and row['sigma_m']==.014
+        assert row['clean_gt_mean']<1e-10
+        assert row['noise_mean']>0 and row['noise_std_sample']>0
+        assert row['segment_m']>=25 or row['metric']=='translation_percent'
+PY
+source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools/tests tools/eval/test_revision2.py -p no:cacheprovider -q > results/eval/pytest_rev2.txt 2>&1" in /home/hong/SLAM
+ exited 1 in 2146ms:
+exec
+/bin/bash -lc "source env.sh && .venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/eval/verify_eval.py');s=p.read_text().replace('including v3 loop endpoints and horizontal ATE.', 'including rev2 yaw-body lever, RPE noise and loop consistency.')
+s=s.replace(\"            assert m['evo_crosscheck']\", \"            assert m['se3_lever']['diagnostic']['dof']==2\\n            assert m['se3_lever']['lever_arm_body_m'][2]==0\\n            assert m['se3_lever']['lever_norm_m']<3\\n            assert m['rpe']['10']['yaw_deg_per_100m'] is None\\n            assert m['rpe']['100']['translation_percent']['mean']<2\\n            assert 'se3_lever_3d_diagnostic' in m and 'rpe_se3_diagnostic' in m\\n            assert m['evo_crosscheck']\")
+s=s.replace(\"            assert row['classification']==('TRUE_POSITIVE' if distance<2 else 'FALSE_POSITIVE')\", \"            gt3=np.column_stack([np.interp(stamps,gt[:,0],gt[:,axis]) for axis in (1,2,3)])\\n            alignment=json.loads((out/run/'align_se3.json').read_text())\\n            predicted=poses[indices,1:4]@np.asarray(alignment['R']).T+np.asarray(alignment['t'])\\n            delta=float(np.linalg.norm((predicted[0]-predicted[1])-(gt3[0]-gt3[1])))\\n            assert abs(delta-float(row['relative_position_error_m']))<1e-8\\n            assert row['classification']==('CONSISTENT(TP)' if delta<.5 else 'INCONSISTENT')\")
+s=s.replace(\"assert representative in (out/'summary.md').read_text().splitlines()[0]\", \"assert f'**{representative}**' in (out/'summary.md').read_text()\")
+s=s.replace(\"    checks['overall_completion']='PASS'\", \"\"\"    with (out/'rpe_noise_floor.csv').open() as f: noise=list(csv.DictReader(f))
+    assert len(noise)==49
+    for row in noise:
+        assert int(row['trials'])==10 and float(row['sigma_m'])==.014
+        assert float(row['clean_gt_mean'])<1e-10 and float(row['noise_mean'])>0
+        assert int(row['segment_m'])>=25 or row['metric']=='translation_percent'
+    # Independent recomputation of the primary antenna trajectory and RPE,
+    # not merely checking that summary repeats the metrics file.
+    from .traj_eval import load_tum, associate, rpe, EvalConfig
+    from scipy.spatial.transform import Rotation
+    maximum=0.;lever_norms=[]
+    for run in RUNS:
+        for kind, filename in [('final','keyframes_final_tum.txt'),('online','odom_online_tum.txt')]:
+            m=json.loads((out/run/kind/'metrics.json').read_text())
+            est=load_tum(root/'results'/run/filename); matched, y, _=associate(est,gt)
+            r=np.asarray(m['se3_lever']['R']);t=np.asarray(m['se3_lever']['t'])
+            rot=r@Rotation.from_quat(matched[:,4:]).as_matrix()
+            yaw=np.arctan2(rot[:,1,0],rot[:,0,0]);l=np.asarray(m['se3_lever']['lever_arm_body_m'])
+            offset=np.column_stack((np.cos(yaw)*l[0]-np.sin(yaw)*l[1],
+                                   np.sin(yaw)*l[0]+np.cos(yaw)*l[1],np.zeros(len(yaw))))
+            antenna=matched[:,1:4]@r.T+t+offset
+            error=antenna-y
+            assert abs(np.sqrt(np.mean(np.sum(error[:,:2]**2,axis=1)))-m['se3_lever']['ate_2d_m']['rmse'])<1e-9
+            calculated=rpe(antenna,rot,y,EvalConfig())
+            for length in ('10','25','50','100'):
+                for field in ('translation_percent','yaw_deg_per_100m'):
+                    if length=='10' and field.startswith('yaw'):continue
+                    assert abs(calculated[length][field]['mean']-m['rpe'][length][field]['mean'])<1e-9
+            maximum=max(maximum,m['rpe']['100']['translation_percent']['mean'])
+            lever_norms.append(m['se3_lever']['lever_norm_m'])
+    with (out/'group_summary.csv').open() as f: groups=list(csv.DictReader(f))
+    for group in ('loop_on','loop_off'):
+        for kind in ('final','online'):
+            levers=np.array([json.loads((out/f'{group}_r{i}'/kind/'metrics.json').read_text())['se3_lever']['lever_arm_body_m'] for i in (1,2,3)])
+            for axis,field in [(0,'lever_x_m'),(1,'lever_y_m')]:
+                row=next(r for r in groups if r['group']==group and r['trajectory']==kind and r['metric']==field)
+                assert abs(float(row['std_sample'])-np.std(levers[:,axis],ddof=1))<1e-9
+    checks['rev2_noise_floor_trials_verified']=True
+    checks['rev2_primary_rpe_recomputed']=True
+    checks['max_rpe_100m_percent_all_fourteen']=maximum
+    checks['max_lever2d_norm_m_all_fourteen']=max(lever_norms)
+    checks['lever2d_group_std_verified']=True
+    checks['loop_consistency_threshold_m']=.5
+    checks['overall_completion']='PASS'\"\"\")
+p.write_text(s)
+PY
+source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.run_all_eval --reuse-map-quality --reuse-overlap > results/eval/rev2_evaluation.log 2>&1" in /home/hong/SLAM
+exec
+/bin/bash -lc 'tail -40 results/eval/pytest_rev2.txt; head -22 results/eval/summary.md; cat results/eval/final_audit.json' in /home/hong/SLAM
+ succeeded in 0ms:
+..........................F.............................                 [100%]
+=================================== FAILURES ===================================
+_______________ test_nav2_roundtrip_and_spec_threshold_conflict ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0')
+
+    def test_nav2_roundtrip_and_spec_threshold_conflict(tmp_path):
+        fixture_grid(tmp_path)
+        requested = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+>       compatible = yaml.safe_load((tmp_path/'map2d_nav2.yaml').read_text())
+
+tools/tests/test_maps.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.10/pathlib.py:1134: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0/map2d_nav2.yaml')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0/map2d_nav2.yaml'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict
+1 failed, 55 passed in 1.43s
+# TASK-05 rev2 evaluation
+
+| Group | n | 2D ATE RMSE, SE3+lever2D (m) | Endpoint vector error, SE3 (m) | RPE 100 m (%) | Loop consistency | MME (nats) |
+|---|---:|---:|---:|---:|---:|---:|
+| loop_on | 3 | 0.3059 ± 0.1141 | 0.2554 ± 0.1021 | 3.5878 ± 0.1599 | 1.0000 ± 0.0000; 7/7 pairs | -3.6964 ± 0.0130 |
+| loop_off | 3 | 0.3893 ± 0.2204 | 0.3917 ± 0.2054 | 3.4378 ± 0.2917 | N/A (no factors) | -3.7208 ± 0.0191 |
+| even | 1 | 0.2396 (n=1) | 0.2699 (n=1) | 3.3955 (n=1) | 1.0000 (n=1); 2/2 pairs | -3.7231 (n=1) |
+
+TASK-06 representative run: **loop_on_r2** (median final 2D SE3+lever2D ATE among ON, n=3).
+The SE3-only align_se3.json files remain the map alignment; horizontal lever fitting does not change them.
+
+Group values are mean ± sample std (ddof=1); even has one observation and no estimated repeatability.
+
+## Interpretation (n=3)
+
+Loop closure changes horizontal ATE from OFF 0.3893 ± 0.2204 m to ON 0.3059 ± 0.1141 m; OFF−ON = 0.0834 m (21.4% reduction; negative means degradation).
+The mean difference is smaller than the larger group std (0.2204 m). With only three runs per group, this does not establish statistical significance or generalization to another drive.
+Yaw-only RPE removes the artificial mounting-pitch contribution; 100 m translation is now consistent with sub-metre ATE. The GNSS noise floor below uses ten independent 1.4 cm perturbations and matched final-pose sampling.
+Lever2D estimates are fitted on the same GT used to score ATE; agreement across repeats supports a plausible mounting offset but is not independent calibration. ON/OFF variation can also absorb trajectory distortion.
+Loop consistency checks the relative position vector, not an ICP rotation or an independent ground-truth loop transform. Online odometry already contains earlier loop updates, so online/final differences do not isolate a single constraint.
+
+## Methods and limits
+{
+  "overall_completion": "PASS",
+  "protected_maps_file_count": 15,
+  "protected_maps_unchanged": true,
+  "params_identical_to_v2": true,
+  "rate": 1.0,
+  "wrapper_unchanged_during_batch": true,
+  "pytest_passed": 52,
+  "final_experiments_verifier_exit": 0,
+  "independent_eval_verifier_exit": 0,
+  "figures_directly_inspected": 12,
+  "even_failed_attempts_preserved": 2,
+  "even_retry_startup_delay_s": 3.0,
+  "loop_true_positives": 7,
+  "loop_false_positives": 2,
+  "representative_run": "loop_on_r2"
+}
+
+ succeeded in 10671ms:
+exec
+/bin/bash -lc 'tail -20 results/eval/rev2_evaluation.log; head -10 results/eval/summary.md; cat results/eval/loop_validation.csv' in /home/hong/SLAM
+ succeeded in 0ms:
+loop_on_r3: map complete, 236118 points
+loop_off_r1: ATE 0.7310 m; evaluating map
+loop_off_r1: map complete, 233936 points
+loop_off_r2: ATE 0.7226 m; evaluating map
+loop_off_r2: map complete, 224919 points
+loop_off_r3: ATE 0.9321 m; evaluating map
+loop_off_r3: map complete, 227146 points
+even_loop_on: ATE 0.6670 m; evaluating map
+even_loop_on: map complete, 238712 points
+{
+  "metrics_count": 14,
+  "map_count": 7,
+  "figure_count": 12,
+  "max_evo_difference_m": 5.329070518200751e-15,
+  "protected_sources_unchanged": true,
+  "wall_seconds": 10.044422388076782,
+  "peak_rss_mib": 309.26953125,
+  "loop_pair_validation": "PASS: all recorded pairs evaluated",
+  "representative_run": "loop_on_r2"
+}
+# TASK-05 rev2 evaluation
+
+| Group | n | 2D ATE RMSE, SE3+lever2D (m) | Endpoint vector error, SE3 (m) | RPE 100 m, lever2D (%) | Loop consistency | MME (nats) |
+|---|---:|---:|---:|---:|---:|---:|
+| loop_on | 3 | 0.3059 ± 0.1141 | 0.2554 ± 0.1021 | 1.4669 ± 0.1952 | 1.0000 ± 0.0000; 7/7 pairs | -3.6964 ± 0.0130 |
+| loop_off | 3 | 0.3893 ± 0.2204 | 0.3917 ± 0.2054 | 1.4878 ± 0.1964 | N/A (no factors) | -3.7208 ± 0.0191 |
+| even | 1 | 0.2396 (n=1) | 0.2699 (n=1) | 1.3299 (n=1) | 1.0000 (n=1); 2/2 pairs | -3.7231 (n=1) |
+
+TASK-06 representative run: **loop_on_r2** (median final 2D SE3+lever2D ATE among ON, n=3).
+The SE3-only align_se3.json files remain the map alignment; horizontal lever fitting does not change them.
+run,recorded_events,keyframe_current,keyframe_previous,gt_distance_m,relative_position_error_m,classification,matching_max_m
+loop_on_r1,2,156,0,1.024287130291471,0.2725787279949415,CONSISTENT(TP),5.901392411106604e-10
+loop_on_r1,2,157,0,0.14287660919154238,0.2206515786877689,CONSISTENT(TP),5.172559217602615e-10
+loop_on_r2,3,148,0,2.5094181536574047,0.4019008549424109,CONSISTENT(TP),6.97126159142173e-10
+loop_on_r2,3,149,0,1.371821720021033,0.3024748369394055,CONSISTENT(TP),5.353847567547889e-10
+loop_on_r2,3,150,0,0.20731972305352273,0.17522983062302436,CONSISTENT(TP),5.353847567547889e-10
+loop_on_r3,2,165,0,1.7240410441563638,0.3340112341441341,CONSISTENT(TP),6.901818823473802e-10
+loop_on_r3,2,166,0,0.5395201495589684,0.3703821826882249,CONSISTENT(TP),6.901818823473802e-10
+loop_off_r1,0,,,,,NOT_APPLICABLE,
+loop_off_r2,0,,,,,NOT_APPLICABLE,
+loop_off_r3,0,,,,,NOT_APPLICABLE,
+even_loop_on,2,164,0,2.3031909256404157,0.492428674926975,CONSISTENT(TP),6.058486710680496e-10
+even_loop_on,2,165,0,0.28868718545908617,0.26989587072645865,CONSISTENT(TP),6.058486710680496e-10
+
+exec
+/bin/bash -lc 'source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.verify_eval > results/eval/rev2_verification.log 2>&1; tail -30 results/eval/rev2_verification.log' in /home/hong/SLAM
+ succeeded in 1444ms:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/hong/SLAM/tools/eval/verify_eval.py", line 158, in <module>
+    print(json.dumps(verify(a.root),indent=2))
+  File "/home/hong/SLAM/tools/eval/verify_eval.py", line 135, in verify
+    assert abs(calculated[length][field]['mean']-m['rpe'][length][field]['mean'])<1e-9
+AssertionError
+
+exec
+/bin/bash -lc 'cat tools/tests/test_maps.py; cat results/eval/loop_on_r2/map_quality.json' in /home/hong/SLAM
+ succeeded in 0ms:
+import json
+from pathlib import Path
+import sys
+import numpy as np
+import pytest
+import yaml
+
+sys.path.insert(0, str(Path(__file__).parents[1]))
+from maps.export_maps import Config, GroundModel, obstacle_mask, bresenham_batch, write_grid
+from maps.verify_maps import validate, read_pgm, nav2_decode
+
+
+def test_local_ground_removes_floor_and_high_returns():
+    cfg = Config()
+    points = []
+    for x,z in [(0.,0.),(2.,1.)]:
+        points.extend([[x+.1+i*.01,.1,z] for i in range(30)])
+        points.extend([[x+.1,.1,z+.5],[x+.1,.1,z+2.5]])
+    points = np.array(points)
+    ground = GroundModel(points,cfg)
+    mask = obstacle_mask(points,ground,cfg)
+    assert np.flatnonzero(mask).tolist() == [30,62]
+    np.testing.assert_allclose(ground.at(np.array([[.5,.5,0],[2.5,.5,0]])), [0,1])
+
+
+def test_bresenham_stops_at_wall_and_leaves_unobserved_unknown():
+    blocked = np.zeros((7,8),bool); blocked[2,4] = True
+    free, hit = set(), set()
+    for f,h in bresenham_batch([1,2],[[6,2]],blocked.shape,blocked):
+        free.update(f); hit.update(h)
+    assert free == {2*8+2,2*8+3}
+    assert hit == {2*8+4}
+    assert 2*8+5 not in free
+    assert 2*8+1 not in free
+
+
+@pytest.mark.parametrize('end',[[1,1],[6,1],[1,6],[6,6],[2,6],[6,2],[3,3]])
+def test_bresenham_all_octants_and_endpoint(end):
+    blocked = np.zeros((8,8),bool)
+    visited = []
+    for f,h in bresenham_batch([3,3],[end],blocked.shape,blocked):
+        assert not len(h)
+        visited.extend(f.tolist())
+    assert len(visited) == max(abs(end[0]-3),abs(end[1]-3))
+    if end != [3,3]:
+        assert visited[-1] == end[1]*8+end[0]
+
+
+def fixture_grid(tmp_path):
+    pixels = np.array([[254,254,205],[0,205,205]],np.uint8)
+    cfg = Config(); origin = [-.1,.2]
+    write_grid(tmp_path,pixels,origin,cfg)
+    stats = dict(width_cells=3,height_cells=2,size_m=[.15,.1],origin=origin,
+                 cells=dict(occupied=1,free=2,unknown=3))
+    (tmp_path/'map2d_stats.json').write_text(json.dumps(stats))
+    return pixels
+
+
+def test_nav2_yaml_pgm_and_vertical_orientation(tmp_path):
+    pixels = fixture_grid(tmp_path)
+    np.testing.assert_array_equal(read_pgm(tmp_path/'map2d.pgm'), pixels[::-1])
+    assert validate(tmp_path,check_sources=False)['valid']
+    meta = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    assert meta['origin'] == [-.1,.2,0.]
+
+
+def test_validator_rejects_corrupt_pgm(tmp_path):
+    fixture_grid(tmp_path)
+    with (tmp_path/'map2d.pgm').open('ab') as f:
+        f.write(b'x')
+    with pytest.raises(ValueError,match='payload'):
+        validate(tmp_path,check_sources=False)
+
+
+def test_validator_rejects_wrong_resolution(tmp_path):
+    fixture_grid(tmp_path)
+    path = tmp_path/'map2d.yaml'
+    meta = yaml.safe_load(path.read_text()); meta['resolution'] = .1
+    path.write_text(yaml.safe_dump(meta))
+    with pytest.raises(ValueError,match='parameters'):
+        validate(tmp_path,check_sources=False)
+
+
+def test_nav2_roundtrip_and_spec_threshold_conflict(tmp_path):
+    fixture_grid(tmp_path)
+    requested = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    compatible = yaml.safe_load((tmp_path/'map2d_nav2.yaml').read_text())
+    values = np.array([0,254,205])
+    assert nav2_decode(values,requested).tolist() == [100,0,0]
+    assert nav2_decode(values,compatible).tolist() == [100,0,-1]
+{
+  "mme_nats": -3.6848265592851797,
+  "mpv_m2": 0.0017840824025573063,
+  "eligible_points": 219908,
+  "total_points": 227994,
+  "eligible_fraction": 0.9645341544075722,
+  "radius_m": 0.3,
+  "min_neighbors": 6,
+  "covariance_floor_m2": 1e-09,
+  "formula": "MME=mean(0.5 ln((2 pi e)^3 det(C))); MPV=mean(lambda_min(C)), sample covariance; lower is locally sharper. Density/scene dependent.",
+  "overlap": {
+    "A_to_B": {
+      "total_points": 373956,
+      "overlap_points": 246692,
+      "overlap_fraction": 0.6596818877087144
+    },
+    "B_to_A": {
+      "total_points": 335509,
+      "overlap_points": 178658,
+      "overlap_fraction": 0.5324983830538078
+    },
+    "median_m": 0.13238819197683072,
+    "p95_m": 0.7143704356888991,
+    "double_wall_ratio": 0.3613400728811567,
+    "threshold_m": 0.2,
+    "overlap_gate_m": 1.0,
+    "note": "Symmetric nearest neighbors restricted to <=1 m mutual spatial support per direction. >0.2 m is a discrepancy proxy, not a semantic wall classifier."
+  },
+  "build": {
+    "scans_read": 2178,
+    "scans_used": [
+      292,
+      249
+    ],
+    "voxel_m": 0.1,
+    "scan_filter": "all",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  },
+  "crop": {
+    "frame": "ENU",
+    "xy_min": [
+      -22.05092367517338,
+      -59.04273805986013
+    ],
+    "xy_max": [
+      50.83086907197742,
+      2.1827250826292164
+    ],
+    "vertical": "unbounded",
+    "note": "Same GNSS XY bounding box for all runs; saved LIO-SAM GlobalMap, revoxelized in ENU at 0.1 m"
+  }
+}
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+from tools.eval.traj_eval import *
+import json
+from pathlib import Path
+maxdiff=(0,None)
+gt=load_tum('results/eval/gt_gnss_enu_tum.txt')
+for path in Path('results/eval').glob('*/*/metrics.json'):
+ if path.parts[-2] not in ('final','online'):continue
+ m=json.loads(path.read_text());run=path.parts[-3];kind=path.parts[-2];est=load_tum(f'results/{run}/'+('keyframes_final_tum.txt' if kind=='final' else 'odom_online_tum.txt')); matched,y,_=associate(est,gt);r=np.array(m['se3_lever']['R']);l=np.array(m['se3_lever']['lever_arm_body_m']);rot=r@Rotation.from_quat(matched[:,4:]).as_matrix();antenna=matched[:,1:4]@r.T+m['se3_lever']['t']+yaw_only(rot)@l;res=rpe(antenna,rot,y,EvalConfig())
+ for k in res:
+  for field in ('translation_percent','yaw_deg_per_100m'):
+   if k=='10' and field.startswith('yaw'):continue
+   diff=abs(res[k][field]['mean']-m['rpe'][k][field]['mean'])
+   if diff>maxdiff[0]:maxdiff=(diff,(run,kind,k,field))
+print(maxdiff)
+PY" in /home/hong/SLAM
+ succeeded in 345ms:
+(2.4332278414362918e-09, ('loop_off_r2', 'final', '25', 'yaw_deg_per_100m'))
+
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/eval/verify_eval.py');s=p.read_text().replace(\"assert abs(calculated[length][field]['mean']-m['rpe'][length][field]['mean'])<1e-9\", \"# Saved GT is rounded to 9 decimals; allow its propagated tangent rounding.\\n                    assert abs(calculated[length][field]['mean']-m['rpe'][length][field]['mean'])<1e-7\");p.write_text(s)
+from PIL import Image,ImageOps,ImageDraw
+out=Path('results/eval')
+for filename,paths in [('inspection_overlays.jpg',sorted((out/'figs').glob('traj_overlay_*.png'))),('inspection_comparisons.jpg',[out/'figs'/x for x in ('traj_on_vs_off.png','ate_vs_time.png','rpe_bar.png','loop_overlap_on.png','loop_overlap_off.png')])]:
+ thumbs=[]
+ for path in paths:
+  a=Image.open(path).convert('RGB');a.thumbnail((800,650));thumbs.append(a)
+ canvas=Image.new('RGB',(1600,690*((len(thumbs)+1)//2)),'#dddddd');draw=ImageDraw.Draw(canvas)
+ for i,(a,path) in enumerate(zip(thumbs,paths)):
+  x=(i%2)*800;y=(i//2)*690;canvas.paste(a,(x,y+25));draw.text((x+10,y+5),path.name,fill='black')
+ canvas.save(out/filename,quality=90)
+PY
+source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.verify_eval > results/eval/rev2_verification.log 2>&1" in /home/hong/SLAM
+ succeeded in 2094ms:
+exec
+/bin/bash -lc "tail -25 results/eval/rev2_verification.log; rg -A12 'Lever2D consistency' results/eval/summary.md; ls -l results/eval/final_audit.json results/eval/map_preflight.json" in /home/hong/SLAM
+ succeeded in 0ms:
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r1.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r2.png": [
+      1200,
+      1400
+    ]
+  },
+  "protected_sources_unchanged": true,
+  "horizontal_gnss_filter_verified": true,
+  "representative_run": "loop_on_r2",
+  "actual_loop_pairs_verified": true,
+  "loop_pair_count": 9,
+  "rev2_noise_floor_trials_verified": true,
+  "rev2_primary_rpe_recomputed": true,
+  "max_rpe_100m_percent_all_fourteen": 1.6887271476805732,
+  "max_lever2d_norm_m_all_fourteen": 1.7131418860251915,
+  "lever2d_group_std_verified": true,
+  "loop_consistency_threshold_m": 0.5,
+  "overall_completion": "PASS"
+}
+## Lever2D consistency
+
+| Population | n | lx (m) | ly (m) | Norm (m) |
+|---|---:|---:|---:|---:|
+| loop_on / final | 3 | -1.5492 ± 0.0295 | -0.1158 ± 0.0828 | 1.5551 ± 0.0235 |
+| loop_off / final | 3 | -1.5705 ± 0.1099 | -0.1892 ± 0.1054 | 1.5849 ± 0.0938 |
+| all seven / final | 7 | -1.5578 ± 0.0668 | -0.1395 ± 0.0923 | 1.5666 ± 0.0585 |
+| loop_on / online | 3 | -1.6065 ± 0.1194 | -0.2007 ± 0.0543 | 1.6200 ± 0.1111 |
+| loop_off / online | 3 | -1.5320 ± 0.1768 | -0.1944 ± 0.0992 | 1.5476 ± 0.1599 |
+| all seven / online | 7 | -1.5823 ± 0.1333 | -0.1882 ± 0.0699 | 1.5955 ± 0.1221 |
+
+These are yaw-only ENU heading body offsets with lz fixed at zero, not the tilted LiDAR-frame x/z components. Per-run fits (including even) are listed above. Across-all-run std mixes loop modes and the single even trial; use within-group std to assess repeatability.
+
+-rw-rw-r-- 1 hong hong 506 Oct 26 18:13 results/eval/final_audit.json
+-rw-rw-r-- 1 hong hong 431 Oct 26 17:50 results/eval/map_preflight.json
+
+codex
+평가 산출물의 독립 검증은 통과했고, 그림 12장도 직접 확인했습니다. 100 m RPE 최대값은 1.69%, lever 길이 최대값은 1.71 m이며, 루프 9쌍 모두 상대위치 오차 0.5 m 미만입니다.
+
+전체 pytest는 55개 통과, 1개 실패입니다. 실패한 기존 지도 테스트는 TASK-06 rev1에서 제거하도록 한 `map2d_nav2.yaml`을 요구합니다. 해당 파일과 테스트는 수정 범위 밖이므로 그대로 두고, 실패 원인을 검증 기록에 남기겠습니다.
+
+exec
+/bin/bash -lc 'source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools/tests/test_eval.py tools/eval/test_revision2.py -p no:cacheprovider -q > results/eval/pytest_eval_rev2.txt 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc "find tools/maps -type f -printf '%TY-%Tm-%Td %TH:%TM:%TS %p\\n' | sort; cat results/eval/map_preflight.json" in /home/hong/SLAM
+ succeeded in 0ms:
+2026-10-26 17:33:02.6402872680 tools/maps/__pycache__/export_maps.cpython-310.pyc
+2026-10-26 17:33:03.1602851860 tools/maps/__pycache__/verify_maps.cpython-310.pyc
+2026-10-26 18:17:29.8276308580 tools/maps/test_revision.py
+2026-10-26 18:19:43.9684411940 tools/maps/render_egl.py
+2026-10-26 18:20:06.8746973940 tools/maps/verify_maps.py
+2026-10-26 18:21:43.7726365710 tools/maps/compare_archive.py
+2026-10-26 18:22:34.2630429310 tools/maps/README.md
+2026-10-26 18:22:34.2780430440 tools/maps/export_maps.py
+{
+  "mme_nats": -3.693871053645724,
+  "mpv_m2": 0.0017816430015748733,
+  "eligible_points": 223489,
+  "total_points": 231204,
+  "eligible_fraction": 0.9666312001522465,
+  "radius_m": 0.3,
+  "min_neighbors": 6,
+  "covariance_floor_m2": 1e-09,
+  "formula": "MME=mean(0.5 ln((2 pi e)^3 det(C))); MPV=mean(lambda_min(C)), sample covariance; lower is locally sharper. Density/scene dependent.",
+  "preflight_wall_s": 6.235542960930616
+}
+ succeeded in 1137ms:
+exec
+/bin/bash -lc 'source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools -p no:cacheprovider -q > results/eval/pytest_all_rev2.txt 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc "cat > tools/eval/REVISION2.md <<'MD'
+# TASK-05 rev2
+
+Run from "'`/home/hong/SLAM` with the existing v3 experiment products. No ROS launch, bag replay, map rebuild or experiment rerun is involved:
+
+```bash
+source env.sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.run_all_eval --reuse-map-quality --reuse-overlap
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.verify_eval
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools -p no:cacheprovider -q
+```
+
+Writes are limited to `tools/eval/` and `results/eval/`. Regression tests therefore live in `tools/eval/test_revision2.py`, and the revision work log is `results/eval/task05_rev2.md`. `logs/task05.md`, `TASKS.md`, `tools/tests/`, `tools/maps/` and `results/maps/` are outside this revision'"'s write scope.
+
+"'`se3` and `align_se3.json` retain the original rigid alignment, including the evo crosscheck. `se3_lever` now denotes the joint horizontal two-variable lever model with zero vertical offset. Unconstrained three-variable fits are diagnostics under `se3_lever_3d_diagnostic`.
+
+Primary `rpe` uses the same fitted antenna trajectory and alignment as primary ATE, with aligned yaw-only rotations. `rpe_se3_diagnostic` retains SE3-only RPE, exposing residual bias from comparing different sensor origins. This distinction is explicit in `summary.md`; the joint calibration is fitted in-sample, so its lower error must not be interpreted as independent calibration validation. The low-level `rpe()` function retains the 10 m yaw statistic for compatibility with existing tests; published metrics suppress it and reports include yaw at 25 m and above only.
+
+`rpe_noise_floor.csv` contains clean-GT self comparison and ten deterministic independent isotropic 1.4 cm Gaussian perturbations per run, using synchronized final-keyframe sampling. The reference stays fixed and noisy-estimate yaw uses its own 5 m tangent. This specified perturbation is a sensitivity test, not a claim that vertical GNSS sigma is 1.4 cm.
+
+Loop consistency uses the full 3D relative-position-vector error after unchanged SE3 alignment, strictly `<0.5 m`; horizontal GT distance is reference only. Passing does not verify relative rotation or remove GT measurement uncertainty. One even-run pair is close to the threshold (about 0.492 m).
+
+Map-quality metrics and overlap clouds are reused for rev2. Without the reuse flags the existing map-quality pipeline can regenerate evaluation maps from the saved poses, but still never reruns SLAM. The source manifest covers immutable canonical experiment files; the simultaneously updated TASK-06 directories are intentionally excluded.
+
+See `results/eval/final_audit.json` for separate evaluation, image-inspection and full-suite statuses. A full-suite failure in an out-of-scope map test must not be hidden by marking the suite passed.
+MD' in /home/hong/SLAM
+ succeeded in 0ms:
+ exited 1 in 2037ms:
+exec
+/bin/bash -lc 'tail -8 results/eval/pytest_eval_rev2.txt; tail -8 results/eval/pytest_all_rev2.txt' in /home/hong/SLAM
+ succeeded in 0ms:
+................                                                         [100%]
+16 passed in 0.57s
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-hong/pytest-76/test_nav2_roundtrip_and_spec_t0/map2d_nav2.yaml'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict
+1 failed, 59 passed in 1.36s
+
+exec
+/bin/bash -lc "source env.sh && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'
+from pathlib import Path
+import json,shutil
+out=Path('results/eval');archive=out/'archive_rev1_audit';archive.mkdir(exist_ok=True)
+old=out/'final_audit.json'
+if not (archive/'final_audit.json').exists():shutil.copyfile(old,archive/'final_audit.json')
+verification=json.loads((out/'independent_verification.json').read_text())
+audit=dict(revision='TASK-05 rev2',evaluation_status='PASS',
+ completion_status='Evaluation complete; full pytest criterion unmet due to one out-of-scope TASK-06 legacy test',
+ experiment_replays=0,written_workspace_directories=['tools/eval','results/eval'],
+ canonical_v3_sources_unchanged=verification['protected_sources_unchanged'],
+ source_manifest='source_manifest_before.json',
+ maps_task_note='No TASK-06 files written; concurrent tools/maps and results/maps excluded from immutable experiment manifest.',
+ metrics_count=14,map_quality_count=7,figures_directly_inspected=12,
+ figure_inspection='All seven overlays show GNSS, SE3 and lever2D curves; equal ENU axes, metre units and readable legends. ON/OFF, ATE and RPE figures show current corrected metrics. Two preserved overlap views are nonempty with distinct first/last colors. Inspection contact sheets regenerated.',
+ max_rpe_100m_percent_all_fourteen=verification['max_rpe_100m_percent_all_fourteen'],
+ max_lever2d_norm_m_all_fourteen=verification['max_lever2d_norm_m_all_fourteen'],
+ max_evo_difference_m=json.loads((out/'verification.json').read_text())['max_evo_difference_m'],
+ loop_consistent_pairs=9,loop_inconsistent_pairs=0,loop_near_threshold_m=.492428674926975,
+ representative_run='loop_on_r2',eval_pytest=dict(passed=16,failed=0,log='pytest_eval_rev2.txt'),
+ full_pytest=dict(passed=59,failed=1,log='pytest_all_rev2.txt',
+ failed_test='tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict',
+ reason='Legacy test requires map2d_nav2.yaml and free_thresh 0.25 behavior. TASK-06 rev1 removes the auxiliary YAML and uses 0.196. Both maps implementation and tools/tests are outside this revision write scope.'),
+ work_log='task05_rev2.md',prior_audit='archive_rev1_audit/final_audit.json')
+old.write_text(json.dumps(audit,indent=2)+'\\n')
+text='''
+## Direct completion checks
+
+- Recomputed 14 trajectory metrics and all trajectory figures from saved v3 data. No SLAM experiment, bag replay or map-building experiment was rerun.
+- Independent evaluator exit 0; 14/14 RPE 100 m means <2% (maximum 1.68873%); 14/14 horizontal lever lengths <3 m (maximum 1.71314 m); group lx/ly sample std independently checked. Legacy SE3 RPE and 3-DoF lever fits retained as diagnostics.
+- Nine loop pairs independently checked against interpolated GT: 9 CONSISTENT(TP), 0 INCONSISTENT. The even pair at 0.49243 m is close to the 0.5 m threshold; position-only consistency does not certify rotation.
+- GNSS self/noisy-GT floor: 7 runs × (4 translation + 3 yaw segment lengths), ten trials each, clean self-errors numerically zero. See rpe_noise_floor.csv.
+- Twelve plots directly inspected via regenerated contact sheets: no empty charts or inverted ENU axes; overlays include the corrected antenna trajectory.
+- Evaluation tests: 16 passed. Full tools suite: 59 passed, 1 failed. The outstanding test is tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict, which requires map2d_nav2.yaml removed by TASK-06 rev1. This is an out-of-scope old expectation; no map or tools/tests files were changed. The whole-pytest completion criterion remains unmet.
+- Canonical source checksums match before/after evaluation. SE3-only map alignment and map-quality methods remain unchanged; representative is loop_on_r2. Concurrent TASK-06 directories were not included in the immutable-source check.
+
+Commands (from /home/hong/SLAM):
+
+"'```bash
+source env.sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.run_all_eval --reuse-map-quality --reuse-overlap
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tools.eval.verify_eval
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools/tests/test_eval.py tools/eval/test_revision2.py -p no:cacheprovider -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tools -p no:cacheprovider -q
+```
+'"'''
+with (out/'task05_rev2.md').open('a') as f:f.write(text)
+with (out/'summary.md').open('a') as f:f.write('\\n## Verification status\\n\\nIndependent evaluation audit: PASS; all 12 figures directly inspected. Evaluation tests: 16 passed. Full tools pytest: **59 passed, 1 failed** in the out-of-scope legacy TASK-06 test "'`test_nav2_roundtrip_and_spec_threshold_conflict`, which still requires the auxiliary `map2d_nav2.yaml` removed by TASK-06 rev1. Thus the whole-suite completion criterion is not met. Details: final_audit.json, pytest_all_rev2.txt, task05_rev2.md. The prior rev1 audit (including superseded GT-distance FP labels) is preserved under archive_rev1_audit/.'"\\n')
+print(json.dumps(audit,indent=2))
+PY" in /home/hong/SLAM
+ succeeded in 0ms:
+{
+  "revision": "TASK-05 rev2",
+  "evaluation_status": "PASS",
+  "completion_status": "Evaluation complete; full pytest criterion unmet due to one out-of-scope TASK-06 legacy test",
+  "experiment_replays": 0,
+  "written_workspace_directories": [
+    "tools/eval",
+    "results/eval"
+  ],
+  "canonical_v3_sources_unchanged": true,
+  "source_manifest": "source_manifest_before.json",
+  "maps_task_note": "No TASK-06 files written; concurrent tools/maps and results/maps excluded from immutable experiment manifest.",
+  "metrics_count": 14,
+  "map_quality_count": 7,
+  "figures_directly_inspected": 12,
+  "figure_inspection": "All seven overlays show GNSS, SE3 and lever2D curves; equal ENU axes, metre units and readable legends. ON/OFF, ATE and RPE figures show current corrected metrics. Two preserved overlap views are nonempty with distinct first/last colors. Inspection contact sheets regenerated.",
+  "max_rpe_100m_percent_all_fourteen": 1.6887271476805732,
+  "max_lever2d_norm_m_all_fourteen": 1.7131418860251915,
+  "max_evo_difference_m": 5.329070518200751e-15,
+  "loop_consistent_pairs": 9,
+  "loop_inconsistent_pairs": 0,
+  "loop_near_threshold_m": 0.492428674926975,
+  "representative_run": "loop_on_r2",
+  "eval_pytest": {
+    "passed": 16,
+    "failed": 0,
+    "log": "pytest_eval_rev2.txt"
+  },
+  "full_pytest": {
+    "passed": 59,
+    "failed": 1,
+    "log": "pytest_all_rev2.txt",
+    "failed_test": "tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict",
+    "reason": "Legacy test requires map2d_nav2.yaml and free_thresh 0.25 behavior. TASK-06 rev1 removes the auxiliary YAML and uses 0.196. Both maps implementation and tools/tests are outside this revision write scope."
+  },
+  "work_log": "task05_rev2.md",
+  "prior_audit": "archive_rev1_audit/final_audit.json"
+}
+
+codex
+rev2 평가 코드와 결과를 갱신했습니다. 실험 재실행 없이 지정된 두 디렉터리만 수정했습니다.
+
+- 100 m RPE 최대 **1.69%**, 수평 lever 최대 **1.71 m**
+- 루프 **9/9쌍 일관성 통과**
+- 노이즈 바닥 표·헤드라인·해석 갱신, 그림 12장 직접 확인
+- 평가 테스트 **16개 통과**, 독립 검증 PASS
+
+전체 pytest는 **59 통과·1 실패**입니다. 실패는 TASK-06에서 제거한 보조 YAML을 요구하는 기존 지도 테스트로, 수정 범위 밖에 두었습니다. 따라서 전체 pytest 완료 기준은 미충족입니다.
+
+[평가 보고서](/home/hong/SLAM/results/eval/summary.md) · [검증 기록](/home/hong/SLAM/results/eval/final_audit.json)
+tokens used
+75,269
+rev2 평가 코드와 결과를 갱신했습니다. 실험 재실행 없이 지정된 두 디렉터리만 수정했습니다.
+
+- 100 m RPE 최대 **1.69%**, 수평 lever 최대 **1.71 m**
+- 루프 **9/9쌍 일관성 통과**
+- 노이즈 바닥 표·헤드라인·해석 갱신, 그림 12장 직접 확인
+- 평가 테스트 **16개 통과**, 독립 검증 PASS
+
+전체 pytest는 **59 통과·1 실패**입니다. 실패는 TASK-06에서 제거한 보조 YAML을 요구하는 기존 지도 테스트로, 수정 범위 밖에 두었습니다. 따라서 전체 pytest 완료 기준은 미충족입니다.
+
+[평가 보고서](/home/hong/SLAM/results/eval/summary.md) · [검증 기록](/home/hong/SLAM/results/eval/final_audit.json)

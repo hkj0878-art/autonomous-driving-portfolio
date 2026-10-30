@@ -1,0 +1,166 @@
+{
+  "metrics": 78,
+  "links": 110,
+  "figures": 9,
+  "protected_files": 1132,
+  "readme": {
+    "mode": "syntax + file/script/module existence only; no execution",
+    "commands": [
+      {
+        "command": "source /opt/ros/humble/setup.bash",
+        "entrypoints": [
+          "/opt/ros/humble/setup.bash"
+        ]
+      },
+      {
+        "command": "export PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1",
+        "entrypoints": []
+      },
+      {
+        "command": "export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1",
+        "entrypoints": []
+      },
+      {
+        "command": ".venv/bin/python -c 'import sys; print(sys.executable)'",
+        "entrypoints": [
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": "cmake -S third_party/gtsam -B third_party/gtsam/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$PWD/third_party/install\" -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_WITH_TBB=ON",
+        "entrypoints": []
+      },
+      {
+        "command": "cmake --build third_party/gtsam/build -j4",
+        "entrypoints": []
+      },
+      {
+        "command": "cmake --install third_party/gtsam/build",
+        "entrypoints": []
+      },
+      {
+        "command": "export CMAKE_PREFIX_PATH=\"$PWD/third_party/install${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}\"",
+        "entrypoints": []
+      },
+      {
+        "command": "export LD_LIBRARY_PATH=\"$PWD/third_party/install/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"",
+        "entrypoints": []
+      },
+      {
+        "command": "(cd ws && MAKEFLAGS=-j3 colcon build --parallel-workers 1 --cmake-args -DBUILD_TESTING=OFF -DPython3_EXECUTABLE=\"$PWD/../.venv/bin/python\" -DCMAKE_PREFIX_PATH=\"$PWD/../third_party/install\")",
+        "entrypoints": [
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": "source env.sh",
+        "entrypoints": [
+          "env.sh"
+        ]
+      },
+      {
+        "command": "source env.sh",
+        "entrypoints": [
+          "env.sh"
+        ]
+      },
+      {
+        "command": "export PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1",
+        "entrypoints": []
+      },
+      {
+        "command": "export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1",
+        "entrypoints": []
+      },
+      {
+        "command": ".venv/bin/python tools/preprocess_bag.py --in data/synced_bag --out data/lio_bag",
+        "entrypoints": [
+          "tools/preprocess_bag.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python tools/preprocess_bag.py --in data/synced_bag --out data/lio_bag_even --keep-every 2 --phase 0",
+        "entrypoints": [
+          "tools/preprocess_bag.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python tools/preprocess_bag.py --in data/synced_bag --out data/lio_bag_odd --keep-every 2 --phase 1",
+        "entrypoints": [
+          "tools/preprocess_bag.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": "bash tools/run_experiments.sh 1.0",
+        "entrypoints": [
+          "tools/run_experiments.sh"
+        ]
+      },
+      {
+        "command": ".venv/bin/python -m tools.eval.run_all_eval",
+        "entrypoints": [
+          "tools/eval/run_all_eval.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python tools/maps/export_maps.py --run loop_on_r2 --align-json results/eval/loop_on_r2/align_se3.json --compare-stride10",
+        "entrypoints": [
+          "tools/maps/export_maps.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python -m tools.loc.run_loc_eval",
+        "entrypoints": [
+          "tools/loc/run_loc_eval.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python tools/report/collect_metrics.py",
+        "entrypoints": [
+          "tools/report/collect_metrics.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": "source env.sh",
+        "entrypoints": [
+          "env.sh"
+        ]
+      },
+      {
+        "command": "export PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1",
+        "entrypoints": []
+      },
+      {
+        "command": "export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1",
+        "entrypoints": []
+      },
+      {
+        "command": ".venv/bin/python tools/report/collect_metrics.py --check",
+        "entrypoints": [
+          "tools/report/collect_metrics.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python tools/report/verify_report.py --dry-run-readme",
+        "entrypoints": [
+          "tools/report/verify_report.py",
+          ".venv/bin/python"
+        ]
+      },
+      {
+        "command": ".venv/bin/python -m pytest -q",
+        "entrypoints": [
+          ".venv/bin/python"
+        ]
+      }
+    ]
+  }
+}

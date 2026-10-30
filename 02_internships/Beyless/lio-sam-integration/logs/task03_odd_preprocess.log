@@ -1,0 +1,9 @@
+[INFO] [1792998199.135343621] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/synced_bag/synced_bag_0.db3' for READ_ONLY.
+[INFO] [1792998199.136580514] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag_odd.0fls60vj/lio_bag_odd.0fls60vj_0.db3' for READ_WRITE.
+Converted 250 scans
+Converted 500 scans
+Converted 750 scans
+Converted 1000 scans
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+{"/imu_raw": 10884, "/gps/fix": 3298, "/points_raw": 1089}

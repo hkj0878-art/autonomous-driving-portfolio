@@ -1,0 +1,6 @@
+{
+  "final_min_distance_to_time_eligible_history_m": 585.0003918921382,
+  "keyframes_with_time_eligible_history": 169,
+  "keyframes_with_distance_time_candidate": 0,
+  "caveat": "Post-hoc final keyframe coordinates; not per-loop-thread timing or measured ICP fitness."
+}

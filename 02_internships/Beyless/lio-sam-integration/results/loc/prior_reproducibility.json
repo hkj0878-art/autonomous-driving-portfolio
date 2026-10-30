@@ -1,0 +1,14 @@
+{
+  "exact_xyz_match": true,
+  "points": 676030,
+  "metadata": {
+    "scans_read": 2178,
+    "scans_used": [
+      1052
+    ],
+    "voxel_m": 0.2,
+    "scan_filter": "even",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  }
+}

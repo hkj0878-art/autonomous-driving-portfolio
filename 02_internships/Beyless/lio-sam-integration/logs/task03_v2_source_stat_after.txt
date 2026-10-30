@@ -1,0 +1,2 @@
+data/synced_bag/metadata.yaml 1973 1763017388
+data/synced_bag/synced_bag_0.db3 4433477632 1763017383

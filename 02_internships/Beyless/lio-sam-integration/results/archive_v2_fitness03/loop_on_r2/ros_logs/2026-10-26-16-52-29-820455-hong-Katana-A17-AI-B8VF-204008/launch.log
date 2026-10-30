@@ -1,0 +1,18 @@
+1793001149.8210342 [INFO] [launch]: All log files can be found below /home/hong/SLAM/results/loop_on_r2/ros_logs/2026-10-26-16-52-29-820455-hong-Katana-A17-AI-B8VF-204008
+1793001149.8211701 [INFO] [launch]: Default logging verbosity is set to INFO
+1793001149.8517635 [INFO] [static_transform_publisher-1]: process started with pid [204009]
+1793001149.8518670 [INFO] [lio_sam_imuPreintegration-2]: process started with pid [204011]
+1793001149.8519025 [INFO] [lio_sam_imageProjection-3]: process started with pid [204013]
+1793001149.8519311 [INFO] [lio_sam_featureExtraction-4]: process started with pid [204015]
+1793001149.8519559 [INFO] [lio_sam_mapOptimization-5]: process started with pid [204017]
+1793001274.3857687 [WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+1793001274.3873658 [INFO] [lio_sam_mapOptimization-5]: sending signal 'SIGINT' to process[lio_sam_mapOptimization-5]
+1793001274.3876426 [INFO] [lio_sam_featureExtraction-4]: sending signal 'SIGINT' to process[lio_sam_featureExtraction-4]
+1793001274.3880029 [INFO] [lio_sam_imageProjection-3]: sending signal 'SIGINT' to process[lio_sam_imageProjection-3]
+1793001274.3882675 [INFO] [lio_sam_imuPreintegration-2]: sending signal 'SIGINT' to process[lio_sam_imuPreintegration-2]
+1793001274.3885660 [INFO] [static_transform_publisher-1]: sending signal 'SIGINT' to process[static_transform_publisher-1]
+1793001274.4958582 [INFO] [static_transform_publisher-1]: process has finished cleanly [pid 204009]
+1793001274.4964454 [INFO] [lio_sam_featureExtraction-4]: process has finished cleanly [pid 204015]
+1793001274.4996352 [INFO] [lio_sam_imageProjection-3]: process has finished cleanly [pid 204013]
+1793001274.5000124 [INFO] [lio_sam_imuPreintegration-2]: process has finished cleanly [pid 204011]
+1793001274.6187015 [INFO] [lio_sam_mapOptimization-5]: process has finished cleanly [pid 204017]

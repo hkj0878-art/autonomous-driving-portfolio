@@ -1,0 +1,3 @@
+[INFO] [1793001776.964719690] [rclcpp]: [1;32m----> Map Optimization Started.[0m
+[WARN] [1793001860.947274798] [lio_sam_mapOptimization]: Not enough features! Only 0 edge and 0 planar features available.
+[INFO] [1793001901.616827170] [rclcpp]: signal_handler(signum=2)

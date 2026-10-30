@@ -1,0 +1,12 @@
+
+Files:             lio_bag.6fza_bfx_0.db3
+Bag size:          1.7 GiB
+Storage id:        sqlite3
+Duration:          108.842667342s
+Start:             Nov 11 2025 18:09:00.578414346 (1762852140.578414346)
+End:               Nov 11 2025 18:10:49.421081688 (1762852249.421081688)
+Messages:          16360
+Topic information: Topic: /gps/fix | Type: sensor_msgs/msg/NavSatFix | Count: 3298 | Serialization Format: cdr
+                   Topic: /imu_raw | Type: sensor_msgs/msg/Imu | Count: 10884 | Serialization Format: cdr
+                   Topic: /points_raw | Type: sensor_msgs/msg/PointCloud2 | Count: 2178 | Serialization Format: cdr
+

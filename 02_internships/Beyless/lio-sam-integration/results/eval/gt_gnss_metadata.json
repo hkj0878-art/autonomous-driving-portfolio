@@ -1,0 +1,21 @@
+{
+  "total": 3298,
+  "rejected_status": 0,
+  "rejected_covariance": 0,
+  "rejected_invalid": 0,
+  "accepted": 3298,
+  "origin_lla": [
+    37.23651316666667,
+    126.77413183333333,
+    29.7
+  ],
+  "max_sigma_m": 0.05,
+  "sigma_axes": "xy",
+  "vertical_sigma_m": {
+    "count": 3298,
+    "min": 0.0512,
+    "max": 0.0584,
+    "mean": 0.05362037598544574
+  },
+  "orientation": "placeholder identity; RPE derives yaw from GNSS tangent"
+}

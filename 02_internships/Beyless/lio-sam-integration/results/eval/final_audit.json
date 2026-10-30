@@ -1,0 +1,38 @@
+{
+  "revision": "TASK-05 rev2",
+  "evaluation_status": "PASS",
+  "completion_status": "Evaluation complete; full pytest criterion unmet due to one out-of-scope TASK-06 legacy test",
+  "experiment_replays": 0,
+  "written_workspace_directories": [
+    "tools/eval",
+    "results/eval"
+  ],
+  "canonical_v3_sources_unchanged": true,
+  "source_manifest": "source_manifest_before.json",
+  "maps_task_note": "No TASK-06 files written; concurrent tools/maps and results/maps excluded from immutable experiment manifest.",
+  "metrics_count": 14,
+  "map_quality_count": 7,
+  "figures_directly_inspected": 12,
+  "figure_inspection": "All seven overlays show GNSS, SE3 and lever2D curves; equal ENU axes, metre units and readable legends. ON/OFF, ATE and RPE figures show current corrected metrics. Two preserved overlap views are nonempty with distinct first/last colors. Inspection contact sheets regenerated.",
+  "max_rpe_100m_percent_all_fourteen": 1.6887271476805732,
+  "max_lever2d_norm_m_all_fourteen": 1.7131418860251915,
+  "max_evo_difference_m": 5.329070518200751e-15,
+  "loop_consistent_pairs": 9,
+  "loop_inconsistent_pairs": 0,
+  "loop_near_threshold_m": 0.492428674926975,
+  "representative_run": "loop_on_r2",
+  "eval_pytest": {
+    "passed": 16,
+    "failed": 0,
+    "log": "pytest_eval_rev2.txt"
+  },
+  "full_pytest": {
+    "passed": 59,
+    "failed": 1,
+    "log": "pytest_all_rev2.txt",
+    "failed_test": "tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict",
+    "reason": "Legacy test requires map2d_nav2.yaml and free_thresh 0.25 behavior. TASK-06 rev1 removes the auxiliary YAML and uses 0.196. Both maps implementation and tools/tests are outside this revision write scope."
+  },
+  "work_log": "task05_rev2.md",
+  "prior_audit": "archive_rev1_audit/final_audit.json"
+}

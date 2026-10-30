@@ -1,0 +1,3 @@
+[INFO] [1792999989.816603993] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag_even/lio_bag_even.rdg6vnk7_0.db3' for READ_ONLY.
+[INFO] [1792999989.816673233] [rosbag2_player]: Set rate to 0.5
+[INFO] [1792999989.820825819] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag_even/lio_bag_even.rdg6vnk7_0.db3' for READ_ONLY.

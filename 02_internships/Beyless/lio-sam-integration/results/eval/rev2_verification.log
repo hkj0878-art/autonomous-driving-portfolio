@@ -1,0 +1,65 @@
+{
+  "fourteen_metrics_and_seven_maps": true,
+  "twelve_nonempty_figures": {
+    "loop_overlap_on.png": [
+      1400,
+      1600
+    ],
+    "ate_vs_time.png": [
+      800,
+      1800
+    ],
+    "traj_overlay_loop_off_r3.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r3.png": [
+      1200,
+      1400
+    ],
+    "loop_overlap_off.png": [
+      1400,
+      1600
+    ],
+    "rpe_bar.png": [
+      800,
+      2200
+    ],
+    "traj_overlay_loop_off_r1.png": [
+      1200,
+      1400
+    ],
+    "traj_on_vs_off.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_off_r2.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_even_loop_on.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r1.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r2.png": [
+      1200,
+      1400
+    ]
+  },
+  "protected_sources_unchanged": true,
+  "horizontal_gnss_filter_verified": true,
+  "representative_run": "loop_on_r2",
+  "actual_loop_pairs_verified": true,
+  "loop_pair_count": 9,
+  "rev2_noise_floor_trials_verified": true,
+  "rev2_primary_rpe_recomputed": true,
+  "max_rpe_100m_percent_all_fourteen": 1.6887271476805732,
+  "max_lever2d_norm_m_all_fourteen": 1.7131418860251915,
+  "lever2d_group_std_verified": true,
+  "loop_consistency_threshold_m": 0.5,
+  "overall_completion": "PASS"
+}

@@ -1,0 +1,4 @@
+PASS: four LIO-SAM nodes discovered and alive for >=5 seconds
+PASS: map -> odom identity received on /tf_static
+PASS: no process death, launch errors, or shared-library errors
+Launch shutdown exit code: 0

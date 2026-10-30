@@ -1,0 +1,3578 @@
+{
+  "data/lio_bag/lio_bag.6fza_bfx_0.db3": [
+    1860689920,
+    1792990991055909269
+  ],
+  "data/lio_bag/metadata.yaml": [
+    1960,
+    1792990991056909264
+  ],
+  "data/synced_bag/synced_bag_0.db3": [
+    4433477632,
+    1763017383000000000
+  ],
+  "data/synced_bag/metadata.yaml": [
+    1973,
+    1763017388000000000
+  ],
+  "data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3": [
+    933036032,
+    1792998230525500261
+  ],
+  "data/lio_bag_odd/metadata.yaml": [
+    1968,
+    1792998230525500261
+  ],
+  "data/lio_bag_even/metadata.yaml": [
+    1970,
+    1792998198349549020
+  ],
+  "data/lio_bag_even/lio_bag_even.rdg6vnk7_0.db3": [
+    932347904,
+    1792998198349549020
+  ],
+  "results/verification_v2.json": [
+    1563,
+    1793005702399078118
+  ],
+  "results/.run.lock": [
+    0,
+    1793005526607026913
+  ],
+  "results/imu_frame_diagnostic.json": [
+    492,
+    1793000643335071502
+  ],
+  "results/split_verification.json": [
+    832,
+    1793000810008097750
+  ],
+  "results/experiments_summary.md": [
+    3150,
+    1793005702399078118
+  ],
+  "results/verification_v3.json": [
+    1813,
+    1793005975699658947
+  ],
+  "results/loop_on_r3/run_meta.json": [
+    1002,
+    1793004771459848216
+  ],
+  "results/loop_on_r3/keyframes_final_tum.txt": [
+    18264,
+    1793004771115850904
+  ],
+  "results/loop_on_r3/params.yaml": [
+    1973,
+    1793004646297876401
+  ],
+  "results/loop_on_r3/odom_online_tum.txt": [
+    48523,
+    1793004755754971714
+  ],
+  "results/loop_on_r3/recorder_status.json": [
+    224,
+    1793004771116850896
+  ],
+  "results/loop_on_r3/run.log": [
+    2717615,
+    1793004771400848677
+  ],
+  "results/loop_on_r3/loop_pairs.json": [
+    18921,
+    1793004771445848326
+  ],
+  "results/loop_on_r3/map/trajectory.pcd": [
+    2856,
+    1793004771032851553
+  ],
+  "results/loop_on_r3/map/transformations.pcd": [
+    6240,
+    1793004771032851553
+  ],
+  "results/loop_on_r3/map/GlobalMap.pcd": [
+    14695134,
+    1793004771109850951
+  ],
+  "results/loop_on_r3/map/SurfMap.pcd": [
+    11879454,
+    1793004771077851201
+  ],
+  "results/loop_on_r3/map/CornerMap.pcd": [
+    2815870,
+    1793004771059851342
+  ],
+  "results/loop_on_r3/ros_logs/python_250636_1793004646303.log": [
+    0,
+    1793004646302876358
+  ],
+  "results/loop_on_r3/ros_logs/lio_sam_mapOptimization_250686_1793004646577.log": [
+    148,
+    1793004771282849599
+  ],
+  "results/loop_on_r3/ros_logs/lio_sam_featureExtraction_250684_1793004646548.log": [
+    150,
+    1793004771282849599
+  ],
+  "results/loop_on_r3/ros_logs/static_transform_publisher_250678_1793004646548.log": [
+    318,
+    1793004771283849591
+  ],
+  "results/loop_on_r3/ros_logs/lio_sam_imageProjection_250682_1793004646548.log": [
+    148,
+    1793004771282849599
+  ],
+  "results/loop_on_r3/ros_logs/python3_250790_1793004647011.log": [
+    330,
+    1793004755878970734
+  ],
+  "results/loop_on_r3/ros_logs/python_250789_1793004646982.log": [
+    0,
+    1793004646981870487
+  ],
+  "results/loop_on_r3/ros_logs/lio_sam_imuPreintegration_250680_1793004646551.log": [
+    550,
+    1793004771283849591
+  ],
+  "results/loop_on_r3/ros_logs/2026-10-26-17-50-46-503815-hong-Katana-A17-AI-B8VF-250677/launch.log": [
+    1868,
+    1793004771400848677
+  ],
+  "results/even_loop_on/run_meta.json": [
+    1119,
+    1793005654525333125
+  ],
+  "results/even_loop_on/keyframes_final_tum.txt": [
+    18149,
+    1793005654182334961
+  ],
+  "results/even_loop_on/params.yaml": [
+    1973,
+    1793005526610026897
+  ],
+  "results/even_loop_on/odom_online_tum.txt": [
+    43396,
+    1793005638889416934
+  ],
+  "results/even_loop_on/recorder_status.json": [
+    223,
+    1793005654183334956
+  ],
+  "results/even_loop_on/run.log": [
+    2696818,
+    1793005654467333435
+  ],
+  "results/even_loop_on/loop_pairs.json": [
+    18946,
+    1793005654512333194
+  ],
+  "results/even_loop_on/map/trajectory.pcd": [
+    2840,
+    1793005654097335415
+  ],
+  "results/even_loop_on/map/transformations.pcd": [
+    6204,
+    1793005654098335410
+  ],
+  "results/even_loop_on/map/GlobalMap.pcd": [
+    14501758,
+    1793005654177334988
+  ],
+  "results/even_loop_on/map/SurfMap.pcd": [
+    11712574,
+    1793005654147335148
+  ],
+  "results/even_loop_on/map/CornerMap.pcd": [
+    2789374,
+    1793005654131335233
+  ],
+  "results/even_loop_on/ros_logs/lio_sam_imuPreintegration_262677_1793005526816.log": [
+    642,
+    1793005654350334062
+  ],
+  "results/even_loop_on/ros_logs/python_262775_1793005527009.log": [
+    0,
+    1793005527009024701
+  ],
+  "results/even_loop_on/ros_logs/python3_262776_1793005527045.log": [
+    418,
+    1793005638863417074
+  ],
+  "results/even_loop_on/ros_logs/python_262632_1793005526616.log": [
+    0,
+    1793005526616026864
+  ],
+  "results/even_loop_on/ros_logs/lio_sam_mapOptimization_262683_1793005526839.log": [
+    271,
+    1793005654349334067
+  ],
+  "results/even_loop_on/ros_logs/lio_sam_featureExtraction_262681_1793005526815.log": [
+    150,
+    1793005654349334067
+  ],
+  "results/even_loop_on/ros_logs/lio_sam_imageProjection_262679_1793005526814.log": [
+    148,
+    1793005654350334062
+  ],
+  "results/even_loop_on/ros_logs/static_transform_publisher_262675_1793005526814.log": [
+    318,
+    1793005654350334062
+  ],
+  "results/even_loop_on/ros_logs/2026-10-26-18-05-26-776820-hong-Katana-A17-AI-B8VF-262674/launch.log": [
+    1870,
+    1793005654467333435
+  ],
+  "results/maps/verification_rev1.log": [
+    383,
+    1793006436863012178
+  ],
+  "results/maps/pytest_rev1.log": [
+    113,
+    1793006438606029780
+  ],
+  "results/maps/obsolete_test_rev1.log": [
+    1885,
+    1793006310227515737
+  ],
+  "results/maps/export_rev1.log": [
+    4462,
+    1793006323212690467
+  ],
+  "results/maps/render_resources.log": [
+    747,
+    1793006390679517710
+  ],
+  "results/maps/.pytest_cache/README.md": [
+    295,
+    1793006438606029780
+  ],
+  "results/maps/.pytest_cache/CACHEDIR.TAG": [
+    194,
+    1793006438606029780
+  ],
+  "results/maps/.pytest_cache/.gitignore": [
+    37,
+    1793006438606029780
+  ],
+  "results/maps/.pytest_cache/v/cache/stepwise": [
+    2,
+    1793006438606029780
+  ],
+  "results/maps/.pytest_cache/v/cache/nodeids": [
+    3907,
+    1793006438606029780
+  ],
+  "results/maps/logs/task06.md": [
+    5750,
+    1793006503774636587
+  ],
+  "results/maps/loop_on_r2/map_0p10_enu.pcd": [
+    7102373,
+    1793006294449296253
+  ],
+  "results/maps/loop_on_r2/map2d.png": [
+    227512,
+    1793006388642494613
+  ],
+  "results/maps/loop_on_r2/map_full.pcd": [
+    13393502,
+    1793006294259293562
+  ],
+  "results/maps/loop_on_r2/map_loop_overlap.png": [
+    2237427,
+    1793006390370514214
+  ],
+  "results/maps/loop_on_r2/map2d.yaml": [
+    201,
+    1793006294479296678
+  ],
+  "results/maps/loop_on_r2/map_0p10.pcd": [
+    7116563,
+    1793006294286293944
+  ],
+  "results/maps/loop_on_r2/map2d_stats.json": [
+    4138,
+    1793006390371514225
+  ],
+  "results/maps/loop_on_r2/map_crop_0p10.pcd": [
+    6299756,
+    1793006294311294299
+  ],
+  "results/maps/loop_on_r2/map_oblique.png": [
+    910022,
+    1793006387977487052
+  ],
+  "results/maps/loop_on_r2/map_crop_0p10_enu.pcd": [
+    6286548,
+    1793006294473296593
+  ],
+  "results/maps/loop_on_r2/validation.json": [
+    383,
+    1793006436863012178
+  ],
+  "results/maps/loop_on_r2/map_crop.pcd": [
+    9293511,
+    1793006294419295828
+  ],
+  "results/maps/loop_on_r2/map_top.png": [
+    1473117,
+    1793006386493470125
+  ],
+  "results/maps/loop_on_r2/map2d.pgm": [
+    6511529,
+    1793006294474296607
+  ],
+  "results/maps/archive_v2/ARCHIVE_NOTE.md": [
+    546,
+    1793006308361490194
+  ],
+  "results/maps/archive_v2/buffer_baseline.json": [
+    534,
+    1793006355613104123
+  ],
+  "results/maps/archive_v2/loop_on_r2/map2d.png": [
+    130895,
+    1793003586396272241
+  ],
+  "results/maps/archive_v2/loop_on_r2/map_full.pcd": [
+    16227856,
+    1793003581446292047
+  ],
+  "results/maps/archive_v2/loop_on_r2/map2d_nav2.yaml": [
+    145,
+    1793003581526291726
+  ],
+  "results/maps/archive_v2/loop_on_r2/map2d.yaml": [
+    144,
+    1793003581526291726
+  ],
+  "results/maps/archive_v2/loop_on_r2/map_0p10.pcd": [
+    8090648,
+    1793003581482291902
+  ],
+  "results/maps/archive_v2/loop_on_r2/map2d_stats.json": [
+    1893,
+    1793003586414272169
+  ],
+  "results/maps/archive_v2/loop_on_r2/map_oblique.png": [
+    629879,
+    1793003584210280985
+  ],
+  "results/maps/archive_v2/loop_on_r2/validation.json": [
+    507,
+    1793003595713235002
+  ],
+  "results/maps/archive_v2/loop_on_r2/map_top.png": [
+    652644,
+    1793003582484287892
+  ],
+  "results/maps/archive_v2/loop_on_r2/map2d.pgm": [
+    24716537,
+    1793003581494291855
+  ],
+  "results/archive_v3_failed_attempts/verification_v2.json": [
+    1609,
+    1793005305275282800
+  ],
+  "results/archive_v3_failed_attempts/ARCHIVE_NOTE.md": [
+    417,
+    1793005305275282800
+  ],
+  "results/archive_v3_failed_attempts/experiments_summary.md": [
+    3253,
+    1793005305275282800
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/run_meta.json": [
+    1013,
+    1793005272583476016
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/keyframes_final_tum.txt": [
+    15528,
+    1793005272241478050
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/params.yaml": [
+    1973,
+    1793005147692236971
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/odom_online_tum.txt": [
+    25547,
+    1793005256950569244
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/recorder_status.json": [
+    224,
+    1793005272242478044
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/run.log": [
+    2410703,
+    1793005272528476343
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/loop_pairs.json": [
+    225,
+    1793005272572476081
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/map/trajectory.pcd": [
+    2440,
+    1793005272173478454
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/map/transformations.pcd": [
+    5304,
+    1793005272173478454
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/map/GlobalMap.pcd": [
+    12642478,
+    1793005272236478080
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/map/SurfMap.pcd": [
+    10205646,
+    1793005272209478240
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/map/CornerMap.pcd": [
+    2437022,
+    1793005272196478317
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/lio_sam_featureExtraction_257518_1793005147898.log": [
+    150,
+    1793005272409477051
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/python3_257614_1793005148124.log": [
+    350,
+    1793005256943569286
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/lio_sam_mapOptimization_257520_1793005147921.log": [
+    148,
+    1793005272410477045
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/python_257459_1793005147698.log": [
+    0,
+    1793005147697236940
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/python_257613_1793005148129.log": [
+    0,
+    1793005148128234244
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/lio_sam_imuPreintegration_257514_1793005147899.log": [
+    1964,
+    1793005272410477045
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/static_transform_publisher_257512_1793005147898.log": [
+    318,
+    1793005272411477039
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/lio_sam_imageProjection_257516_1793005147898.log": [
+    148,
+    1793005272410477045
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt1/ros_logs/2026-10-26-17-59-07-862378-hong-Katana-A17-AI-B8VF-257511/launch.log": [
+    1870,
+    1793005272528476343
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/run_meta.json": [
+    1008,
+    1793005430417562756
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/keyframes_final_tum.txt": [
+    14162,
+    1793005430078564669
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/params.yaml": [
+    1973,
+    1793005305530281303
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/odom_online_tum.txt": [
+    21382,
+    1793005414496652780
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/recorder_status.json": [
+    220,
+    1793005430079564663
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/run.log": [
+    1709826,
+    1793005430366563045
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/loop_pairs.json": [
+    225,
+    1793005430409562802
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/map/trajectory.pcd": [
+    2216,
+    1793005430014565030
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/map/transformations.pcd": [
+    4800,
+    1793005430014565030
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/map/GlobalMap.pcd": [
+    11067150,
+    1793005430074564692
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/map/SurfMap.pcd": [
+    8929134,
+    1793005430050564827
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/map/CornerMap.pcd": [
+    2138206,
+    1793005430038564895
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/python_259938_1793005305932.log": [
+    0,
+    1793005305931278948
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/lio_sam_featureExtraction_259844_1793005305738.log": [
+    150,
+    1793005430246563722
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/lio_sam_imageProjection_259842_1793005305737.log": [
+    148,
+    1793005430246563722
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/lio_sam_mapOptimization_259846_1793005305762.log": [
+    271,
+    1793005430246563722
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/static_transform_publisher_259838_1793005305737.log": [
+    318,
+    1793005430247563717
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/python3_259939_1793005305970.log": [
+    350,
+    1793005414786651137
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/lio_sam_imuPreintegration_259840_1793005305739.log": [
+    4691,
+    1793005430247563717
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/python_259795_1793005305537.log": [
+    0,
+    1793005305536281268
+  ],
+  "results/archive_v3_failed_attempts/even_loop_on_attempt2/ros_logs/2026-10-26-18-01-45-702484-hong-Katana-A17-AI-B8VF-259837/launch.log": [
+    1870,
+    1793005430366563045
+  ],
+  "results/loop_on_r1/run_meta.json": [
+    1004,
+    1793004520571027924
+  ],
+  "results/loop_on_r1/keyframes_final_tum.txt": [
+    17273,
+    1793004520226031276
+  ],
+  "results/loop_on_r1/params.yaml": [
+    1973,
+    1793004395663322490
+  ],
+  "results/loop_on_r1/odom_online_tum.txt": [
+    37912,
+    1793004504831182016
+  ],
+  "results/loop_on_r1/recorder_status.json": [
+    225,
+    1793004520227031266
+  ],
+  "results/loop_on_r1/run.log": [
+    2714867,
+    1793004520511028507
+  ],
+  "results/loop_on_r1/loop_pairs.json": [
+    19055,
+    1793004520557028060
+  ],
+  "results/loop_on_r1/map/trajectory.pcd": [
+    2712,
+    1793004520148032033
+  ],
+  "results/loop_on_r1/map/transformations.pcd": [
+    5916,
+    1793004520148032033
+  ],
+  "results/loop_on_r1/map/GlobalMap.pcd": [
+    13720366,
+    1793004520219031344
+  ],
+  "results/loop_on_r1/map/SurfMap.pcd": [
+    11056046,
+    1793004520189031635
+  ],
+  "results/loop_on_r1/map/CornerMap.pcd": [
+    2664510,
+    1793004520175031771
+  ],
+  "results/loop_on_r1/ros_logs/lio_sam_imageProjection_247028_1793004395903.log": [
+    230,
+    1793004520394029643
+  ],
+  "results/loop_on_r1/ros_logs/python3_247123_1793004396139.log": [
+    330,
+    1793004505012180229
+  ],
+  "results/loop_on_r1/ros_logs/lio_sam_mapOptimization_247032_1793004395933.log": [
+    148,
+    1793004520394029643
+  ],
+  "results/loop_on_r1/ros_logs/python_246982_1793004395676.log": [
+    0,
+    1793004395675322356
+  ],
+  "results/loop_on_r1/ros_logs/static_transform_publisher_247024_1793004395902.log": [
+    318,
+    1793004520394029643
+  ],
+  "results/loop_on_r1/ros_logs/lio_sam_imuPreintegration_247026_1793004395906.log": [
+    550,
+    1793004520395029633
+  ],
+  "results/loop_on_r1/ros_logs/lio_sam_featureExtraction_247030_1793004395902.log": [
+    150,
+    1793004520394029643
+  ],
+  "results/loop_on_r1/ros_logs/python_247122_1793004396074.log": [
+    0,
+    1793004396073317951
+  ],
+  "results/loop_on_r1/ros_logs/2026-10-26-17-46-35-851736-hong-Katana-A17-AI-B8VF-247023/launch.log": [
+    1868,
+    1793004520511028507
+  ],
+  "results/loop_off_r1/run_meta.json": [
+    1003,
+    1793004896723911607
+  ],
+  "results/loop_off_r1/keyframes_final_tum.txt": [
+    17824,
+    1793004896379914071
+  ],
+  "results/loop_off_r1/params.yaml": [
+    1974,
+    1793004771833845293
+  ],
+  "results/loop_off_r1/odom_online_tum.txt": [
+    40138,
+    1793004880963025103
+  ],
+  "results/loop_off_r1/recorder_status.json": [
+    225,
+    1793004896380914064
+  ],
+  "results/loop_off_r1/run.log": [
+    2715075,
+    1793004896670911986
+  ],
+  "results/loop_off_r1/loop_pairs.json": [
+    225,
+    1793004896708911714
+  ],
+  "results/loop_off_r1/map/trajectory.pcd": [
+    2792,
+    1793004896298914652
+  ],
+  "results/loop_off_r1/map/transformations.pcd": [
+    6096,
+    1793004896298914652
+  ],
+  "results/loop_off_r1/map/GlobalMap.pcd": [
+    14318190,
+    1793004896374914107
+  ],
+  "results/loop_off_r1/map/SurfMap.pcd": [
+    11564398,
+    1793004896343914329
+  ],
+  "results/loop_off_r1/map/CornerMap.pcd": [
+    2753982,
+    1793004896327914444
+  ],
+  "results/loop_off_r1/ros_logs/python_252325_1793004771839.log": [
+    0,
+    1793004771838845253
+  ],
+  "results/loop_off_r1/ros_logs/python_252478_1793004772234.log": [
+    0,
+    1793004772233842168
+  ],
+  "results/loop_off_r1/ros_logs/lio_sam_featureExtraction_252384_1793004772040.log": [
+    150,
+    1793004896547912868
+  ],
+  "results/loop_off_r1/ros_logs/lio_sam_imuPreintegration_252380_1793004772042.log": [
+    550,
+    1793004896548912861
+  ],
+  "results/loop_off_r1/ros_logs/lio_sam_mapOptimization_252386_1793004772063.log": [
+    148,
+    1793004896547912868
+  ],
+  "results/loop_off_r1/ros_logs/lio_sam_imageProjection_252382_1793004772040.log": [
+    230,
+    1793004896547912868
+  ],
+  "results/loop_off_r1/ros_logs/python3_252479_1793004772272.log": [
+    330,
+    1793004881135023859
+  ],
+  "results/loop_off_r1/ros_logs/static_transform_publisher_252378_1793004772040.log": [
+    318,
+    1793004896548912861
+  ],
+  "results/loop_off_r1/ros_logs/2026-10-26-17-52-52-004914-hong-Katana-A17-AI-B8VF-252366/launch.log": [
+    1869,
+    1793004896670911986
+  ],
+  "results/archive_v3_preloop_pairs/verification_v2.json": [
+    1557,
+    1793002986844864909
+  ],
+  "results/archive_v3_preloop_pairs/ARCHIVE_NOTE.md": [
+    285,
+    1793004395400325400
+  ],
+  "results/archive_v3_preloop_pairs/experiments_summary.md": [
+    3368,
+    1793002986844864909
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/run_meta.json": [
+    1003,
+    1793002475070750950
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/keyframes_final_tum.txt": [
+    20230,
+    1793002474727753284
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/params.yaml": [
+    1973,
+    1793002350089653831
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/odom_online_tum.txt": [
+    52649,
+    1793002459388858407
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/recorder_status.json": [
+    224,
+    1793002474728753277
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/run.log": [
+    2705180,
+    1793002475016751317
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/map/trajectory.pcd": [
+    3144,
+    1793002474631753937
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/map/transformations.pcd": [
+    6888,
+    1793002474631753937
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/map/GlobalMap.pcd": [
+    16206640,
+    1793002474722753318
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/map/SurfMap.pcd": [
+    13091310,
+    1793002474686753563
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/map/CornerMap.pcd": [
+    3115518,
+    1793002474668753685
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/static_transform_publisher_220304_1793002350377.log": [
+    318,
+    1793002474898752119
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/lio_sam_imuPreintegration_220306_1793002350379.log": [
+    550,
+    1793002474896752133
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/lio_sam_featureExtraction_220310_1793002350377.log": [
+    150,
+    1793002474895752140
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/lio_sam_mapOptimization_220312_1793002350401.log": [
+    148,
+    1793002474895752140
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/lio_sam_imageProjection_220308_1793002350377.log": [
+    230,
+    1793002474896752133
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/python3_220403_1793002350585.log": [
+    330,
+    1793002459460857910
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/python3_220402_1793002350524.log": [
+    0,
+    1793002350523650499
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/python3_220262_1793002350121.log": [
+    0,
+    1793002350120653593
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r3/ros_logs/2026-10-26-17-12-30-336537-hong-Katana-A17-AI-B8VF-220303/launch.log": [
+    1868,
+    1793002475016751317
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/run_meta.json": [
+    1012,
+    1793002976620914131
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/keyframes_final_tum.txt": [
+    17708,
+    1793002976276915791
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/params.yaml": [
+    1973,
+    1793002851631537085
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/odom_online_tum.txt": [
+    38708,
+    1793002960381992817
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/recorder_status.json": [
+    224,
+    1793002976277915786
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/run.log": [
+    2703692,
+    1793002976572914363
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/map/trajectory.pcd": [
+    2776,
+    1793002976174916284
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/map/transformations.pcd": [
+    6060,
+    1793002976174916284
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/map/GlobalMap.pcd": [
+    14093118,
+    1793002976269915825
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/map/SurfMap.pcd": [
+    11368718,
+    1793002976235915989
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/map/CornerMap.pcd": [
+    2724590,
+    1793002976216916081
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/python3_227048_1793002851664.log": [
+    0,
+    1793002851663536920
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/lio_sam_imageProjection_227094_1793002851917.log": [
+    148,
+    1793002976444914980
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/python3_227200_1793002852120.log": [
+    350,
+    1793002960953990033
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/lio_sam_featureExtraction_227096_1793002851917.log": [
+    150,
+    1793002976444914980
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/lio_sam_mapOptimization_227098_1793002851946.log": [
+    148,
+    1793002976444914980
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/python3_227199_1793002852068.log": [
+    0,
+    1793002852068534832
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/lio_sam_imuPreintegration_227092_1793002851919.log": [
+    550,
+    1793002976445914976
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/static_transform_publisher_227090_1793002851917.log": [
+    318,
+    1793002976445914976
+  ],
+  "results/archive_v3_preloop_pairs/even_loop_on/ros_logs/2026-10-26-17-20-51-875977-hong-Katana-A17-AI-B8VF-227089/launch.log": [
+    1870,
+    1793002976572914363
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/run_meta.json": [
+    1001,
+    1793002224428686745
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/keyframes_final_tum.txt": [
+    19021,
+    1793002224084689774
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/params.yaml": [
+    1973,
+    1793002099188599124
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/odom_online_tum.txt": [
+    53077,
+    1793002208702826480
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/recorder_status.json": [
+    223,
+    1793002224084689774
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/run.log": [
+    2716488,
+    1793002224374687221
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/map/trajectory.pcd": [
+    2968,
+    1793002223982690672
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/map/transformations.pcd": [
+    6492,
+    1793002223982690672
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/map/GlobalMap.pcd": [
+    15190014,
+    1793002224078689827
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/map/SurfMap.pcd": [
+    12257662,
+    1793002224043690135
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/map/CornerMap.pcd": [
+    2932542,
+    1793002224024690302
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/lio_sam_imageProjection_216950_1793002099485.log": [
+    230,
+    1793002224253688286
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/python3_216903_1793002099222.log": [
+    0,
+    1793002099221599036
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/lio_sam_featureExtraction_216952_1793002099485.log": [
+    150,
+    1793002224252688295
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/lio_sam_mapOptimization_216954_1793002099513.log": [
+    148,
+    1793002224252688295
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/python3_217047_1793002099941.log": [
+    330,
+    1793002208833825306
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/lio_sam_imuPreintegration_216948_1793002099487.log": [
+    550,
+    1793002224253688286
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/python3_217046_1793002099881.log": [
+    0,
+    1793002099880597278
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/static_transform_publisher_216946_1793002099485.log": [
+    318,
+    1793002224253688286
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r1/ros_logs/2026-10-26-17-08-19-443006-hong-Katana-A17-AI-B8VF-216945/launch.log": [
+    1868,
+    1793002224374687221
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/run_meta.json": [
+    1009,
+    1793002600398943054
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/keyframes_final_tum.txt": [
+    19797,
+    1793002600054945159
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/params.yaml": [
+    1974,
+    1793002475428748514
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/odom_online_tum.txt": [
+    51165,
+    1793002584312042094
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/recorder_status.json": [
+    226,
+    1793002600055945152
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/run.log": [
+    2717034,
+    1793002600344943384
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/map/trajectory.pcd": [
+    3080,
+    1793002599950945795
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/map/transformations.pcd": [
+    6744,
+    1793002599950945795
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/map/GlobalMap.pcd": [
+    15775646,
+    1793002600048945195
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/map/SurfMap.pcd": [
+    12729758,
+    1793002600014945403
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/map/CornerMap.pcd": [
+    3046078,
+    1793002599996945513
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/python3_221920_1793002475458.log": [
+    0,
+    1793002475457748317
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/lio_sam_featureExtraction_221975_1793002475705.log": [
+    150,
+    1793002600222944130
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/static_transform_publisher_221969_1793002475705.log": [
+    318,
+    1793002600223944124
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/python3_222067_1793002475854.log": [
+    0,
+    1793002475853745623
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/python3_222070_1793002475915.log": [
+    330,
+    1793002584788039145
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/lio_sam_mapOptimization_221977_1793002475732.log": [
+    148,
+    1793002600222944130
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/lio_sam_imageProjection_221973_1793002475706.log": [
+    230,
+    1793002600222944130
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/lio_sam_imuPreintegration_221971_1793002475707.log": [
+    550,
+    1793002600223944124
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r1/ros_logs/2026-10-26-17-14-35-665018-hong-Katana-A17-AI-B8VF-221961/launch.log": [
+    1869,
+    1793002600344943384
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/run_meta.json": [
+    1009,
+    1793002725700211791
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/keyframes_final_tum.txt": [
+    20337,
+    1793002725354213720
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/params.yaml": [
+    1974,
+    1793002600717941103
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/odom_online_tum.txt": [
+    57568,
+    1793002709624301953
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/recorder_status.json": [
+    226,
+    1793002725354213720
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/run.log": [
+    2717234,
+    1793002725643212109
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/map/trajectory.pcd": [
+    3160,
+    1793002725256214267
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/map/transformations.pcd": [
+    6924,
+    1793002725256214267
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/map/GlobalMap.pcd": [
+    16191360,
+    1793002725349213748
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/map/SurfMap.pcd": [
+    13065406,
+    1793002725314213943
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/map/CornerMap.pcd": [
+    3126142,
+    1793002725295214049
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/static_transform_publisher_223692_1793002601018.log": [
+    318,
+    1793002725525212766
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/python3_223791_1793002601219.log": [
+    330,
+    1793002710099299275
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/lio_sam_imageProjection_223696_1793002601018.log": [
+    230,
+    1793002725524212772
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/python3_223650_1793002600753.log": [
+    0,
+    1793002600752940889
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/lio_sam_mapOptimization_223700_1793002601045.log": [
+    148,
+    1793002725523212777
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/lio_sam_imuPreintegration_223694_1793002601020.log": [
+    550,
+    1793002725525212766
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/python3_223790_1793002601159.log": [
+    0,
+    1793002601158938407
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/lio_sam_featureExtraction_223698_1793002601018.log": [
+    150,
+    1793002725523212777
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r2/ros_logs/2026-10-26-17-16-40-975244-hong-Katana-A17-AI-B8VF-223691/launch.log": [
+    1869,
+    1793002725643212109
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/run_meta.json": [
+    1002,
+    1793002851301538786
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/keyframes_final_tum.txt": [
+    19896,
+    1793002850956540565
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/params.yaml": [
+    1974,
+    1793002726068209738
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/odom_online_tum.txt": [
+    57989,
+    1793002835517620526
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/recorder_status.json": [
+    225,
+    1793002850957540560
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/run.log": [
+    2716817,
+    1793002851244539080
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/map/trajectory.pcd": [
+    3096,
+    1793002850863541045
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/map/transformations.pcd": [
+    6780,
+    1793002850864541040
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/map/GlobalMap.pcd": [
+    15845038,
+    1793002850951540591
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/map/SurfMap.pcd": [
+    12783390,
+    1793002850917540767
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/map/CornerMap.pcd": [
+    3061838,
+    1793002850900540854
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/python3_225497_1793002726760.log": [
+    0,
+    1793002726759205886
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/python3_225500_1793002726816.log": [
+    330,
+    1793002835700619574
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/lio_sam_imuPreintegration_225395_1793002726371.log": [
+    550,
+    1793002851124539699
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/lio_sam_imageProjection_225397_1793002726369.log": [
+    230,
+    1793002851124539699
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/lio_sam_featureExtraction_225399_1793002726369.log": [
+    150,
+    1793002851123539704
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/python3_225351_1793002726104.log": [
+    0,
+    1793002726103209543
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/lio_sam_mapOptimization_225401_1793002726407.log": [
+    148,
+    1793002851123539704
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/static_transform_publisher_225393_1793002726369.log": [
+    318,
+    1793002851124539699
+  ],
+  "results/archive_v3_preloop_pairs/loop_off_r3/ros_logs/2026-10-26-17-18-46-327342-hong-Katana-A17-AI-B8VF-225392/launch.log": [
+    1869,
+    1793002851244539080
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/run_meta.json": [
+    1028,
+    1793002063351694464
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/keyframes_final_tum.txt": [
+    20766,
+    1793002063006695379
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/params.yaml": [
+    1973,
+    1793001938385022258
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/odom_online_tum.txt": [
+    62008,
+    1793002047566736279
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/recorder_status.json": [
+    224,
+    1793002063006695379
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/run.log": [
+    2712620,
+    1793002063300694599
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/map/trajectory.pcd": [
+    3224,
+    1793002062899695662
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/map/transformations.pcd": [
+    7068,
+    1793002062899695662
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/map/GlobalMap.pcd": [
+    16545984,
+    1793002063001695393
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/map/SurfMap.pcd": [
+    13349470,
+    1793002062963695493
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/map/CornerMap.pcd": [
+    3196702,
+    1793002062943695546
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/lio_sam_imuPreintegration_214717_1793001938670.log": [
+    550,
+    1793002063175694931
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/python3_214661_1793001938411.log": [
+    0,
+    1793001938411022191
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/python3_214814_1793001938874.log": [
+    330,
+    1793002047736735829
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/lio_sam_featureExtraction_214721_1793001938667.log": [
+    150,
+    1793002063174694934
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/lio_sam_imageProjection_214719_1793001938667.log": [
+    230,
+    1793002063175694931
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/python3_214813_1793001938813.log": [
+    0,
+    1793001938813021149
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/lio_sam_mapOptimization_214723_1793001938692.log": [
+    271,
+    1793002063174694934
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/static_transform_publisher_214715_1793001938667.log": [
+    318,
+    1793002063175694931
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_fitness05_trial/ros_logs/2026-10-26-17-05-38-625951-hong-Katana-A17-AI-B8VF-214703/launch.log": [
+    1881,
+    1793002063300694599
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/run_meta.json": [
+    1007,
+    1793001020671935086
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/keyframes_final_tum.txt": [
+    17909,
+    1793001020328935488
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/params.yaml": [
+    1973,
+    1793000786915103498
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/odom_online_tum.txt": [
+    43816,
+    1793001004223953956
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/recorder_status.json": [
+    226,
+    1793001020328935488
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/run.log": [
+    2707854,
+    1793001020617935149
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/map/trajectory.pcd": [
+    2808,
+    1793001020250935580
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/map/transformations.pcd": [
+    6132,
+    1793001020250935580
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/map/GlobalMap.pcd": [
+    14397198,
+    1793001020323935494
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/map/SurfMap.pcd": [
+    11618638,
+    1793001020293935529
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/map/CornerMap.pcd": [
+    2778750,
+    1793001020277935548
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/python3_199508_1793000787330.log": [
+    0,
+    1793000787329103418
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/static_transform_publisher_199408_1793000787172.log": [
+    318,
+    1793001020496935290
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/lio_sam_mapOptimization_199416_1793000787196.log": [
+    148,
+    1793001020495935291
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/python3_199346_1793000786946.log": [
+    0,
+    1793000786945103493
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/lio_sam_featureExtraction_199414_1793000787173.log": [
+    150,
+    1793001020495935291
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/lio_sam_imageProjection_199412_1793000787172.log": [
+    230,
+    1793001020496935290
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/python3_199509_1793000787389.log": [
+    332,
+    1793001005103952971
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/lio_sam_imuPreintegration_199410_1793000787174.log": [
+    550,
+    1793001020496935290
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate05/ros_logs/2026-10-26-16-46-27-136724-hong-Katana-A17-AI-B8VF-199397/launch.log": [
+    1870,
+    1793001020617935149
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/run_meta.json": [
+    1005,
+    1793000769393106029
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/keyframes_final_tum.txt": [
+    19238,
+    1793000769049106061
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/params.yaml": [
+    1973,
+    1793000644437072245
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/odom_online_tum.txt": [
+    51334,
+    1793000753548106909
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/recorder_status.json": [
+    225,
+    1793000769050106060
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/run.log": [
+    2716576,
+    1793000769335106035
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/map/trajectory.pcd": [
+    3000,
+    1793000768959106069
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/map/transformations.pcd": [
+    6564,
+    1793000768959106069
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/map/GlobalMap.pcd": [
+    15538718,
+    1793000769044106062
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/map/SurfMap.pcd": [
+    12566814,
+    1793000769012106065
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/map/CornerMap.pcd": [
+    2972094,
+    1793000768994106066
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/python3_197594_1793000644904.log": [
+    330,
+    1793000753770106905
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/lio_sam_mapOptimization_197501_1793000644719.log": [
+    148,
+    1793000769217106046
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/python3_197593_1793000644852.log": [
+    0,
+    1793000644851072522
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/lio_sam_imageProjection_197497_1793000644692.log": [
+    230,
+    1793000769217106046
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/static_transform_publisher_197493_1793000644692.log": [
+    318,
+    1793000769218106046
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/lio_sam_imuPreintegration_197495_1793000644693.log": [
+    550,
+    1793000769218106046
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/lio_sam_featureExtraction_197499_1793000644692.log": [
+    150,
+    1793000769217106046
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/python3_197451_1793000644462.log": [
+    0,
+    1793000644461072261
+  ],
+  "results/archive_v3_preloop_pairs/pilot_rate1/ros_logs/2026-10-26-16-44-04-655316-hong-Katana-A17-AI-B8VF-197492/launch.log": [
+    1869,
+    1793000769336106035
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/run_meta.json": [
+    1002,
+    1793002349755656397
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/keyframes_final_tum.txt": [
+    20335,
+    1793002349410659049
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/params.yaml": [
+    1973,
+    1793002224762683804
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/odom_online_tum.txt": [
+    58207,
+    1793002333928778998
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/recorder_status.json": [
+    226,
+    1793002349411659041
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/run.log": [
+    2717219,
+    1793002349701656813
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/map/trajectory.pcd": [
+    3160,
+    1793002349308659833
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/map/transformations.pcd": [
+    6924,
+    1793002349308659833
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/map/GlobalMap.pcd": [
+    16227856,
+    1793002349405659087
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/map/SurfMap.pcd": [
+    13078846,
+    1793002349368659372
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/map/CornerMap.pcd": [
+    3149198,
+    1793002349347659533
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/lio_sam_featureExtraction_218651_1793002225065.log": [
+    150,
+    1793002349578657758
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/python3_218743_1793002225209.log": [
+    0,
+    1793002225208679879
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/lio_sam_imageProjection_218649_1793002225065.log": [
+    230,
+    1793002349578657758
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/lio_sam_imuPreintegration_218647_1793002225067.log": [
+    550,
+    1793002349579657750
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/lio_sam_mapOptimization_218653_1793002225091.log": [
+    148,
+    1793002349578657758
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/python3_218603_1793002224796.log": [
+    0,
+    1793002224795683514
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/static_transform_publisher_218645_1793002225064.log": [
+    318,
+    1793002349579657750
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/python3_218744_1793002225268.log": [
+    330,
+    1793002334142777328
+  ],
+  "results/archive_v3_preloop_pairs/loop_on_r2/ros_logs/2026-10-26-17-10-25-024260-hong-Katana-A17-AI-B8VF-218644/launch.log": [
+    1868,
+    1793002349701656813
+  ],
+  "results/loop_off_r2/run_meta.json": [
+    1006,
+    1793005022035047035
+  ],
+  "results/loop_off_r2/keyframes_final_tum.txt": [
+    16947,
+    1793005021693049312
+  ],
+  "results/loop_off_r2/params.yaml": [
+    1974,
+    1793004897138908634
+  ],
+  "results/loop_off_r2/odom_online_tum.txt": [
+    36624,
+    1793005006174153042
+  ],
+  "results/loop_off_r2/recorder_status.json": [
+    224,
+    1793005021693049312
+  ],
+  "results/loop_off_r2/run.log": [
+    2700758,
+    1793005021978047414
+  ],
+  "results/loop_off_r2/loop_pairs.json": [
+    225,
+    1793005022022047122
+  ],
+  "results/loop_off_r2/map/trajectory.pcd": [
+    2664,
+    1793005021613049844
+  ],
+  "results/loop_off_r2/map/transformations.pcd": [
+    5808,
+    1793005021614049838
+  ],
+  "results/loop_off_r2/map/GlobalMap.pcd": [
+    13547950,
+    1793005021686049359
+  ],
+  "results/loop_off_r2/map/SurfMap.pcd": [
+    10951102,
+    1793005021655049565
+  ],
+  "results/loop_off_r2/map/CornerMap.pcd": [
+    2597038,
+    1793005021640049665
+  ],
+  "results/loop_off_r2/ros_logs/python_254083_1793004897145.log": [
+    0,
+    1793004897144908590
+  ],
+  "results/loop_off_r2/ros_logs/static_transform_publisher_254134_1793004897354.log": [
+    318,
+    1793005021861048192
+  ],
+  "results/loop_off_r2/ros_logs/lio_sam_featureExtraction_254140_1793004897354.log": [
+    150,
+    1793005021861048192
+  ],
+  "results/loop_off_r2/ros_logs/python_254234_1793004897547.log": [
+    0,
+    1793004897546905711
+  ],
+  "results/loop_off_r2/ros_logs/python3_254235_1793004897580.log": [
+    330,
+    1793005006443151235
+  ],
+  "results/loop_off_r2/ros_logs/lio_sam_mapOptimization_254142_1793004897383.log": [
+    148,
+    1793005021860048199
+  ],
+  "results/loop_off_r2/ros_logs/lio_sam_imuPreintegration_254136_1793004897356.log": [
+    550,
+    1793005021862048186
+  ],
+  "results/loop_off_r2/ros_logs/lio_sam_imageProjection_254138_1793004897354.log": [
+    230,
+    1793005021861048192
+  ],
+  "results/loop_off_r2/ros_logs/2026-10-26-17-54-57-316558-hong-Katana-A17-AI-B8VF-254133/launch.log": [
+    1869,
+    1793005021978047414
+  ],
+  "results/loop_off_r3/run_meta.json": [
+    1009,
+    1793005147314239336
+  ],
+  "results/loop_off_r3/keyframes_final_tum.txt": [
+    18033,
+    1793005146970241488
+  ],
+  "results/loop_off_r3/params.yaml": [
+    1974,
+    1793005022412044527
+  ],
+  "results/loop_off_r3/odom_online_tum.txt": [
+    46411,
+    1793005131532338422
+  ],
+  "results/loop_off_r3/recorder_status.json": [
+    226,
+    1793005146971241482
+  ],
+  "results/loop_off_r3/run.log": [
+    2717660,
+    1793005147255239705
+  ],
+  "results/loop_off_r3/loop_pairs.json": [
+    225,
+    1793005147301239417
+  ],
+  "results/loop_off_r3/map/trajectory.pcd": [
+    2824,
+    1793005146880242051
+  ],
+  "results/loop_off_r3/map/transformations.pcd": [
+    6168,
+    1793005146880242051
+  ],
+  "results/loop_off_r3/map/GlobalMap.pcd": [
+    14211486,
+    1793005146964241526
+  ],
+  "results/loop_off_r3/map/SurfMap.pcd": [
+    11464862,
+    1793005146932241726
+  ],
+  "results/loop_off_r3/map/CornerMap.pcd": [
+    2746814,
+    1793005146917241819
+  ],
+  "results/loop_off_r3/ros_logs/python_255812_1793005022419.log": [
+    0,
+    1793005022418044487
+  ],
+  "results/loop_off_r3/ros_logs/lio_sam_featureExtraction_255872_1793005022618.log": [
+    150,
+    1793005147138240436
+  ],
+  "results/loop_off_r3/ros_logs/lio_sam_imageProjection_255870_1793005022618.log": [
+    230,
+    1793005147138240436
+  ],
+  "results/loop_off_r3/ros_logs/python_255966_1793005022813.log": [
+    0,
+    1793005022812041865
+  ],
+  "results/loop_off_r3/ros_logs/lio_sam_imuPreintegration_255868_1793005022620.log": [
+    550,
+    1793005147139240430
+  ],
+  "results/loop_off_r3/ros_logs/lio_sam_mapOptimization_255874_1793005022642.log": [
+    148,
+    1793005147138240436
+  ],
+  "results/loop_off_r3/ros_logs/python3_255967_1793005022846.log": [
+    330,
+    1793005131718337249
+  ],
+  "results/loop_off_r3/ros_logs/static_transform_publisher_255866_1793005022618.log": [
+    318,
+    1793005147139240430
+  ],
+  "results/loop_off_r3/ros_logs/2026-10-26-17-57-02-581910-hong-Katana-A17-AI-B8VF-255865/launch.log": [
+    1869,
+    1793005147255239705
+  ],
+  "results/archive_v1_wrong_rpy/.run.lock": [
+    0,
+    1793000252982113248
+  ],
+  "results/archive_v1_wrong_rpy/imu_frame_diagnostic.json": [
+    476,
+    1792998462557978075
+  ],
+  "results/archive_v1_wrong_rpy/ARCHIVE_NOTE.md": [
+    629,
+    1793000642894071202
+  ],
+  "results/archive_v1_wrong_rpy/split_verification.json": [
+    832,
+    1792998337554293286
+  ],
+  "results/archive_v1_wrong_rpy/experiments_summary.md": [
+    2369,
+    1793000493190883255
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/run_meta.json": [
+    1004,
+    1792999271093896354
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/keyframes_final_tum.txt": [
+    19941,
+    1792999270749897873
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/params.yaml": [
+    1973,
+    1792999036842904845
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/odom_online_tum.txt": [
+    52383,
+    1792999255052967122
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/recorder_status.json": [
+    224,
+    1792999270749897873
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/run.log": [
+    2717233,
+    1792999271040896588
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/map/trajectory.pcd": [
+    3064,
+    1792999270648898319
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/map/transformations.pcd": [
+    6708,
+    1792999270648898319
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/map/GlobalMap.pcd": [
+    15594286,
+    1792999270742897904
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/map/SurfMap.pcd": [
+    12572318,
+    1792999270697898103
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/map/CornerMap.pcd": [
+    3022158,
+    1792999270679898182
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/python3_176808_1792999037541.log": [
+    0,
+    1792999037540901931
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/lio_sam_mapOptimization_176693_1792999037182.log": [
+    148,
+    1792999270918897127
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/python3_176641_1792999036882.log": [
+    0,
+    1792999036881904682
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/static_transform_publisher_176685_1792999037154.log": [
+    318,
+    1792999270919897122
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/lio_sam_imuPreintegration_176687_1792999037157.log": [
+    550,
+    1792999270919897122
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/python3_176809_1792999037596.log": [
+    332,
+    1792999255339965857
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/lio_sam_imageProjection_176689_1792999037154.log": [
+    230,
+    1792999270918897127
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/lio_sam_featureExtraction_176691_1792999037154.log": [
+    150,
+    1792999270918897127
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r3/ros_logs/2026-10-26-16-17-17-109235-hong-Katana-A17-AI-B8VF-176684/launch.log": [
+    1868,
+    1792999271040896588
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/run_meta.json": [
+    1009,
+    1793000486750870894
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/keyframes_final_tum.txt": [
+    16359,
+    1793000486411870233
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/params.yaml": [
+    1973,
+    1793000252986113267
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/odom_online_tum.txt": [
+    31012,
+    1793000471109839220
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/recorder_status.json": [
+    224,
+    1793000486412870235
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/run.log": [
+    1626694,
+    1793000486696870789
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/map/trajectory.pcd": [
+    2520,
+    1793000486335870084
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/map/transformations.pcd": [
+    5484,
+    1793000486335870084
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/map/GlobalMap.pcd": [
+    12415790,
+    1793000486406870223
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/map/SurfMap.pcd": [
+    9900606,
+    1793000486379870170
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/map/CornerMap.pcd": [
+    2515374,
+    1793000486366870145
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/static_transform_publisher_192444_1793000253266.log": [
+    318,
+    1793000486580870562
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/lio_sam_featureExtraction_192450_1793000253266.log": [
+    150,
+    1793000486579870561
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/python3_192545_1793000253479.log": [
+    352,
+    1793000471096839193
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/python3_192544_1793000253418.log": [
+    0,
+    1793000253417115309
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/lio_sam_imageProjection_192448_1793000253266.log": [
+    148,
+    1793000486579870561
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/lio_sam_mapOptimization_192452_1793000253294.log": [
+    271,
+    1793000486579870561
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/lio_sam_imuPreintegration_192446_1793000253268.log": [
+    6711,
+    1793000486580870562
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/python3_192402_1793000253020.log": [
+    0,
+    1793000253019113424
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on/ros_logs/2026-10-26-16-37-33-228249-hong-Katana-A17-AI-B8VF-192443/launch.log": [
+    1870,
+    1793000486696870789
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/run_meta.json": [
+    1014,
+    1793000223107964730
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/keyframes_final_tum.txt": [
+    24725,
+    1793000222768962964
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/params.yaml": [
+    1973,
+    1792999989308583105
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ARCHIVE_NOTE.md": [
+    233,
+    1793000252776112269
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/odom_online_tum.txt": [
+    45928,
+    1793000206844878013
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/recorder_status.json": [
+    225,
+    1793000222768962964
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/run.log": [
+    1701837,
+    1793000223060964485
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/map/trajectory.pcd": [
+    3688,
+    1793000222650962350
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/map/transformations.pcd": [
+    8112,
+    1793000222650962350
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/map/GlobalMap.pcd": [
+    18925184,
+    1793000222761962928
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/map/SurfMap.pcd": [
+    15226046,
+    1793000222719962709
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/map/CornerMap.pcd": [
+    3699326,
+    1793000222698962600
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/lio_sam_imuPreintegration_189064_1792999989590.log": [
+    8731,
+    1793000222936963840
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/lio_sam_featureExtraction_189068_1792999989588.log": [
+    150,
+    1793000222935963835
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/static_transform_publisher_189062_1792999989587.log": [
+    318,
+    1793000222936963840
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/lio_sam_imageProjection_189066_1792999989589.log": [
+    148,
+    1793000222935963835
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/python3_189020_1792999989339.log": [
+    0,
+    1792999989338582963
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/python3_189161_1792999989799.log": [
+    352,
+    1793000207418881145
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/python3_189160_1792999989742.log": [
+    0,
+    1792999989741581055
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/lio_sam_mapOptimization_189070_1792999989622.log": [
+    148,
+    1793000222935963835
+  ],
+  "results/archive_v1_wrong_rpy/even_loop_on_failed_attempt1/ros_logs/2026-10-26-16-33-09-549592-hong-Katana-A17-AI-B8VF-189061/launch.log": [
+    1870,
+    1793000223060964485
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/run_meta.json": [
+    1003,
+    1792998801929843203
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/keyframes_final_tum.txt": [
+    18949,
+    1792998801582844518
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/params.yaml": [
+    1973,
+    1792998567696663724
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/odom_online_tum.txt": [
+    46574,
+    1792998785476905205
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/recorder_status.json": [
+    224,
+    1792998801582844518
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/run.log": [
+    2706872,
+    1792998801872843419
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/map/trajectory.pcd": [
+    2920,
+    1792998801484844889
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/map/transformations.pcd": [
+    6384,
+    1792998801484844889
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/map/GlobalMap.pcd": [
+    15099182,
+    1792998801577844537
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/map/SurfMap.pcd": [
+    12192590,
+    1792998801542844670
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/map/CornerMap.pcd": [
+    2906782,
+    1792998801524844738
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/lio_sam_imageProjection_170701_1792998568007.log": [
+    230,
+    1792998801751843878
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/lio_sam_mapOptimization_170705_1792998568032.log": [
+    148,
+    1792998801750843882
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/python3_170798_1792998568437.log": [
+    332,
+    1792998786153902665
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/python3_170654_1792998567730.log": [
+    0,
+    1792998567729663620
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/lio_sam_featureExtraction_170703_1792998568007.log": [
+    150,
+    1792998801750843882
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/static_transform_publisher_170697_1792998568007.log": [
+    318,
+    1792998801751843878
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/python3_170797_1792998568384.log": [
+    0,
+    1792998568383661543
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/lio_sam_imuPreintegration_170699_1792998568010.log": [
+    550,
+    1792998801751843878
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r1/ros_logs/2026-10-26-16-09-27-951681-hong-Katana-A17-AI-B8VF-170696/launch.log": [
+    1868,
+    1792998801872843419
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/run_meta.json": [
+    1005,
+    1792999505421841461
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/keyframes_final_tum.txt": [
+    19276,
+    1792999505074843047
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/params.yaml": [
+    1974,
+    1792999271420894908
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/odom_online_tum.txt": [
+    48552,
+    1792999489254915326
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/recorder_status.json": [
+    226,
+    1792999505075843042
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/run.log": [
+    2713292,
+    1792999505364841721
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/map/trajectory.pcd": [
+    2984,
+    1792999504963843555
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/map/transformations.pcd": [
+    6528,
+    1792999504963843555
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/map/GlobalMap.pcd": [
+    15221038,
+    1792999505068843074
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/map/SurfMap.pcd": [
+    12293374,
+    1792999505029843253
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/map/CornerMap.pcd": [
+    2927854,
+    1792999505009843344
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/static_transform_publisher_179693_1792999271696.log": [
+    318,
+    1792999505242842278
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/python3_179812_1792999271854.log": [
+    0,
+    1792999271853892995
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/python3_179813_1792999271914.log": [
+    332,
+    1792999489634913590
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/lio_sam_mapOptimization_179701_1792999271727.log": [
+    148,
+    1792999505241842283
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/lio_sam_imageProjection_179697_1792999271697.log": [
+    230,
+    1792999505242842278
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/python3_179651_1792999271451.log": [
+    0,
+    1792999271450894776
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/lio_sam_imuPreintegration_179695_1792999271699.log": [
+    550,
+    1792999505242842278
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/lio_sam_featureExtraction_179699_1792999271697.log": [
+    150,
+    1792999505241842283
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r1/ros_logs/2026-10-26-16-21-11-657869-hong-Katana-A17-AI-B8VF-179692/launch.log": [
+    1869,
+    1792999505364841721
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/run_meta.json": [
+    1005,
+    1792999739986756398
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/keyframes_final_tum.txt": [
+    20516,
+    1792999739643758000
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/params.yaml": [
+    1974,
+    1792999505766839883
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/odom_online_tum.txt": [
+    57574,
+    1792999723773832082
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/recorder_status.json": [
+    225,
+    1792999739644757995
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/run.log": [
+    2717442,
+    1792999739935756636
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/map/trajectory.pcd": [
+    3144,
+    1792999739550758434
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/map/transformations.pcd": [
+    6888,
+    1792999739550758434
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/map/GlobalMap.pcd": [
+    16060048,
+    1792999739638758023
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/map/SurfMap.pcd": [
+    12961966,
+    1792999739605758177
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/map/CornerMap.pcd": [
+    3098270,
+    1792999739587758262
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/lio_sam_imageProjection_182633_1792999506074.log": [
+    230,
+    1792999739811757215
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/lio_sam_featureExtraction_182635_1792999506074.log": [
+    150,
+    1792999739811757215
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/lio_sam_mapOptimization_182637_1792999506102.log": [
+    148,
+    1792999739811757215
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/lio_sam_imuPreintegration_182631_1792999506076.log": [
+    550,
+    1792999739812757210
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/python3_182753_1792999506529.log": [
+    332,
+    1792999724248829866
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/python3_182587_1792999505800.log": [
+    0,
+    1792999505799839732
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/python3_182752_1792999506466.log": [
+    0,
+    1792999506465836686
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/static_transform_publisher_182629_1792999506074.log": [
+    318,
+    1792999739812757210
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r2/ros_logs/2026-10-26-16-25-06-029169-hong-Katana-A17-AI-B8VF-182628/launch.log": [
+    1869,
+    1792999739935756636
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/run_meta.json": [
+    1001,
+    1792999974604652699
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/keyframes_final_tum.txt": [
+    20440,
+    1792999974258654337
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/params.yaml": [
+    1974,
+    1792999740366754622
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/odom_online_tum.txt": [
+    57970,
+    1792999958665728084
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/recorder_status.json": [
+    223,
+    1792999974259654332
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/run.log": [
+    2718690,
+    1792999974549652960
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/map/trajectory.pcd": [
+    3144,
+    1792999974151654843
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/map/transformations.pcd": [
+    6888,
+    1792999974151654843
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/map/GlobalMap.pcd": [
+    16133120,
+    1792999974252654365
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/map/SurfMap.pcd": [
+    13021086,
+    1792999974214654545
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/map/CornerMap.pcd": [
+    3112222,
+    1792999974192654649
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/static_transform_publisher_185816_1792999740716.log": [
+    318,
+    1792999974428653532
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/python3_185917_1792999741121.log": [
+    332,
+    1792999958844727238
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/lio_sam_mapOptimization_185824_1792999740748.log": [
+    148,
+    1792999974427653537
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/lio_sam_imuPreintegration_185818_1792999740721.log": [
+    550,
+    1792999974428653532
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/lio_sam_imageProjection_185820_1792999740716.log": [
+    230,
+    1792999974428653532
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/python3_185750_1792999740400.log": [
+    0,
+    1792999740399754468
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/lio_sam_featureExtraction_185822_1792999740716.log": [
+    150,
+    1792999974427653537
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/python3_185916_1792999741065.log": [
+    0,
+    1792999741064751362
+  ],
+  "results/archive_v1_wrong_rpy/loop_off_r3/ros_logs/2026-10-26-16-29-00-664143-hong-Katana-A17-AI-B8VF-185814/launch.log": [
+    1869,
+    1792999974549652960
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_even/data_report.md": [
+    10292,
+    1792998198880548271
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_even/gnss_traj.png": [
+    58083,
+    1792998198879548273
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_even/timing.png": [
+    101265,
+    1792998198770548427
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_even/statistics.json": [
+    37589,
+    1792998198881548270
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_odd/data_report.md": [
+    10293,
+    1792998231069499380
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_odd/gnss_traj.png": [
+    58083,
+    1792998231068499381
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_odd/timing.png": [
+    100642,
+    1792998230969499543
+  ],
+  "results/archive_v1_wrong_rpy/data_report_lio_bag_odd/statistics.json": [
+    37607,
+    1792998231070499379
+  ],
+  "results/archive_v1_wrong_rpy/data_report/data_report.md": [
+    10314,
+    1792991013657780539
+  ],
+  "results/archive_v1_wrong_rpy/data_report/verification.json": [
+    1169,
+    1792991012675786131
+  ],
+  "results/archive_v1_wrong_rpy/data_report/gnss_traj.png": [
+    58083,
+    1792990991711905533
+  ],
+  "results/archive_v1_wrong_rpy/data_report/timing.png": [
+    102584,
+    1792990991609906114
+  ],
+  "results/archive_v1_wrong_rpy/data_report/statistics.json": [
+    37612,
+    1792990991713905522
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/run_meta.json": [
+    945,
+    1792998513339831240
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/keyframes_final_tum.txt": [
+    19172,
+    1792998512994832270
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/params.yaml": [
+    1973,
+    1792998279103414387
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/odom_online_tum.txt": [
+    49180,
+    1792998497207878932
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/recorder_status.json": [
+    224,
+    1792998512994832270
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/run.log": [
+    2716962,
+    1792998513287831396
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/map/trajectory.pcd": [
+    2952,
+    1792998512900832550
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/map/transformations.pcd": [
+    6456,
+    1792998512901832547
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/map/GlobalMap.pcd": [
+    15095886,
+    1792998512989832285
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/map/SurfMap.pcd": [
+    12180014,
+    1792998512954832389
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/map/CornerMap.pcd": [
+    2916062,
+    1792998512936832443
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/lio_sam_imageProjection_166807_1792998279405.log": [
+    230,
+    1792998513166831757
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/python3_166903_1792998279791.log": [
+    0,
+    1792998279790413073
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/lio_sam_featureExtraction_166809_1792998279405.log": [
+    150,
+    1792998513165831759
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/python3_166761_1792998279136.log": [
+    0,
+    1792998279135414325
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/lio_sam_mapOptimization_166811_1792998279432.log": [
+    148,
+    1792998513165831759
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/python3_166904_1792998279848.log": [
+    332,
+    1792998497582877833
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/static_transform_publisher_166803_1792998279405.log": [
+    318,
+    1792998513166831757
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/lio_sam_imuPreintegration_166805_1792998279406.log": [
+    550,
+    1792998513166831757
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate05/ros_logs/2026-10-26-16-04-39-351251-hong-Katana-A17-AI-B8VF-166802/launch.log": [
+    1870,
+    1792998513287831396
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/run_meta.json": [
+    865,
+    1792998249439468556
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/keyframes_final_tum.txt": [
+    24445,
+    1792998249098469148
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/params.yaml": [
+    1973,
+    1792998123641634682
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/odom_online_tum.txt": [
+    54884,
+    1792998233532495368
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/loop_candidate_diagnostic.json": [
+    270,
+    1792999176901308620
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/recorder_status.json": [
+    147,
+    1792998249098469148
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/run.log": [
+    2217143,
+    1792998249395468633
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/map/trajectory.pcd": [
+    3704,
+    1792998248993469330
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/map/transformations.pcd": [
+    8148,
+    1792998248993469330
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/map/GlobalMap.pcd": [
+    18468112,
+    1792998249092469159
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/map/SurfMap.pcd": [
+    14850750,
+    1792998249054469225
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/map/CornerMap.pcd": [
+    3617550,
+    1792998249031469265
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/lio_sam_mapOptimization_164478_1792998124340.log": [
+    148,
+    1792998249268468853
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/lio_sam_imageProjection_164474_1792998124250.log": [
+    230,
+    1792998249268468853
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/static_transform_publisher_164470_1792998124247.log": [
+    318,
+    1792998249269468851
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/python3_164590_1792998124708.log": [
+    0,
+    1792998124707633749
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/python3_164591_1792998124780.log": [
+    330,
+    1792998233658495162
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/lio_sam_featureExtraction_164476_1792998124247.log": [
+    150,
+    1792998249268468853
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/python3_164412_1792998123725.log": [
+    0,
+    1792998123725634608
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/lio_sam_imuPreintegration_164472_1792998124260.log": [
+    4893,
+    1792998249269468851
+  ],
+  "results/archive_v1_wrong_rpy/pilot_rate1/ros_logs/2026-10-26-16-02-04-174722-hong-Katana-A17-AI-B8VF-164467/launch.log": [
+    1869,
+    1792998249395468633
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/run_meta.json": [
+    1002,
+    1792999036494906298
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/keyframes_final_tum.txt": [
+    20598,
+    1792999036150907733
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/params.yaml": [
+    1973,
+    1792998802259841955
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/odom_online_tum.txt": [
+    57008,
+    1792999020448973087
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/recorder_status.json": [
+    225,
+    1792999036151907729
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/run.log": [
+    2707472,
+    1792999036441906519
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/map/trajectory.pcd": [
+    3160,
+    1792999036040908192
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/map/transformations.pcd": [
+    6924,
+    1792999036040908192
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/map/GlobalMap.pcd": [
+    16255696,
+    1792999036142907766
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/map/SurfMap.pcd": [
+    13113486,
+    1792999036103907929
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/map/CornerMap.pcd": [
+    3142398,
+    1792999036081908021
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/python3_173650_1792998802289.log": [
+    0,
+    1792998802288841845
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/python3_173793_1792998803004.log": [
+    332,
+    1792999020724971940
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/static_transform_publisher_173692_1792998802558.log": [
+    318,
+    1792999036318907032
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/lio_sam_mapOptimization_173700_1792998802585.log": [
+    148,
+    1792999036317907036
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/python3_173792_1792998802945.log": [
+    0,
+    1792998802944839361
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/lio_sam_imuPreintegration_173694_1792998802561.log": [
+    550,
+    1792999036318907032
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/lio_sam_imageProjection_173696_1792998802559.log": [
+    230,
+    1792999036318907032
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/lio_sam_featureExtraction_173698_1792998802559.log": [
+    150,
+    1792999036317907036
+  ],
+  "results/archive_v1_wrong_rpy/loop_on_r2/ros_logs/2026-10-26-16-13-22-516731-hong-Katana-A17-AI-B8VF-173691/launch.log": [
+    1868,
+    1792999036441906519
+  ],
+  "results/eval/task05_rev2.md": [
+    3356,
+    1793006656300716626
+  ],
+  "results/eval/pytest_rev2.txt": [
+    1896,
+    1793006402889653824
+  ],
+  "results/eval/rev2_verification.log": [
+    1326,
+    1793006491555530153
+  ],
+  "results/eval/rpe_noise_floor.csv": [
+    5889,
+    1793006442110064945
+  ],
+  "results/eval/independent_verification.json": [
+    1325,
+    1793006491555530153
+  ],
+  "results/eval/source_manifest_before.json": [
+    18594,
+    1793006432345966208
+  ],
+  "results/eval/pytest_eval_rev2.txt": [
+    99,
+    1793006561062093724
+  ],
+  "results/eval/rev2_evaluation.log": [
+    1793,
+    1793006442236066203
+  ],
+  "results/eval/pytest_all_rev2.txt": [
+    1896,
+    1793006590164301220
+  ],
+  "results/eval/inspection_comparisons.jpg": [
+    283271,
+    1793006489920515665
+  ],
+  "results/eval/map_preflight.json": [
+    431,
+    1793004640713924802
+  ],
+  "results/eval/summary.md": [
+    16255,
+    1793006656300716626
+  ],
+  "results/eval/final_audit.json": [
+    1805,
+    1793006656300716626
+  ],
+  "results/eval/loop_validation.csv": [
+    1091,
+    1793006441400057843
+  ],
+  "results/eval/verification.json": [
+    325,
+    1793006442236066203
+  ],
+  "results/eval/map_quality.csv": [
+    1310,
+    1793006441400057843
+  ],
+  "results/eval/group_summary.csv": [
+    5841,
+    1793006441401057853
+  ],
+  "results/eval/gt_gnss_enu_tum.txt": [
+    357736,
+    1793006432477967558
+  ],
+  "results/eval/summary.csv": [
+    5111,
+    1793006441400057843
+  ],
+  "results/eval/inspection_overlays.jpg": [
+    456709,
+    1793006489741514074
+  ],
+  "results/eval/gt_gnss_metadata.json": [
+    434,
+    1793006432477967558
+  ],
+  "results/eval/loop_on_r3/align_se3.json": [
+    1051,
+    1793006441731061155
+  ],
+  "results/eval/loop_on_r3/overlap_clouds.npz": [
+    23277218,
+    1793004910339814475
+  ],
+  "results/eval/loop_on_r3/map_quality.json": [
+    1553,
+    1793006436469008187
+  ],
+  "results/eval/loop_on_r3/online/metrics.json": [
+    9283,
+    1793006435319996530
+  ],
+  "results/eval/loop_on_r3/online/error_vs_time.csv": [
+    55707,
+    1793006435321996551
+  ],
+  "results/eval/loop_on_r3/final/metrics.json": [
+    9267,
+    1793006435276996094
+  ],
+  "results/eval/loop_on_r3/final/error_vs_time.csv": [
+    20957,
+    1793006435276996094
+  ],
+  "results/eval/even_loop_on/align_se3.json": [
+    1049,
+    1793006441731061155
+  ],
+  "results/eval/even_loop_on/overlap_clouds.npz": [
+    19202873,
+    1793005762498761046
+  ],
+  "results/eval/even_loop_on/map_quality.json": [
+    1555,
+    1793006441399057833
+  ],
+  "results/eval/even_loop_on/online/metrics.json": [
+    9253,
+    1793006440493048754
+  ],
+  "results/eval/even_loop_on/online/error_vs_time.csv": [
+    49832,
+    1793006440494048764
+  ],
+  "results/eval/even_loop_on/final/metrics.json": [
+    9298,
+    1793006440455048373
+  ],
+  "results/eval/even_loop_on/final/error_vs_time.csv": [
+    20832,
+    1793006440456048382
+  ],
+  "results/eval/archive_rev1_audit/final_audit.json": [
+    506,
+    1793006656300716626
+  ],
+  "results/eval/loop_on_r1/align_se3.json": [
+    1051,
+    1793006441731061155
+  ],
+  "results/eval/loop_on_r1/overlap_clouds.npz": [
+    23797547,
+    1793004857020199788
+  ],
+  "results/eval/loop_on_r1/map_quality.json": [
+    1551,
+    1793006433764980703
+  ],
+  "results/eval/loop_on_r1/online/metrics.json": [
+    9286,
+    1793006432535968151
+  ],
+  "results/eval/loop_on_r1/online/error_vs_time.csv": [
+    43582,
+    1793006432536968161
+  ],
+  "results/eval/loop_on_r1/final/metrics.json": [
+    9299,
+    1793006432498967773
+  ],
+  "results/eval/loop_on_r1/final/error_vs_time.csv": [
+    19832,
+    1793006432498967773
+  ],
+  "results/eval/loop_off_r1/align_se3.json": [
+    1049,
+    1793006441731061155
+  ],
+  "results/eval/loop_off_r1/overlap_clouds.npz": [
+    24657350,
+    1793005085302632908
+  ],
+  "results/eval/loop_off_r1/map_quality.json": [
+    1555,
+    1793006437783021478
+  ],
+  "results/eval/loop_off_r1/online/metrics.json": [
+    9284,
+    1793006436523008734
+  ],
+  "results/eval/loop_off_r1/online/error_vs_time.csv": [
+    46082,
+    1793006436524008744
+  ],
+  "results/eval/loop_off_r1/final/metrics.json": [
+    9286,
+    1793006436488008379
+  ],
+  "results/eval/loop_off_r1/final/error_vs_time.csv": [
+    20457,
+    1793006436489008389
+  ],
+  "results/eval/loop_off_r2/align_se3.json": [
+    1047,
+    1793006441731061155
+  ],
+  "results/eval/loop_off_r2/overlap_clouds.npz": [
+    23741238,
+    1793005113065455292
+  ],
+  "results/eval/loop_off_r2/map_quality.json": [
+    1553,
+    1793006438912032865
+  ],
+  "results/eval/loop_off_r2/online/metrics.json": [
+    9292,
+    1793006437835022004
+  ],
+  "results/eval/loop_off_r2/online/error_vs_time.csv": [
+    42082,
+    1793006437836022014
+  ],
+  "results/eval/loop_off_r2/final/metrics.json": [
+    9276,
+    1793006437802021670
+  ],
+  "results/eval/loop_off_r2/final/error_vs_time.csv": [
+    19457,
+    1793006437803021680
+  ],
+  "results/eval/loop_off_r3/align_se3.json": [
+    1051,
+    1793006441731061155
+  ],
+  "results/eval/loop_off_r3/overlap_clouds.npz": [
+    24638837,
+    1793005176252059469
+  ],
+  "results/eval/loop_off_r3/map_quality.json": [
+    1554,
+    1793006440436048182
+  ],
+  "results/eval/loop_off_r3/online/metrics.json": [
+    9274,
+    1793006439264036407
+  ],
+  "results/eval/loop_off_r3/online/error_vs_time.csv": [
+    53332,
+    1793006439265036417
+  ],
+  "results/eval/loop_off_r3/final/metrics.json": [
+    9297,
+    1793006439224036004
+  ],
+  "results/eval/loop_off_r3/final/error_vs_time.csv": [
+    20707,
+    1793006439225036014
+  ],
+  "results/eval/figs/loop_overlap_on.png": [
+    176764,
+    1793006435255995881
+  ],
+  "results/eval/figs/ate_vs_time.png": [
+    302446,
+    1793006441610059944
+  ],
+  "results/eval/figs/traj_overlay_loop_off_r3.png": [
+    136976,
+    1793006439365037422
+  ],
+  "results/eval/figs/traj_overlay_loop_on_r3.png": [
+    130168,
+    1793006435424997597
+  ],
+  "results/eval/figs/loop_overlap_off.png": [
+    181694,
+    1793006439204035803
+  ],
+  "results/eval/figs/rpe_bar.png": [
+    74746,
+    1793006441730061145
+  ],
+  "results/eval/figs/traj_overlay_loop_off_r1.png": [
+    129786,
+    1793006436625009767
+  ],
+  "results/eval/figs/traj_on_vs_off.png": [
+    141114,
+    1793006441507058913
+  ],
+  "results/eval/figs/traj_overlay_loop_off_r2.png": [
+    129427,
+    1793006437940023065
+  ],
+  "results/eval/figs/traj_overlay_even_loop_on.png": [
+    131405,
+    1793006440593049757
+  ],
+  "results/eval/figs/traj_overlay_loop_on_r1.png": [
+    127611,
+    1793006432663969460
+  ],
+  "results/eval/figs/traj_overlay_loop_on_r2.png": [
+    129573,
+    1793006433918982275
+  ],
+  "results/eval/strict_3axis_audit/gt_gnss_metadata.json": [
+    218,
+    1793004103111275203
+  ],
+  "results/eval/loop_on_r2/align_se3.json": [
+    1049,
+    1793006441731061155
+  ],
+  "results/eval/loop_on_r2/overlap_clouds.npz": [
+    23307411,
+    1793004883917003743
+  ],
+  "results/eval/loop_on_r2/map_quality.json": [
+    1554,
+    1793006434955992833
+  ],
+  "results/eval/loop_on_r2/online/metrics.json": [
+    9285,
+    1793006433815981224
+  ],
+  "results/eval/loop_on_r2/online/error_vs_time.csv": [
+    46082,
+    1793006433816981234
+  ],
+  "results/eval/loop_on_r2/final/metrics.json": [
+    9287,
+    1793006433783980897
+  ],
+  "results/eval/loop_on_r2/final/error_vs_time.csv": [
+    18957,
+    1793006433783980897
+  ],
+  "results/archive_v2_fitness03/verification_v2.json": [
+    1607,
+    1793001957466972714
+  ],
+  "results/archive_v2_fitness03/ARCHIVE_NOTE.md": [
+    823,
+    1793002098966599716
+  ],
+  "results/archive_v2_fitness03/experiments_summary.md": [
+    2923,
+    1793001957466972714
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/run_meta.json": [
+    1003,
+    1793001399965300025
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/keyframes_final_tum.txt": [
+    19121,
+    1793001399621300735
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/params.yaml": [
+    1973,
+    1793001274982544607
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/odom_online_tum.txt": [
+    49533,
+    1793001384204332347
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/recorder_status.json": [
+    224,
+    1793001399622300732
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/run.log": [
+    2716780,
+    1793001399909300140
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/map/trajectory.pcd": [
+    2984,
+    1793001399515300953
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/map/transformations.pcd": [
+    6528,
+    1793001399515300953
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/map/GlobalMap.pcd": [
+    15334830,
+    1793001399614300749
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/map/SurfMap.pcd": [
+    12380766,
+    1793001399577300825
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/map/CornerMap.pcd": [
+    2954254,
+    1793001399559300863
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/lio_sam_featureExtraction_205654_1793001275238.log": [
+    150,
+    1793001399788300390
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/lio_sam_imageProjection_205652_1793001275238.log": [
+    230,
+    1793001399788300390
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/lio_sam_mapOptimization_205656_1793001275265.log": [
+    148,
+    1793001399788300390
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/python3_205748_1793001275400.log": [
+    0,
+    1793001275399543839
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/lio_sam_imuPreintegration_205650_1793001275240.log": [
+    550,
+    1793001399789300388
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/static_transform_publisher_205648_1793001275237.log": [
+    318,
+    1793001399789300388
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/python3_205749_1793001275460.log": [
+    330,
+    1793001384338332073
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/python3_205606_1793001275014.log": [
+    0,
+    1793001275013544550
+  ],
+  "results/archive_v2_fitness03/loop_on_r3/ros_logs/2026-10-26-16-54-35-202423-hong-Katana-A17-AI-B8VF-205647/launch.log": [
+    1868,
+    1793001399910300138
+  ],
+  "results/archive_v2_fitness03/even_loop_on/run_meta.json": [
+    1012,
+    1793001901792116690
+  ],
+  "results/archive_v2_fitness03/even_loop_on/keyframes_final_tum.txt": [
+    18155,
+    1793001901448117574
+  ],
+  "results/archive_v2_fitness03/even_loop_on/params.yaml": [
+    1973,
+    1793001776555433519
+  ],
+  "results/archive_v2_fitness03/even_loop_on/odom_online_tum.txt": [
+    44497,
+    1793001885979157255
+  ],
+  "results/archive_v2_fitness03/even_loop_on/recorder_status.json": [
+    226,
+    1793001901449117572
+  ],
+  "results/archive_v2_fitness03/even_loop_on/run.log": [
+    2694125,
+    1793001901740116823
+  ],
+  "results/archive_v2_fitness03/even_loop_on/map/trajectory.pcd": [
+    2840,
+    1793001901344117841
+  ],
+  "results/archive_v2_fitness03/even_loop_on/map/transformations.pcd": [
+    6204,
+    1793001901344117841
+  ],
+  "results/archive_v2_fitness03/even_loop_on/map/GlobalMap.pcd": [
+    14181966,
+    1793001901442117589
+  ],
+  "results/archive_v2_fitness03/even_loop_on/map/SurfMap.pcd": [
+    11426702,
+    1793001901401117695
+  ],
+  "results/archive_v2_fitness03/even_loop_on/map/CornerMap.pcd": [
+    2755454,
+    1793001901381117746
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/python3_212707_1793001777242.log": [
+    0,
+    1793001777241431815
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/lio_sam_imuPreintegration_212609_1793001776910.log": [
+    642,
+    1793001901619117135
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/lio_sam_imageProjection_212611_1793001776908.log": [
+    148,
+    1793001901617117140
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/python3_212554_1793001776589.log": [
+    0,
+    1793001776588433437
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/lio_sam_mapOptimization_212615_1793001776934.log": [
+    271,
+    1793001901617117140
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/python3_212708_1793001777302.log": [
+    350,
+    1793001886146156828
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/lio_sam_featureExtraction_212613_1793001776908.log": [
+    150,
+    1793001901617117140
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/static_transform_publisher_212607_1793001776908.log": [
+    318,
+    1793001901617117140
+  ],
+  "results/archive_v2_fitness03/even_loop_on/ros_logs/2026-10-26-17-02-56-865790-hong-Katana-A17-AI-B8VF-212595/launch.log": [
+    1870,
+    1793001901740116823
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/run_meta.json": [
+    1006,
+    1793001149288758641
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/keyframes_final_tum.txt": [
+    18920,
+    1793001148945759173
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/params.yaml": [
+    1973,
+    1793001024315930770
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/odom_online_tum.txt": [
+    48732,
+    1793001133140783354
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/recorder_status.json": [
+    226,
+    1793001148946759171
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/run.log": [
+    2717953,
+    1793001149232758728
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/map/trajectory.pcd": [
+    2952,
+    1793001148844759330
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/map/transformations.pcd": [
+    6456,
+    1793001148844759330
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/map/GlobalMap.pcd": [
+    15203806,
+    1793001148940759181
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/map/SurfMap.pcd": [
+    12268670,
+    1793001148907759232
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/map/CornerMap.pcd": [
+    2935326,
+    1793001148888759262
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/python3_202453_1793001024785.log": [
+    330,
+    1793001133652782582
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/lio_sam_featureExtraction_202358_1793001024572.log": [
+    150,
+    1793001149113758912
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/static_transform_publisher_202352_1793001024572.log": [
+    318,
+    1793001149113758912
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/python3_202452_1793001024736.log": [
+    0,
+    1793001024735930271
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/lio_sam_imuPreintegration_202354_1793001024573.log": [
+    550,
+    1793001149114758910
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/python3_202307_1793001024346.log": [
+    0,
+    1793001024345930735
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/lio_sam_mapOptimization_202360_1793001024598.log": [
+    148,
+    1793001149112758913
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/lio_sam_imageProjection_202356_1793001024572.log": [
+    230,
+    1793001149113758912
+  ],
+  "results/archive_v2_fitness03/loop_on_r1/ros_logs/2026-10-26-16-50-24-536875-hong-Katana-A17-AI-B8VF-202351/launch.log": [
+    1868,
+    1793001149232758728
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/run_meta.json": [
+    1005,
+    1793001525560029203
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/keyframes_final_tum.txt": [
+    20662,
+    1793001525214029979
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/params.yaml": [
+    1974,
+    1793001400305299323
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/odom_online_tum.txt": [
+    60396,
+    1793001509839064276
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/recorder_status.json": [
+    223,
+    1793001525215029977
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/run.log": [
+    2717350,
+    1793001525504029328
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/map/trajectory.pcd": [
+    3208,
+    1793001525099030236
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/map/transformations.pcd": [
+    7032,
+    1793001525099030236
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/map/GlobalMap.pcd": [
+    16521104,
+    1793001525203030004
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/map/SurfMap.pcd": [
+    13335934,
+    1793001525168030082
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/map/CornerMap.pcd": [
+    3185358,
+    1793001525148030127
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/python3_207276_1793001400338.log": [
+    0,
+    1793001400337299256
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/lio_sam_mapOptimization_207326_1793001400636.log": [
+    148,
+    1793001525382029602
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/lio_sam_imuPreintegration_207320_1793001400612.log": [
+    550,
+    1793001525383029600
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/lio_sam_featureExtraction_207324_1793001400609.log": [
+    150,
+    1793001525382029602
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/python3_207418_1793001400997.log": [
+    0,
+    1793001400996297896
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/python3_207419_1793001401062.log": [
+    330,
+    1793001509954064020
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/lio_sam_imageProjection_207322_1793001400610.log": [
+    230,
+    1793001525382029602
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/static_transform_publisher_207318_1793001400609.log": [
+    318,
+    1793001525383029600
+  ],
+  "results/archive_v2_fitness03/loop_off_r1/ros_logs/2026-10-26-16-56-40-571147-hong-Katana-A17-AI-B8VF-207317/launch.log": [
+    1869,
+    1793001525504029328
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/run_meta.json": [
+    1008,
+    1793001650858739463
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/keyframes_final_tum.txt": [
+    18478,
+    1793001650514740281
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/params.yaml": [
+    1974,
+    1793001525875028497
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/odom_online_tum.txt": [
+    45242,
+    1793001635003777068
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/recorder_status.json": [
+    225,
+    1793001650515740278
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/run.log": [
+    2717803,
+    1793001650803739594
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/map/trajectory.pcd": [
+    2888,
+    1793001650409740530
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/map/transformations.pcd": [
+    6312,
+    1793001650410740528
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/map/GlobalMap.pcd": [
+    14769214,
+    1793001650508740295
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/map/SurfMap.pcd": [
+    11920062,
+    1793001650474740376
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/map/CornerMap.pcd": [
+    2849342,
+    1793001650455740421
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/lio_sam_imageProjection_208965_1793001526136.log": [
+    230,
+    1793001650682739881
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/lio_sam_imuPreintegration_208963_1793001526138.log": [
+    550,
+    1793001650682739881
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/lio_sam_mapOptimization_208969_1793001526165.log": [
+    148,
+    1793001650681739884
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/python3_209061_1793001526300.log": [
+    0,
+    1793001526300027544
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/python3_209062_1793001526359.log": [
+    330,
+    1793001635237776514
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/python3_208919_1793001525906.log": [
+    0,
+    1793001525906028428
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/static_transform_publisher_208961_1793001526135.log": [
+    318,
+    1793001650682739881
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/lio_sam_featureExtraction_208967_1793001526136.log": [
+    150,
+    1793001650681739884
+  ],
+  "results/archive_v2_fitness03/loop_off_r2/ros_logs/2026-10-26-16-58-46-100296-hong-Katana-A17-AI-B8VF-208960/launch.log": [
+    1869,
+    1793001650803739594
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/run_meta.json": [
+    1005,
+    1793001776197434408
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/keyframes_final_tum.txt": [
+    20773,
+    1793001775853435263
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/params.yaml": [
+    1974,
+    1793001651216738610
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/odom_online_tum.txt": [
+    61608,
+    1793001760574473108
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/recorder_status.json": [
+    225,
+    1793001775854435260
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/run.log": [
+    2717390,
+    1793001776141434547
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/map/trajectory.pcd": [
+    3224,
+    1793001775736435554
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/map/transformations.pcd": [
+    7068,
+    1793001775736435554
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/map/GlobalMap.pcd": [
+    16503440,
+    1793001775847435278
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/map/SurfMap.pcd": [
+    13321182,
+    1793001775804435385
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/map/CornerMap.pcd": [
+    3182446,
+    1793001775783435437
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/python3_210749_1793001651652.log": [
+    0,
+    1793001651651737575
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/python3_210597_1793001651247.log": [
+    0,
+    1793001651246738539
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/lio_sam_mapOptimization_210648_1793001651533.log": [
+    148,
+    1793001776020434848
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/lio_sam_featureExtraction_210646_1793001651505.log": [
+    150,
+    1793001776020434848
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/static_transform_publisher_210640_1793001651504.log": [
+    318,
+    1793001776021434845
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/python3_210750_1793001651710.log": [
+    330,
+    1793001760582473088
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/lio_sam_imuPreintegration_210642_1793001651506.log": [
+    550,
+    1793001776021434845
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/lio_sam_imageProjection_210644_1793001651504.log": [
+    230,
+    1793001776020434848
+  ],
+  "results/archive_v2_fitness03/loop_off_r3/ros_logs/2026-10-26-17-00-51-462262-hong-Katana-A17-AI-B8VF-210638/launch.log": [
+    1869,
+    1793001776141434547
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/run_meta.json": [
+    1002,
+    1793001274664545193
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/keyframes_final_tum.txt": [
+    19078,
+    1793001274219546016
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/params.yaml": [
+    1973,
+    1793001149597758162
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/odom_online_tum.txt": [
+    49620,
+    1793001258813574136
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/loop_candidate_diagnostic.json": [
+    273,
+    1793001391873316662
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/recorder_status.json": [
+    224,
+    1793001274219546016
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/run.log": [
+    2698029,
+    1793001274617545280
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/map/trajectory.pcd": [
+    2984,
+    1793001274128546183
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/map/transformations.pcd": [
+    6528,
+    1793001274128546183
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/map/GlobalMap.pcd": [
+    15355630,
+    1793001274213546026
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/map/SurfMap.pcd": [
+    12398142,
+    1793001274180546087
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/map/CornerMap.pcd": [
+    2957678,
+    1793001274163546119
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/lio_sam_imuPreintegration_204011_1793001149858.log": [
+    550,
+    1793001274388545701
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/lio_sam_featureExtraction_204015_1793001149856.log": [
+    150,
+    1793001274387545703
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/lio_sam_imageProjection_204013_1793001149856.log": [
+    230,
+    1793001274388545701
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/static_transform_publisher_204009_1793001149856.log": [
+    318,
+    1793001274388545701
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/python3_203967_1793001149628.log": [
+    0,
+    1793001149627758116
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/lio_sam_mapOptimization_204017_1793001149887.log": [
+    148,
+    1793001274387545703
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/python3_204109_1793001150019.log": [
+    0,
+    1793001150018757508
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/python3_204110_1793001150071.log": [
+    330,
+    1793001258940573906
+  ],
+  "results/archive_v2_fitness03/loop_on_r2/ros_logs/2026-10-26-16-52-29-820455-hong-Katana-A17-AI-B8VF-204008/launch.log": [
+    1868,
+    1793001274617545280
+  ],
+  "results/loop_on_r2/run_meta.json": [
+    1003,
+    1793004645884879972
+  ],
+  "results/loop_on_r2/keyframes_final_tum.txt": [
+    16506,
+    1793004645535882992
+  ],
+  "results/loop_on_r2/params.yaml": [
+    1973,
+    1793004520943024309
+  ],
+  "results/loop_on_r2/odom_online_tum.txt": [
+    40101,
+    1793004630222016389
+  ],
+  "results/loop_on_r2/recorder_status.json": [
+    225,
+    1793004645537882975
+  ],
+  "results/loop_on_r2/run.log": [
+    2711336,
+    1793004645827880466
+  ],
+  "results/loop_on_r2/loop_pairs.json": [
+    28861,
+    1793004645866880128
+  ],
+  "results/loop_on_r2/map/trajectory.pcd": [
+    2600,
+    1793004645418884005
+  ],
+  "results/loop_on_r2/map/transformations.pcd": [
+    5664,
+    1793004645418884005
+  ],
+  "results/loop_on_r2/map/GlobalMap.pcd": [
+    13393502,
+    1793004645527883061
+  ],
+  "results/loop_on_r2/map/SurfMap.pcd": [
+    10824558,
+    1793004645487883407
+  ],
+  "results/loop_on_r2/map/CornerMap.pcd": [
+    2569134,
+    1793004645470883555
+  ],
+  "results/loop_on_r2/ros_logs/python_248866_1793004521343.log": [
+    0,
+    1793004521343020427
+  ],
+  "results/loop_on_r2/ros_logs/lio_sam_imageProjection_248770_1793004521148.log": [
+    230,
+    1793004645703881539
+  ],
+  "results/loop_on_r2/ros_logs/python3_248867_1793004521379.log": [
+    330,
+    1793004630244016196
+  ],
+  "results/loop_on_r2/ros_logs/static_transform_publisher_248766_1793004521147.log": [
+    318,
+    1793004645704881530
+  ],
+  "results/loop_on_r2/ros_logs/lio_sam_imuPreintegration_248768_1793004521150.log": [
+    550,
+    1793004645704881530
+  ],
+  "results/loop_on_r2/ros_logs/python_248724_1793004520949.log": [
+    0,
+    1793004520949024251
+  ],
+  "results/loop_on_r2/ros_logs/lio_sam_mapOptimization_248774_1793004521171.log": [
+    148,
+    1793004645703881539
+  ],
+  "results/loop_on_r2/ros_logs/lio_sam_featureExtraction_248772_1793004521148.log": [
+    150,
+    1793004645703881539
+  ],
+  "results/loop_on_r2/ros_logs/2026-10-26-17-48-41-112685-hong-Katana-A17-AI-B8VF-248765/launch.log": [
+    1868,
+    1793004645827880466
+  ]
+}

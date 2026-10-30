@@ -1,0 +1,327 @@
+{
+  "input_count": 155,
+  "matched_count": 155,
+  "excluded_count": 0,
+  "interval_s": [
+    1762852141.471053,
+    1762852247.6710176
+  ],
+  "primary_metric": "2D horizontal ATE after SE3 + yaw-only horizontal 2-DoF lever fit; no scale",
+  "se3": {
+    "R": [
+      [
+        0.9927570301517111,
+        -0.12013687528202241,
+        0.0007812053678385375
+      ],
+      [
+        0.12013767565019855,
+        0.9926866756324317,
+        -0.0118365075592163
+      ],
+      [
+        0.0006465088728304359,
+        0.011844628288953439,
+        0.9999296409282882
+      ]
+    ],
+    "t": [
+      0.5165070530387403,
+      0.39790191443449174,
+      -0.24096790008640984
+    ],
+    "ate_m": {
+      "rmse": 0.7225779962243546,
+      "mean": 0.6469859355284479,
+      "median": 0.6272122510786772,
+      "max": 1.4512010009762464,
+      "std": 0.32175792120161173
+    },
+    "ate_3d_m": {
+      "rmse": 0.7225779962243546,
+      "mean": 0.6469859355284479,
+      "median": 0.6272122510786772,
+      "max": 1.4512010009762464,
+      "std": 0.32175792120161173
+    },
+    "ate_2d_m": {
+      "rmse": 0.7200352289836951,
+      "mean": 0.6435982800942387,
+      "median": 0.6265533746247901,
+      "max": 1.4511546070471826,
+      "std": 0.32284978680082804
+    }
+  },
+  "se3_lever": {
+    "R": [
+      [
+        0.9968669753375614,
+        -0.07909581671230413,
+        0.00029199307378683357
+      ],
+      [
+        0.07909368503583365,
+        0.9967961883750828,
+        -0.011897387459381868
+      ],
+      [
+        0.0006499759948598939,
+        0.01188320745926378,
+        0.999929180948174
+      ]
+    ],
+    "t": [
+      1.6443379885166205,
+      0.8423305379545097,
+      -0.23992914286416503
+    ],
+    "lever_arm_body_m": [
+      -1.6178205758013795,
+      -0.131819230052499,
+      0.0
+    ],
+    "lever_norm_m": 1.6231819752874108,
+    "warning": false,
+    "ate_m": {
+      "rmse": 0.2704886614133261,
+      "mean": 0.23461246814743247,
+      "median": 0.2163108681119675,
+      "max": 0.6407657335870076,
+      "std": 0.134614656493797
+    },
+    "ate_3d_m": {
+      "rmse": 0.2704886614133261,
+      "mean": 0.23461246814743247,
+      "median": 0.2163108681119675,
+      "max": 0.6407657335870076,
+      "std": 0.134614656493797
+    },
+    "ate_2d_m": {
+      "rmse": 0.2636214487533857,
+      "mean": 0.22732229032495577,
+      "median": 0.20840242174930373,
+      "max": 0.6406707269010162,
+      "std": 0.1334947360919169
+    },
+    "diagnostic": {
+      "model": "R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0]",
+      "dof": 2,
+      "jacobian_singular_values": [
+        571.7565116915698,
+        454.35757325805633,
+        349.4273064949084,
+        12.551403120748567,
+        12.53201814414834,
+        12.34709470940118,
+        7.625820940304536,
+        3.8618774556572006
+      ],
+      "jacobian_condition": 148.05143825939197,
+      "note": "Yaw-only body removes approximately 9.3 degree LiDAR mounting pitch; in-sample nuisance fit, not independent antenna calibration."
+    }
+  },
+  "se3_lever_3d_diagnostic": {
+    "R": [
+      [
+        0.9969806998315252,
+        -0.07764911610193447,
+        0.0003145346257466409
+      ],
+      [
+        0.07764732460784103,
+        0.9969093034104726,
+        -0.011947123289359301
+      ],
+      [
+        0.000614121068728028,
+        0.011935474110184703,
+        0.99992858110621
+      ]
+    ],
+    "t": [
+      1.671856894727537,
+      0.873687623882479,
+      -6.357234966902129
+    ],
+    "lever_arm_body_m": [
+      -2.600508408422061,
+      -0.18000009144664264,
+      5.782833008493602
+    ],
+    "ate_3d_m": {
+      "rmse": 0.26532770788156235,
+      "mean": 0.23263142786655094,
+      "median": 0.21152660743082333,
+      "max": 0.6069249277947877,
+      "std": 0.12759863376405486
+    },
+    "diagnostic": {
+      "jacobian_singular_values": [
+        575.3671408079546,
+        460.38602793747,
+        351.49597164258637,
+        13.009695535878954,
+        12.462705190068789,
+        12.33421068237346,
+        10.13600197735897,
+        3.8615586446734627,
+        0.08025369882918691
+      ],
+      "jacobian_condition": 7169.353552570505,
+      "note": "Planar motion weakly observes vertical lever arm; joint fit may absorb trajectory errors."
+    },
+    "note": "Legacy unconstrained 3-DoF fit: diagnostic only, excluded from primary metrics."
+  },
+  "endpoint": {
+    "gt_displacement_m": 0.536421964492554,
+    "est_displacement_m": 0.5637029290252847,
+    "displacement_error_m": 0.17375619646829413,
+    "displacement_error_vector_enu_m": [
+      -0.00963595475043133,
+      -0.13697449394084515,
+      0.10647230718278552
+    ]
+  },
+  "rpe": {
+    "10": {
+      "count": 146,
+      "translation_percent": {
+        "rmse": 4.079616829345399,
+        "mean": 2.9997219508772113,
+        "median": 2.0051705245012204,
+        "max": 20.14370411218211,
+        "std": 2.764948768368707
+      },
+      "yaw_deg_per_100m": null,
+      "mean_actual_length_m": 10.860687040513872
+    },
+    "25": {
+      "count": 135,
+      "translation_percent": {
+        "rmse": 2.984702855359464,
+        "mean": 2.1513850472082594,
+        "median": 1.477137363593568,
+        "max": 12.327202989715788,
+        "std": 2.068814518858482
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 9.782951592892394,
+        "mean": 6.575056056262518,
+        "median": 3.248291960044557,
+        "max": 33.4731314955588,
+        "std": 7.243947799776129
+      },
+      "mean_actual_length_m": 25.893940344945904
+    },
+    "50": {
+      "count": 120,
+      "translation_percent": {
+        "rmse": 2.915845261477372,
+        "mean": 1.9179062509399722,
+        "median": 1.1272727876544946,
+        "max": 11.43603394296752,
+        "std": 2.1963126374643083
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 5.614993738288617,
+        "mean": 3.7382554556914616,
+        "median": 2.160587960433433,
+        "max": 26.816517533131634,
+        "std": 4.189701758957718
+      },
+      "mean_actual_length_m": 50.92599698932584
+    },
+    "100": {
+      "count": 87,
+      "translation_percent": {
+        "rmse": 2.2735036806529236,
+        "mean": 1.4783718579355511,
+        "median": 0.8619419481261593,
+        "max": 9.553704831218965,
+        "std": 1.7272045725989085
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 3.00993603707284,
+        "mean": 2.0925668800071993,
+        "median": 1.2893513063632982,
+        "max": 13.012571218680936,
+        "std": 2.1635338684584275
+      },
+      "mean_actual_length_m": 100.86007080737154
+    }
+  },
+  "rpe_se3_diagnostic": {
+    "10": {
+      "count": 146,
+      "translation_percent": {
+        "rmse": 10.242759545956488,
+        "mean": 7.4419604342486725,
+        "median": 4.827386248461218,
+        "max": 34.79016521590616,
+        "std": 7.037851093292618
+      },
+      "yaw_deg_per_100m": null,
+      "mean_actual_length_m": 10.860687040513872
+    },
+    "25": {
+      "count": 135,
+      "translation_percent": {
+        "rmse": 6.830461217051714,
+        "mean": 5.812951720789599,
+        "median": 5.399552117188381,
+        "max": 19.199905950332965,
+        "std": 3.5867523931011482
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 9.782998197127446,
+        "mean": 6.575115236532985,
+        "median": 3.2487429852949403,
+        "max": 33.47321519133226,
+        "std": 7.24395702301654
+      },
+      "mean_actual_length_m": 25.893940344945904
+    },
+    "50": {
+      "count": 120,
+      "translation_percent": {
+        "rmse": 5.6790691591063895,
+        "mean": 4.915104567979157,
+        "median": 4.23507279725378,
+        "max": 17.264579559787443,
+        "std": 2.844920666687172
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 5.6150140818084004,
+        "mean": 3.7383661205546557,
+        "median": 2.1613638195965694,
+        "max": 26.81584063022358,
+        "std": 4.189630280537385
+      },
+      "mean_actual_length_m": 50.92599698932584
+    },
+    "100": {
+      "count": 87,
+      "translation_percent": {
+        "rmse": 3.960125455002351,
+        "mean": 3.370589923428691,
+        "median": 2.8578188862179963,
+        "max": 12.309813101437047,
+        "std": 2.078874019135971
+      },
+      "yaw_deg_per_100m": {
+        "rmse": 3.010023516579106,
+        "mean": 2.092681933034374,
+        "median": 1.2895356173974195,
+        "max": 13.012197160844451,
+        "std": 2.1635442906284035
+      },
+      "mean_actual_length_m": 100.86007080737154
+    }
+  },
+  "rpe_note": "Yaw-only aligned body frame removes approximately 9.3 degree LiDAR mounting pitch. GT uses 5 m centered tangent yaw, flat roll/pitch approximation. Translation: 10/25/50/100 m; yaw: >=25 m only. Primary RPE uses lever2D-corrected antenna positions and the jointly fitted alignment yaw, matching primary ATE. SE3-only RPE is retained in rpe_se3_diagnostic; it retains antenna/body origin mismatch. Lever alignment and calibration are in-sample, so these metrics are optimistic. All start poses overlap and are correlated.",
+  "evo_crosscheck": {
+    "ate_rmse_m": 0.7225779962243544,
+    "absolute_difference_m": 2.220446049250313e-16
+  },
+  "online_note": "Online trajectory is causal accumulated poses; it is not a saved before-loop trajectory. Final vs online does not isolate a single loop factor."
+}

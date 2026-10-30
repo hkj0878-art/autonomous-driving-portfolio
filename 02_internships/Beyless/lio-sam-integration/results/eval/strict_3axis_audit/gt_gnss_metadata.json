@@ -1,0 +1,13 @@
+{
+  "total": 3298,
+  "rejected_status": 0,
+  "rejected_covariance": 3298,
+  "rejected_invalid": 0,
+  "accepted": 0,
+  "origin_lla": [
+    37.23651316666667,
+    126.77413183333333,
+    29.7
+  ],
+  "max_sigma_m": 0.05
+}

@@ -1,0 +1,22 @@
+Starting >>> lio_sam
+--- stderr: lio_sam
+CMake Warning (dev) at CMakeLists.txt:29 (find_package):
+  Policy CMP0074 is not set: find_package uses <PackageName>_ROOT variables.
+  Run "cmake --help-policy CMP0074" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  CMake variable PCL_ROOT is set to:
+
+    /usr
+
+  For compatibility, CMake is ignoring the variable.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+/usr/bin/ld: warning: libtbb.so.2, needed by /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.5.4d, may conflict with libtbb.so.12
+---
+[Processing: lio_sam]
+[Processing: lio_sam]
+Finished <<< lio_sam [1min 23s]
+
+Summary: 1 package finished [1min 23s]
+  1 package had stderr output: lio_sam

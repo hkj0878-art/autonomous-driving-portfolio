@@ -1,0 +1,5 @@
+{
+  "pairs": [],
+  "snapshots": [],
+  "matching_note": "Latest cumulative marker snapshot; independent nearest final keyframe in odom coordinates, endpoint order current/previous. Inspect matching distances for ambiguity."
+}

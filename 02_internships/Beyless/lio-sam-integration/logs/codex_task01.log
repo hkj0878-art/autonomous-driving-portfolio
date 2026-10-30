@@ -1,0 +1,881 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.1
+--------
+workdir: /home/hong/SLAM
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a17613-3655-7572-8e68-5005db0d6b49
+--------
+user
+TASKS.md를 읽고 [CODEX-TASK] TASK-01만 수행해. 다른 태스크는 하지 마. 완료 기준을 직접 검증하고, 결과를 logs/task01_build.md에 정리해. data/synced_bag은 읽기 전용이다.
+codex
+`TASKS.md`와 작업 지침을 확인한 뒤 TASK-01만 수행하고, 완료 기준을 직접 검증해 `logs/task01_build.md`에 기록하겠습니다. `data/synced_bag`은 수정하지 않겠습니다.
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g 'TASKS.md' -g '"'!data/synced_bag/**'"' -g '"'!build/**'"' -g '"'!install/**'"'" in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM
+TASKS.md
+
+exec
+/bin/bash -lc 'cat TASKS.md' in /home/hong/SLAM
+ succeeded in 0ms:
+# SLAM 프로젝트 — LIO-SAM (ROS 2 Humble) 매핑 + GNSS 정확도 평가
+
+## 전체 목표
+보유 rosbag(LiDAR+IMU+RTK GNSS)으로 LIO-SAM 매핑 파이프라인을 직접 구성하고, 루프 클로저 유무에 따른 궤적 정확도를 RTK GNSS 기준으로 정량 평가해 포트폴리오용 결과물(2D 지도, 3D PCD, 평가 리포트)을 만든다.
+
+## 데이터 분석 결과 (data/synced_bag, 이미 ROS 2 sqlite3 bag — 변환 불필요, 전처리만 필요)
+| 토픽 | 타입 | 주기 | frame | 비고 |
+|---|---|---|---|---|
+| /front/lidar_point_synced | PointCloud2 | 20 Hz | front_lidar | 128 ring, 수평 FOV 약 -65~+61°(전방 전용, Hesai AT128 계열로 추정), 스캔당 78336점 고정(무효점은 0,0,0), 필드: x y z intensity(f32) ring(u16 @16) timestamp(f64 @18, **절대시각이 2020년 epoch** — 헤더 stamp와 고정 오프셋 약 169765152.46 s), 스캔 내 시간 폭 약 25 ms |
+| /imu/data_synced | Imu | 100 Hz | imu_link | Xsens MTi(추정), orientation 있음(9축, yaw 안정적), z 가속도 +9.8 → z-up |
+| /fix_synced | NavSatFix | 32 Hz | gps | status=2(GBAS/RTK), σ≈1.3–1.5 cm → **정답(GT)으로 사용** |
+- 길이 108.7 s, 주행거리 약 237 m, 약 70×60 m 사각형 **폐루프 1바퀴**(시계방향, 시작-끝 0.47 m), 평지(고도 ±0.1 m)
+- 헤더 stamp(2025-11-11)와 bag 기록시각(2025-11-13)이 다름 → **헤더 stamp 기준**으로 처리
+- /tf, /tf_static 없음 → **IMU–LiDAR 외부 파라미터 미제공** (리스크)
+
+## 아키텍처 결정사항
+- LIO-SAM `ros2` 브랜치(TixiaoShan/LIO-SAM)를 그대로 사용하고, 알고리즘 바깥(전처리·설정·평가·지도 내보내기)을 직접 구현한다.
+- GTSAM은 sudo 없이 소스 빌드하여 `~/SLAM/third_party/install`에 설치한다(시스템 경로 수정 금지).
+- 포인트클라우드는 오프라인 전처리로 LIO-SAM velodyne 형식(x,y,z,intensity f32 / ring u16 / time f32 = 스캔 시작 기준 상대초)으로 변환한 새 bag을 만든다. 실시간 변환 노드보다 재현성과 디버깅이 쉽다.
+- GNSS는 평가용 GT로만 쓴다. 기본 실험에서는 LIO-SAM GPS factor를 끈다(GT 누출 방지). GPS 융합은 선택 실험으로 분리한다.
+- 루프 테스트 = 같은 bag을 **루프 클로저 ON/OFF**로 매핑해 ATE/RPE/종점 드리프트를 비교한다.
+- 평가 도구는 venv(`~/SLAM/.venv`)에 둔다. 시스템 numpy 2.x와 ROS Humble의 충돌을 피하기 위해서다.
+- 피할 것: ~/ros2_ws, ~/catkin_ws 수정, 시스템 패키지 설치, 원본 bag 수정.
+
+## 디렉터리 구조
+```
+SLAM/
+  data/synced_bag/          원본(읽기 전용)
+  data/lio_bag/             전처리된 bag
+  third_party/              gtsam 소스/설치
+  ws/src/LIO-SAM            colcon 워크스페이스
+  tools/                    전처리·기록·평가·지도변환 스크립트(+tests)
+  config/                   LIO-SAM params yaml
+  results/<run_name>/       traj_tum.txt, map pcd, metrics.json, plots
+  report/REPORT.md          포트폴리오 리포트
+```
+
+## 태스크 목록
+- [ ] TASK-01: 환경 구축 (GTSAM 소스 빌드 + LIO-SAM ros2 빌드)
+- [ ] TASK-02: bag 전처리 (point time 변환, 무효점 제거) + 데이터 리포트
+- [ ] TASK-03: 외부 파라미터 확인 + LIO-SAM 설정 + 실행/궤적 기록 파이프라인
+- [ ] TASK-04: 실험 실행 (loop ON / loop OFF / (선택) GPS 융합)
+- [ ] TASK-05: GNSS 대비 정확도 평가 (ATE, RPE, 종점 드리프트, 그래프)
+- [ ] TASK-06: 지도 산출물 (3D PCD, 2D occupancy grid PGM/YAML, 렌더 이미지)
+- [ ] TASK-07: 포트폴리오 리포트 (REPORT.md + README 재현 절차)
+
+## 실행 순서 및 의존성
+TASK-01 ─┐
+TASK-02 ─┴→ TASK-03 → TASK-04 → (TASK-05 ∥ TASK-06) → TASK-07
+(TASK-01과 TASK-02는 병렬 가능)
+
+---
+
+### [CODEX-TASK] TASK-01: 환경 구축 (GTSAM + LIO-SAM ros2)
+
+**목적**
+LIO-SAM을 ROS 2 Humble에서 빌드하고 실행할 수 있게 한다.
+
+**입력**
+- 시스템: Ubuntu 22.04, ROS 2 Humble(/opt/ros/humble), 16코어, RAM 14 GB(가용 약 4 GB)
+- 설치되어 있음: libboost-all-dev 1.74, libeigen3-dev 3.4, libpcl-dev 1.12, libtbb-dev
+- 의존성: 없음
+
+**출력**
+- /home/hong/SLAM/third_party/gtsam (소스, 4.1.1 태그 권장 — LIO-SAM 검증 버전), /home/hong/SLAM/third_party/install (설치 prefix)
+- /home/hong/SLAM/ws/src/LIO-SAM (ros2 브랜치), /home/hong/SLAM/ws/install
+- /home/hong/SLAM/env.sh: ROS + GTSAM LD_LIBRARY_PATH/CMAKE_PREFIX_PATH + ws overlay를 source하는 스크립트
+- /home/hong/SLAM/logs/task01_build.md: 사용한 버전, 커맨드, 이슈와 해결 방법
+
+**구현 조건**
+- sudo 사용 불가. 시스템 경로나 /opt에 쓰지 않는다. apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 "사용자 sudo 필요: <명령>"으로 남기고 중단한다.
+- GTSAM cmake: -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_WITH_TBB=ON(문제가 생기면 OFF), CMAKE_INSTALL_PREFIX=third_party/install
+- 메모리가 적으므로 make는 -j6 이하, colcon은 --parallel-workers 2 및 MAKEFLAGS=-j4로 빌드한다.
+- LIO-SAM 소스 수정은 빌드 호환성 문제일 때만 최소한으로 하고, 수정 내용을 diff로 로그에 남긴다.
+- ~/ros2_ws, ~/catkin_ws는 건드리지 않는다.
+
+**완료 기준**
+- [ ] `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에 imageProjection, imuPreintegration, featureExtraction, mapOptimization이 나온다
+- [ ] 각 노드가 기본 params로 5초 동안 크래시 없이 기동된다(공유 라이브러리 에러 없음)
+- [ ] task01_build.md 작성
+
+**컨텍스트**
+작업 루트는 /home/hong/SLAM이다. 전체 설계는 TASKS.md를 참고한다. 이 태스크에서는 데이터 처리를 하지 않는다.
+
+exec
+/bin/bash -lc 'for p in /AGENTS.md /home/AGENTS.md /home/hong/AGENTS.md; do if [ -f "$p" ]; then printf '"'%s\\n' \""'$p"; cat "$p"; fi; done; ls -la' in /home/hong/SLAM
+ succeeded in 0ms:
+total 24
+drwxrwxr-x  4 hong hong 4096 Oct 26 11:38 .
+drwxr-x--- 61 hong hong 4096 Oct 26 11:35 ..
+drwxrwxr-x  3 hong hong 4096 Oct 26 11:35 data
+drwxrwxr-x  2 hong hong 4096 Oct 26 11:38 logs
+-rw-rw-r--  1 hong hong 5875 Oct 26 11:38 TASKS.md
+
+exec
+/bin/bash -lc 'ls /opt/ros/humble; free -h; command -v cmake gcc g++ git colcon; dpkg-query -W libboost-all-dev libeigen3-dev libpcl-dev libtbb-dev libmetis-dev ros-humble-pcl-ros ros-humble-pcl-conversions ros-humble-xacro ros-humble-robot-localization 2>&1; ls -la logs' in /home/hong/SLAM
+ succeeded in 0ms:
+bin
+cmake
+include
+lib
+local
+local_setup.bash
+local_setup.sh
+_local_setup_util.py
+local_setup.zsh
+opt
+setup.bash
+setup.sh
+setup.zsh
+share
+src
+tools
+               total        used        free      shared  buff/cache   available
+Mem:            14Gi       9.8Gi       3.3Gi       177Mi       1.8Gi       4.6Gi
+Swap:          4.5Gi       4.5Gi       5.0Mi
+/usr/bin/cmake
+/usr/bin/gcc
+/usr/bin/g++
+/usr/bin/git
+/usr/bin/colcon
+dpkg-query: no packages found matching libmetis-dev
+dpkg-query: no packages found matching ros-humble-pcl-ros
+dpkg-query: no packages found matching ros-humble-xacro
+dpkg-query: no packages found matching ros-humble-robot-localization
+libboost-all-dev	1.74.0.3ubuntu7
+libeigen3-dev	3.4.0-2ubuntu2
+libpcl-dev	1.12.1+dfsg-3build1
+libtbb-dev:amd64	2021.5.0-7ubuntu2
+ros-humble-pcl-conversions	2.4.5-2jammy.20251017.015844
+total 16
+drwxrwxr-x 2 hong hong 4096 Oct 26 11:38 .
+drwxrwxr-x 4 hong hong 4096 Oct 26 11:38 ..
+-rw-rw-r-- 1 hong hong 7294 Oct 26 11:39 codex_task01.log
+
+exec
+/bin/bash -lc 'mkdir -p third_party ws/src; git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git third_party/gtsam' in /home/hong/SLAM
+exec
+/bin/bash -lc 'git clone --depth 1 --branch ros2 https://github.com/TixiaoShan/LIO-SAM.git ws/src/LIO-SAM' in /home/hong/SLAM
+ succeeded in 3175ms:
+Cloning into 'third_party/gtsam'...
+Note: switching to '69a3a75195b65356d6e56669e5199d325c7962c9'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+
+ succeeded in 3852ms:
+Cloning into 'ws/src/LIO-SAM'...
+
+exec
+/bin/bash -lc "cat ws/src/LIO-SAM/CMakeLists.txt; cat ws/src/LIO-SAM/package.xml; rg -n 'depend|install|apt|robot_localization|xacro' ws/src/LIO-SAM/README.md ws/src/LIO-SAM/launch; git -C ws/src/LIO-SAM rev-parse HEAD; cmake --version; g++ --version; cat /etc/os-release; rg --files -g AGENTS.md third_party ws" in /home/hong/SLAM
+ exited 1 in 0ms:
+cmake_minimum_required(VERSION 3.5)
+project(lio_sam)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(pcl_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_ros REQUIRED)
+set(OpenCV_STATIC ON)
+find_package(OpenCV REQUIRED)
+find_package(PCL REQUIRED)
+find_package(GTSAM REQUIRED)
+find_package(Eigen REQUIRED)
+find_package(OpenMP REQUIRED)
+
+include_directories(
+  include/lio_sam
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME} "msg/CloudInfo.msg" "srv/SaveMap.srv" DEPENDENCIES std_msgs sensor_msgs)
+
+
+
+add_executable(${PROJECT_NAME}_featureExtraction src/featureExtraction.cpp)
+ament_target_dependencies(${PROJECT_NAME}_featureExtraction rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs pcl_conversions pcl_msgs visualization_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL)
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(${PROJECT_NAME}_featureExtraction "${cpp_typesupport_target}") 
+
+add_executable(${PROJECT_NAME}_imageProjection src/imageProjection.cpp)
+ament_target_dependencies(${PROJECT_NAME}_imageProjection rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs pcl_conversions pcl_msgs visualization_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL)
+target_link_libraries(${PROJECT_NAME}_imageProjection "${cpp_typesupport_target}") 
+
+add_executable(${PROJECT_NAME}_imuPreintegration src/imuPreintegration.cpp)
+ament_target_dependencies(${PROJECT_NAME}_imuPreintegration rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs pcl_conversions pcl_msgs visualization_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL GTSAM Eigen)
+target_link_libraries(${PROJECT_NAME}_imuPreintegration gtsam "${cpp_typesupport_target}")
+
+add_executable(${PROJECT_NAME}_mapOptimization src/mapOptmization.cpp)
+ament_target_dependencies(${PROJECT_NAME}_mapOptimization rclcpp rclpy std_msgs sensor_msgs geometry_msgs nav_msgs pcl_conversions pcl_msgs visualization_msgs tf2 tf2_ros tf2_eigen tf2_sensor_msgs tf2_geometry_msgs OpenCV PCL GTSAM)
+if (OpenMP_CXX_FOUND)
+  target_link_libraries(${PROJECT_NAME}_mapOptimization gtsam "${cpp_typesupport_target}" OpenMP::OpenMP_CXX)
+else()
+  target_link_libraries(${PROJECT_NAME}_mapOptimization gtsam "${cpp_typesupport_target}")
+endif()
+
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+install(
+  TARGETS ${PROJECT_NAME}_imageProjection
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}_imuPreintegration
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}_featureExtraction
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}_mapOptimization
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY "include/"
+  DESTINATION include
+)
+
+ament_export_include_directories(include)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # uncomment the line when a copyright and license is not present in all source files
+  #set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # uncomment the line when this package is not in a git repo
+  #set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>lio_sam</name>
+  <version>1.0.0</version>
+  <description>Lidar Odometry</description>
+
+  <maintainer email="shant@mit.edu">Tixiao Shan</maintainer>
+
+  <license>TODO</license>
+
+  <author>Tixiao Shan</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <build_depend>rclcpp</build_depend>
+  <build_depend>rclpy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_sensor_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>pcl_msgs</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>gtsam</build_depend>
+  <build_depend>eigen</build_depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>pcl_msgs</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
+  <exec_depend>tf2_eigen</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>libopencv-dev</exec_depend>
+  <exec_depend>libpcl-all-dev</exec_depend>
+  <exec_depend>gtsam</exec_depend>
+  <exec_depend>eigen</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+ws/src/LIO-SAM/README.md:22:  - [**Package dependency**](#dependency)
+ws/src/LIO-SAM/README.md:24:  - [**Package install**](#install)
+ws/src/LIO-SAM/README.md:75:  sudo apt install ros-<ros2-version>-perception-pcl \
+ws/src/LIO-SAM/README.md:78:		   ros-<ros2-version>-xacro
+ws/src/LIO-SAM/README.md:83:  sudo add-apt-repository ppa:borglab/gtsam-release-4.1
+ws/src/LIO-SAM/README.md:84:  sudo apt install libgtsam-dev libgtsam-unstable-dev
+ws/src/LIO-SAM/README.md:150:  - **IMU requirement**. Like the original LOAM implementation, LIO-SAM only works with a 9-axis IMU, which gives roll, pitch, and yaw estimation. The roll and pitch estimation is mainly used to initialize the system at the correct attitude. The yaw estimation initializes the system at the right heading when using GPS data. Theoretically, an initialization procedure like VINS-Mono will enable LIO-SAM to work with a 6-axis IMU. The performance of the system largely depends on the quality of the IMU measurements. The higher the IMU data rate, the better the system accuracy. We use Microstrain 3DM-GX5-25, which outputs data at 500Hz. We recommend using an IMU that gives at least a 200Hz output rate. Note that the internal IMU of Ouster lidar is an 6-axis IMU.
+ws/src/LIO-SAM/README.md:193:  - **Loop closure:** The loop function here gives an example of proof of concept. It is directly adapted from LeGO-LOAM loop closure. For more advanced loop closure implementation, please refer to [ScanContext](https://github.com/irapkaist/SC-LeGO-LOAM). Set the "loopClosureEnableFlag" in "params.yaml" to "true" to test the loop closure function. In Rviz, uncheck "Map (cloud)" and check "Map (global)". This is because the visualized map - "Map (cloud)" - is simply a stack of point clouds in Rviz. Their postion will not be updated after pose correction. The loop closure function here is simply adapted from LeGO-LOAM, which is an ICP-based method. Because ICP runs pretty slow, it is suggested that the playback speed is set to be "-r 1". You can try the Garden dataset for testing.
+ws/src/LIO-SAM/README.md:240:  - **mapOptimization crash**: it is usually caused by GTSAM. Please install the GTSAM specified in the README.md. More similar issues can be found [here](https://github.com/TixiaoShan/LIO-SAM/issues).
+ws/src/LIO-SAM/README.md:242:  - **gps odometry unavailable**: it is generally caused due to unavailable transform between message frame_ids and robot frame_id (for example: transform should be available from "imu_frame_id" and "gps_frame_id" to "base_link" frame. Please read the Robot Localization documentation found [here](http://docs.ros.org/en/melodic/api/robot_localization/html/preparing_sensor_data.html).
+ws/src/LIO-SAM/README.md:258:Part of the code is adapted from [LeGO-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM).
+ws/src/LIO-SAM/launch/run.launch.py:13:    xacro_path = os.path.join(share_dir, 'config', 'robot.urdf.xacro')
+ws/src/LIO-SAM/launch/run.launch.py:22:    print("urdf_file_name : {}".format(xacro_path))
+ws/src/LIO-SAM/launch/run.launch.py:39:                'robot_description': Command(['xacro', ' ', xacro_path])
+08af3f32f01725372d4269838dc44c19c6d9e76b
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=jammy
+
+exec
+/bin/bash -lc "source /opt/ros/humble/setup.bash; python3 - <<'PY'
+from ament_index_python.packages import get_package_prefix, PackageNotFoundError
+names = ['ament_cmake','rosidl_default_generators','rclcpp','rclpy','cv_bridge','std_msgs','sensor_msgs','geometry_msgs','nav_msgs','visualization_msgs','pcl_conversions','pcl_msgs','tf2','tf2_geometry_msgs','tf2_sensor_msgs','tf2_eigen','tf2_ros','xacro','robot_state_publisher','rviz2']
+for name in names:
+    try:
+        print(f'{name}: {get_package_prefix(name)}')
+    except PackageNotFoundError:
+        print(f'{name}: MISSING')
+PY
+sed -n '65,90p' ws/src/LIO-SAM/README.md; cat ws/src/LIO-SAM/launch/run.launch.py" in /home/hong/SLAM
+ succeeded in 0ms:
+ament_cmake: /opt/ros/humble
+rosidl_default_generators: /opt/ros/humble
+rclcpp: /opt/ros/humble
+rclpy: /opt/ros/humble
+cv_bridge: /opt/ros/humble
+std_msgs: /opt/ros/humble
+sensor_msgs: /opt/ros/humble
+geometry_msgs: /opt/ros/humble
+nav_msgs: /opt/ros/humble
+visualization_msgs: /opt/ros/humble
+pcl_conversions: /opt/ros/humble
+pcl_msgs: /opt/ros/humble
+tf2: /opt/ros/humble
+tf2_geometry_msgs: /opt/ros/humble
+tf2_sensor_msgs: /opt/ros/humble
+tf2_eigen: /opt/ros/humble
+tf2_ros: /opt/ros/humble
+xacro: MISSING
+robot_state_publisher: /opt/ros/humble
+rviz2: /opt/ros/humble
+- [bluespace_ai_xsens_ros_mti_driver](https://github.com/bluespace-ai/bluespace_ai_xsens_ros_mti_driver)
+- [sbg_ros2_driver](https://github.com/SBG-Systems/sbg_ros2_driver)
+
+In these tests, the IMU was mounted on the bottom of the lidar such that their x-axes pointed in the same direction. The parameters `extrinsicRot` and `extrinsicRPY` in `params.yaml` correspond to this constellation.
+
+## Dependencies
+
+Tested with ROS2 versions foxy and galactic on Ubuntu 20.04 and humble on Ubuntu 22.04
+- [ROS2](https://docs.ros.org/en/humble/Installation.html)
+  ```
+  sudo apt install ros-<ros2-version>-perception-pcl \
+		   ros-<ros2-version>-pcl-msgs \
+		   ros-<ros2-version>-vision-opencv \
+		   ros-<ros2-version>-xacro
+  ```
+- [gtsam](https://gtsam.org/get_started) (Georgia Tech Smoothing and Mapping library)
+  ```
+  # Add GTSAM-PPA
+  sudo add-apt-repository ppa:borglab/gtsam-release-4.1
+  sudo apt install libgtsam-dev libgtsam-unstable-dev
+  ```
+
+## Install
+
+Use the following commands to download and compile the package.
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, Command
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+
+    share_dir = get_package_share_directory('lio_sam')
+    parameter_file = LaunchConfiguration('params_file')
+    xacro_path = os.path.join(share_dir, 'config', 'robot.urdf.xacro')
+    rviz_config_file = os.path.join(share_dir, 'config', 'rviz2.rviz')
+
+    params_declare = DeclareLaunchArgument(
+        'params_file',
+        default_value=os.path.join(
+            share_dir, 'config', 'params.yaml'),
+        description='FPath to the ROS2 parameters file to use.')
+
+    print("urdf_file_name : {}".format(xacro_path))
+
+    return LaunchDescription([
+        params_declare,
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments='0.0 0.0 0.0 0.0 0.0 0.0 map odom'.split(' '),
+            parameters=[parameter_file],
+            output='screen'
+            ),
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{
+                'robot_description': Command(['xacro', ' ', xacro_path])
+            }]
+        ),
+        Node(
+            package='lio_sam',
+            executable='lio_sam_imuPreintegration',
+            name='lio_sam_imuPreintegration',
+            parameters=[parameter_file],
+            output='screen'
+        ),
+        Node(
+            package='lio_sam',
+            executable='lio_sam_imageProjection',
+            name='lio_sam_imageProjection',
+            parameters=[parameter_file],
+            output='screen'
+        ),
+        Node(
+            package='lio_sam',
+            executable='lio_sam_featureExtraction',
+            name='lio_sam_featureExtraction',
+            parameters=[parameter_file],
+            output='screen'
+        ),
+        Node(
+            package='lio_sam',
+            executable='lio_sam_mapOptimization',
+            name='lio_sam_mapOptimization',
+            parameters=[parameter_file],
+            output='screen'
+        ),
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_config_file],
+            output='screen'
+        )
+    ])
+
+codex
+빌드에 필요한 ROS 패키지는 확인됐지만, LIO-SAM의 실행 의존성인 `xacro`가 없습니다. 기본 launch 파일에서도 이를 사용합니다. TASK-01의 “추가 apt 패키지가 필요하면 명령을 로그에 남기고 중단” 조건에 따라 여기서 중단하고, 확인 결과와 필요한 설치 명령을 기록하겠습니다.
+
+exec
+/bin/bash -lc 'source /opt/ros/humble/setup.bash; ros2 pkg executables lio_sam; test -f /home/hong/SLAM/env.sh; command -v xacro; git -C third_party/gtsam status --short; git -C ws/src/LIO-SAM status --short' in /home/hong/SLAM
+ succeeded in 414ms:
+Package 'lio_sam' not found
+
+exec
+/bin/bash -lc "date -Iseconds; git -C third_party/gtsam describe --tags --exact-match; git -C third_party/gtsam rev-parse HEAD; rg -n 'xacro' ws/src/LIO-SAM/package.xml ws/src/LIO-SAM/launch/run.launch.py; ls -ld third_party/install ws/install" in /home/hong/SLAM
+ exited 2 in 0ms:
+2026-10-26T11:39:45+09:00
+4.1.1
+69a3a75195b65356d6e56669e5199d325c7962c9
+ws/src/LIO-SAM/launch/run.launch.py:13:    xacro_path = os.path.join(share_dir, 'config', 'robot.urdf.xacro')
+ws/src/LIO-SAM/launch/run.launch.py:22:    print("urdf_file_name : {}".format(xacro_path))
+ws/src/LIO-SAM/launch/run.launch.py:39:                'robot_description': Command(['xacro', ' ', xacro_path])
+ws/src/LIO-SAM/package.xml:54:  <exec_depend>xacro</exec_depend>
+ls: cannot access 'third_party/install': No such file or directory
+ls: cannot access 'ws/install': No such file or directory
+
+apply patch
+patch: completed
+/home/hong/SLAM/logs/task01_build.md
+diff --git a/logs/task01_build.md b/logs/task01_build.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..707b53ff2b9fa896db4cd6702927ef2a7b46ebe0
+--- /dev/null
++++ b/logs/task01_build.md
+@@ -0,0 +1,65 @@
++# TASK-01 환경 구축 기록
++
++- 확인 일시: 2026-10-26 11:39 KST
++- 상태: **미완료 — 추가 시스템 패키지 필요로 지침에 따라 중단**
++- 수행 범위: TASK-01 의존성 확인과 소스 다운로드. 다른 태스크는 수행하지 않았다.
++- `data/synced_bag`에는 접근하거나 쓰지 않았다. `/opt`, 시스템 경로, `~/ros2_ws`, `~/catkin_ws`를 수정하지 않았으며 sudo/apt를 실행하지 않았다.
++
++## 환경 및 소스 버전
++
++| 항목 | 확인 결과 |
++|---|---|
++| OS | Ubuntu 22.04.5 LTS |
++| ROS | Humble, `/opt/ros/humble` |
++| CMake / G++ | 3.22.1 / 11.4.0 |
++| Boost / Eigen / PCL / TBB | 1.74.0 / 3.4.0 / 1.12.1 / 2021.5.0 |
++| 메모리 | RAM 14 GiB, available 약 4.6 GiB; swap 4.5 GiB 중 약 5 MiB 여유 |
++| GTSAM | 태그 `4.1.1`, commit `69a3a75195b65356d6e56669e5199d325c7962c9` |
++| LIO-SAM | `ros2` 브랜치, commit `08af3f32f01725372d4269838dc44c19c6d9e76b` |
++
++## 실행한 주요 명령
++
++작업 경로: `/home/hong/SLAM`.
++
++```bash
++mkdir -p third_party ws/src
++git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git third_party/gtsam
++git clone --depth 1 --branch ros2 https://github.com/TixiaoShan/LIO-SAM.git ws/src/LIO-SAM
++source /opt/ros/humble/setup.bash
++```
++
++`dpkg-query`와 ROS ament index로 의존성을 확인했다. LIO-SAM `CMakeLists.txt`에 나열된 ROS 패키지(`ament_cmake`, `rosidl_default_generators`, `rclcpp`, `rclpy`, `cv_bridge`, 메시지 패키지, `pcl_conversions`, `pcl_msgs`, TF 패키지)는 모두 `/opt/ros/humble`에서 발견됐다. `robot_state_publisher`, `rviz2`도 발견됐다.
++
++확인에 사용한 Python API는 `ament_index_python.packages.get_package_prefix`이다. `xacro` 조회는 `PackageNotFoundError`였고, `command -v xacro`도 실행 경로를 반환하지 않았다. `dpkg-query -W ros-humble-xacro` 결과 역시 미설치였다.
++
++## 중단 원인 및 해결 방법
++
++`xacro`가 없다. 다음 소스에서 필수 실행 의존성임을 확인했다.
++
++- `ws/src/LIO-SAM/package.xml:54`: `<exec_depend>xacro</exec_depend>`
++- `ws/src/LIO-SAM/launch/run.launch.py:39`: 로봇 모델 생성에 `Command(['xacro', ' ', xacro_path])` 사용
++
++개별 C++ 노드 빌드와 별개로, 제공되는 기본 launch를 실행하려면 이 패키지가 필요하다. TASK-01의 구현 조건인 “apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 남기고 중단”을 적용했다.
++
++**사용자 sudo 필요: `sudo apt install ros-humble-xacro`**
++
++이 명령은 실행하지 않았다. 우회 설치나 의존성 삭제도 하지 않았다. GTSAM/LIO-SAM 빌드는 아직 실행하지 않았고, `third_party/install`, `ws/install`, `env.sh`는 아직 생성하지 않았다.
++
++## 완료 기준 직접 확인
++
++| 완료 기준 | 결과 및 근거 |
++|---|---|
++| `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에서 네 실행 파일 확인 | **미충족**. `test -f /home/hong/SLAM/env.sh` 실패. ROS 기본 환경에서 `ros2 pkg executables lio_sam`은 `Package 'lio_sam' not found` 반환. |
++| 각 노드를 기본 params로 5초간 실행, 크래시/공유 라이브러리 오류 없음 | **검증 불가**. 빌드·설치된 실행 파일이 없으므로 기동 시험을 수행할 수 없음. |
++| `logs/task01_build.md` 작성 | **완료**. 본 파일. |
++
++## 소스 수정 및 재개 지점
++
++두 저장소 모두 `git status --short` 출력이 비어 있다. LIO-SAM 소스 변경이 없으므로 기록할 diff도 없다. `TASKS.md`의 완료 체크는 변경하지 않았다.
++
++사용자가 위 패키지를 설치한 뒤 의존성을 재확인하고 다음 단계부터 재개해야 한다.
++
++1. GTSAM을 `third_party/install` prefix로 빌드·설치한다. 요구된 CMake 옵션(`GTSAM_BUILD_WITH_MARCH_NATIVE=OFF`, `GTSAM_USE_SYSTEM_EIGEN=ON`, `GTSAM_BUILD_TESTS=OFF`, `GTSAM_BUILD_EXAMPLES_ALWAYS=OFF`, `GTSAM_WITH_TBB=ON`)을 적용하고 make는 `-j6` 이하로 제한한다. 현재 swap이 거의 가득 차 있으므로 낮은 병렬도로 시작한다.
++2. LIO-SAM은 `MAKEFLAGS=-j4`, `colcon build --parallel-workers 2` 조건으로 빌드한다. 빌드 호환성 수정이 필요하면 최소 변경과 diff를 기록한다.
++3. ROS + GTSAM 라이브러리/prefix + ws overlay를 설정하는 `env.sh`를 작성한다.
++4. 실행 파일 네 개 확인 및 upstream 기본 `config/params.yaml`을 사용한 각 노드의 5초 기동 시험을 수행하고 이 로그에 결과를 추가한다.
+
+diff --git a/logs/task01_build.md b/logs/task01_build.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..707b53ff2b9fa896db4cd6702927ef2a7b46ebe0
+--- /dev/null
++++ b/logs/task01_build.md
+@@ -0,0 +1,65 @@
++# TASK-01 환경 구축 기록
++
++- 확인 일시: 2026-10-26 11:39 KST
++- 상태: **미완료 — 추가 시스템 패키지 필요로 지침에 따라 중단**
++- 수행 범위: TASK-01 의존성 확인과 소스 다운로드. 다른 태스크는 수행하지 않았다.
++- `data/synced_bag`에는 접근하거나 쓰지 않았다. `/opt`, 시스템 경로, `~/ros2_ws`, `~/catkin_ws`를 수정하지 않았으며 sudo/apt를 실행하지 않았다.
++
++## 환경 및 소스 버전
++
++| 항목 | 확인 결과 |
++|---|---|
++| OS | Ubuntu 22.04.5 LTS |
++| ROS | Humble, `/opt/ros/humble` |
++| CMake / G++ | 3.22.1 / 11.4.0 |
++| Boost / Eigen / PCL / TBB | 1.74.0 / 3.4.0 / 1.12.1 / 2021.5.0 |
++| 메모리 | RAM 14 GiB, available 약 4.6 GiB; swap 4.5 GiB 중 약 5 MiB 여유 |
++| GTSAM | 태그 `4.1.1`, commit `69a3a75195b65356d6e56669e5199d325c7962c9` |
++| LIO-SAM | `ros2` 브랜치, commit `08af3f32f01725372d4269838dc44c19c6d9e76b` |
++
++## 실행한 주요 명령
++
++작업 경로: `/home/hong/SLAM`.
++
++```bash
++mkdir -p third_party ws/src
++git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git third_party/gtsam
++git clone --depth 1 --branch ros2 https://github.com/TixiaoShan/LIO-SAM.git ws/src/LIO-SAM
++source /opt/ros/humble/setup.bash
++```
++
++`dpkg-query`와 ROS ament index로 의존성을 확인했다. LIO-SAM `CMakeLists.txt`에 나열된 ROS 패키지(`ament_cmake`, `rosidl_default_generators`, `rclcpp`, `rclpy`, `cv_bridge`, 메시지 패키지, `pcl_conversions`, `pcl_msgs`, TF 패키지)는 모두 `/opt/ros/humble`에서 발견됐다. `robot_state_publisher`, `rviz2`도 발견됐다.
++
++확인에 사용한 Python API는 `ament_index_python.packages.get_package_prefix`이다. `xacro` 조회는 `PackageNotFoundError`였고, `command -v xacro`도 실행 경로를 반환하지 않았다. `dpkg-query -W ros-humble-xacro` 결과 역시 미설치였다.
++
++## 중단 원인 및 해결 방법
++
++`xacro`가 없다. 다음 소스에서 필수 실행 의존성임을 확인했다.
++
++- `ws/src/LIO-SAM/package.xml:54`: `<exec_depend>xacro</exec_depend>`
++- `ws/src/LIO-SAM/launch/run.launch.py:39`: 로봇 모델 생성에 `Command(['xacro', ' ', xacro_path])` 사용
++
++개별 C++ 노드 빌드와 별개로, 제공되는 기본 launch를 실행하려면 이 패키지가 필요하다. TASK-01의 구현 조건인 “apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 남기고 중단”을 적용했다.
++
++**사용자 sudo 필요: `sudo apt install ros-humble-xacro`**
++
++이 명령은 실행하지 않았다. 우회 설치나 의존성 삭제도 하지 않았다. GTSAM/LIO-SAM 빌드는 아직 실행하지 않았고, `third_party/install`, `ws/install`, `env.sh`는 아직 생성하지 않았다.
++
++## 완료 기준 직접 확인
++
++| 완료 기준 | 결과 및 근거 |
++|---|---|
++| `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에서 네 실행 파일 확인 | **미충족**. `test -f /home/hong/SLAM/env.sh` 실패. ROS 기본 환경에서 `ros2 pkg executables lio_sam`은 `Package 'lio_sam' not found` 반환. |
++| 각 노드를 기본 params로 5초간 실행, 크래시/공유 라이브러리 오류 없음 | **검증 불가**. 빌드·설치된 실행 파일이 없으므로 기동 시험을 수행할 수 없음. |
++| `logs/task01_build.md` 작성 | **완료**. 본 파일. |
++
++## 소스 수정 및 재개 지점
++
++두 저장소 모두 `git status --short` 출력이 비어 있다. LIO-SAM 소스 변경이 없으므로 기록할 diff도 없다. `TASKS.md`의 완료 체크는 변경하지 않았다.
++
++사용자가 위 패키지를 설치한 뒤 의존성을 재확인하고 다음 단계부터 재개해야 한다.
++
++1. GTSAM을 `third_party/install` prefix로 빌드·설치한다. 요구된 CMake 옵션(`GTSAM_BUILD_WITH_MARCH_NATIVE=OFF`, `GTSAM_USE_SYSTEM_EIGEN=ON`, `GTSAM_BUILD_TESTS=OFF`, `GTSAM_BUILD_EXAMPLES_ALWAYS=OFF`, `GTSAM_WITH_TBB=ON`)을 적용하고 make는 `-j6` 이하로 제한한다. 현재 swap이 거의 가득 차 있으므로 낮은 병렬도로 시작한다.
++2. LIO-SAM은 `MAKEFLAGS=-j4`, `colcon build --parallel-workers 2` 조건으로 빌드한다. 빌드 호환성 수정이 필요하면 최소 변경과 diff를 기록한다.
++3. ROS + GTSAM 라이브러리/prefix + ws overlay를 설정하는 `env.sh`를 작성한다.
++4. 실행 파일 네 개 확인 및 upstream 기본 `config/params.yaml`을 사용한 각 노드의 5초 기동 시험을 수행하고 이 로그에 결과를 추가한다.
+
+exec
+/bin/bash -lc "test -s logs/task01_build.md && rg -n '사용자 sudo 필요|미충족|검증 불가|상태:' logs/task01_build.md" in /home/hong/SLAM
+ succeeded in 0ms:
+4:- 상태: **미완료 — 추가 시스템 패키지 필요로 지침에 따라 중단**
+44:**사용자 sudo 필요: `sudo apt install ros-humble-xacro`**
+52:| `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에서 네 실행 파일 확인 | **미충족**. `test -f /home/hong/SLAM/env.sh` 실패. ROS 기본 환경에서 `ros2 pkg executables lio_sam`은 `Package 'lio_sam' not found` 반환. |
+53:| 각 노드를 기본 params로 5초간 실행, 크래시/공유 라이브러리 오류 없음 | **검증 불가**. 빌드·설치된 실행 파일이 없으므로 기동 시험을 수행할 수 없음. |
+
+diff --git a/logs/task01_build.md b/logs/task01_build.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..707b53ff2b9fa896db4cd6702927ef2a7b46ebe0
+--- /dev/null
++++ b/logs/task01_build.md
+@@ -0,0 +1,65 @@
++# TASK-01 환경 구축 기록
++
++- 확인 일시: 2026-10-26 11:39 KST
++- 상태: **미완료 — 추가 시스템 패키지 필요로 지침에 따라 중단**
++- 수행 범위: TASK-01 의존성 확인과 소스 다운로드. 다른 태스크는 수행하지 않았다.
++- `data/synced_bag`에는 접근하거나 쓰지 않았다. `/opt`, 시스템 경로, `~/ros2_ws`, `~/catkin_ws`를 수정하지 않았으며 sudo/apt를 실행하지 않았다.
++
++## 환경 및 소스 버전
++
++| 항목 | 확인 결과 |
++|---|---|
++| OS | Ubuntu 22.04.5 LTS |
++| ROS | Humble, `/opt/ros/humble` |
++| CMake / G++ | 3.22.1 / 11.4.0 |
++| Boost / Eigen / PCL / TBB | 1.74.0 / 3.4.0 / 1.12.1 / 2021.5.0 |
++| 메모리 | RAM 14 GiB, available 약 4.6 GiB; swap 4.5 GiB 중 약 5 MiB 여유 |
++| GTSAM | 태그 `4.1.1`, commit `69a3a75195b65356d6e56669e5199d325c7962c9` |
++| LIO-SAM | `ros2` 브랜치, commit `08af3f32f01725372d4269838dc44c19c6d9e76b` |
++
++## 실행한 주요 명령
++
++작업 경로: `/home/hong/SLAM`.
++
++```bash
++mkdir -p third_party ws/src
++git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git third_party/gtsam
++git clone --depth 1 --branch ros2 https://github.com/TixiaoShan/LIO-SAM.git ws/src/LIO-SAM
++source /opt/ros/humble/setup.bash
++```
++
++`dpkg-query`와 ROS ament index로 의존성을 확인했다. LIO-SAM `CMakeLists.txt`에 나열된 ROS 패키지(`ament_cmake`, `rosidl_default_generators`, `rclcpp`, `rclpy`, `cv_bridge`, 메시지 패키지, `pcl_conversions`, `pcl_msgs`, TF 패키지)는 모두 `/opt/ros/humble`에서 발견됐다. `robot_state_publisher`, `rviz2`도 발견됐다.
++
++확인에 사용한 Python API는 `ament_index_python.packages.get_package_prefix`이다. `xacro` 조회는 `PackageNotFoundError`였고, `command -v xacro`도 실행 경로를 반환하지 않았다. `dpkg-query -W ros-humble-xacro` 결과 역시 미설치였다.
++
++## 중단 원인 및 해결 방법
++
++`xacro`가 없다. 다음 소스에서 필수 실행 의존성임을 확인했다.
++
++- `ws/src/LIO-SAM/package.xml:54`: `<exec_depend>xacro</exec_depend>`
++- `ws/src/LIO-SAM/launch/run.launch.py:39`: 로봇 모델 생성에 `Command(['xacro', ' ', xacro_path])` 사용
++
++개별 C++ 노드 빌드와 별개로, 제공되는 기본 launch를 실행하려면 이 패키지가 필요하다. TASK-01의 구현 조건인 “apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 남기고 중단”을 적용했다.
++
++**사용자 sudo 필요: `sudo apt install ros-humble-xacro`**
++
++이 명령은 실행하지 않았다. 우회 설치나 의존성 삭제도 하지 않았다. GTSAM/LIO-SAM 빌드는 아직 실행하지 않았고, `third_party/install`, `ws/install`, `env.sh`는 아직 생성하지 않았다.
++
++## 완료 기준 직접 확인
++
++| 완료 기준 | 결과 및 근거 |
++|---|---|
++| `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에서 네 실행 파일 확인 | **미충족**. `test -f /home/hong/SLAM/env.sh` 실패. ROS 기본 환경에서 `ros2 pkg executables lio_sam`은 `Package 'lio_sam' not found` 반환. |
++| 각 노드를 기본 params로 5초간 실행, 크래시/공유 라이브러리 오류 없음 | **검증 불가**. 빌드·설치된 실행 파일이 없으므로 기동 시험을 수행할 수 없음. |
++| `logs/task01_build.md` 작성 | **완료**. 본 파일. |
++
++## 소스 수정 및 재개 지점
++
++두 저장소 모두 `git status --short` 출력이 비어 있다. LIO-SAM 소스 변경이 없으므로 기록할 diff도 없다. `TASKS.md`의 완료 체크는 변경하지 않았다.
++
++사용자가 위 패키지를 설치한 뒤 의존성을 재확인하고 다음 단계부터 재개해야 한다.
++
++1. GTSAM을 `third_party/install` prefix로 빌드·설치한다. 요구된 CMake 옵션(`GTSAM_BUILD_WITH_MARCH_NATIVE=OFF`, `GTSAM_USE_SYSTEM_EIGEN=ON`, `GTSAM_BUILD_TESTS=OFF`, `GTSAM_BUILD_EXAMPLES_ALWAYS=OFF`, `GTSAM_WITH_TBB=ON`)을 적용하고 make는 `-j6` 이하로 제한한다. 현재 swap이 거의 가득 차 있으므로 낮은 병렬도로 시작한다.
++2. LIO-SAM은 `MAKEFLAGS=-j4`, `colcon build --parallel-workers 2` 조건으로 빌드한다. 빌드 호환성 수정이 필요하면 최소 변경과 diff를 기록한다.
++3. ROS + GTSAM 라이브러리/prefix + ws overlay를 설정하는 `env.sh`를 작성한다.
++4. 실행 파일 네 개 확인 및 upstream 기본 `config/params.yaml`을 사용한 각 노드의 5초 기동 시험을 수행하고 이 로그에 결과를 추가한다.
+
+codex
+TASK-01만 진행했으며, 필수 실행 의존성 `xacro`가 없어 지침에 따라 중단했습니다.
+
+- GTSAM 4.1.1과 LIO-SAM `ros2` 소스 다운로드 완료
+- 빌드 및 5초 기동 검증은 미완료
+- `data/synced_bag` 수정 없음
+
+사용자 설치 필요: `sudo apt install ros-humble-xacro`
+
+확인 결과와 재개 절차를 [logs/task01_build.md](/home/hong/SLAM/logs/task01_build.md)에 기록했습니다.
+diff --git a/logs/task01_build.md b/logs/task01_build.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..707b53ff2b9fa896db4cd6702927ef2a7b46ebe0
+--- /dev/null
++++ b/logs/task01_build.md
+@@ -0,0 +1,65 @@
++# TASK-01 환경 구축 기록
++
++- 확인 일시: 2026-10-26 11:39 KST
++- 상태: **미완료 — 추가 시스템 패키지 필요로 지침에 따라 중단**
++- 수행 범위: TASK-01 의존성 확인과 소스 다운로드. 다른 태스크는 수행하지 않았다.
++- `data/synced_bag`에는 접근하거나 쓰지 않았다. `/opt`, 시스템 경로, `~/ros2_ws`, `~/catkin_ws`를 수정하지 않았으며 sudo/apt를 실행하지 않았다.
++
++## 환경 및 소스 버전
++
++| 항목 | 확인 결과 |
++|---|---|
++| OS | Ubuntu 22.04.5 LTS |
++| ROS | Humble, `/opt/ros/humble` |
++| CMake / G++ | 3.22.1 / 11.4.0 |
++| Boost / Eigen / PCL / TBB | 1.74.0 / 3.4.0 / 1.12.1 / 2021.5.0 |
++| 메모리 | RAM 14 GiB, available 약 4.6 GiB; swap 4.5 GiB 중 약 5 MiB 여유 |
++| GTSAM | 태그 `4.1.1`, commit `69a3a75195b65356d6e56669e5199d325c7962c9` |
++| LIO-SAM | `ros2` 브랜치, commit `08af3f32f01725372d4269838dc44c19c6d9e76b` |
++
++## 실행한 주요 명령
++
++작업 경로: `/home/hong/SLAM`.
++
++```bash
++mkdir -p third_party ws/src
++git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git third_party/gtsam
++git clone --depth 1 --branch ros2 https://github.com/TixiaoShan/LIO-SAM.git ws/src/LIO-SAM
++source /opt/ros/humble/setup.bash
++```
++
++`dpkg-query`와 ROS ament index로 의존성을 확인했다. LIO-SAM `CMakeLists.txt`에 나열된 ROS 패키지(`ament_cmake`, `rosidl_default_generators`, `rclcpp`, `rclpy`, `cv_bridge`, 메시지 패키지, `pcl_conversions`, `pcl_msgs`, TF 패키지)는 모두 `/opt/ros/humble`에서 발견됐다. `robot_state_publisher`, `rviz2`도 발견됐다.
++
++확인에 사용한 Python API는 `ament_index_python.packages.get_package_prefix`이다. `xacro` 조회는 `PackageNotFoundError`였고, `command -v xacro`도 실행 경로를 반환하지 않았다. `dpkg-query -W ros-humble-xacro` 결과 역시 미설치였다.
++
++## 중단 원인 및 해결 방법
++
++`xacro`가 없다. 다음 소스에서 필수 실행 의존성임을 확인했다.
++
++- `ws/src/LIO-SAM/package.xml:54`: `<exec_depend>xacro</exec_depend>`
++- `ws/src/LIO-SAM/launch/run.launch.py:39`: 로봇 모델 생성에 `Command(['xacro', ' ', xacro_path])` 사용
++
++개별 C++ 노드 빌드와 별개로, 제공되는 기본 launch를 실행하려면 이 패키지가 필요하다. TASK-01의 구현 조건인 “apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 남기고 중단”을 적용했다.
++
++**사용자 sudo 필요: `sudo apt install ros-humble-xacro`**
++
++이 명령은 실행하지 않았다. 우회 설치나 의존성 삭제도 하지 않았다. GTSAM/LIO-SAM 빌드는 아직 실행하지 않았고, `third_party/install`, `ws/install`, `env.sh`는 아직 생성하지 않았다.
++
++## 완료 기준 직접 확인
++
++| 완료 기준 | 결과 및 근거 |
++|---|---|
++| `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에서 네 실행 파일 확인 | **미충족**. `test -f /home/hong/SLAM/env.sh` 실패. ROS 기본 환경에서 `ros2 pkg executables lio_sam`은 `Package 'lio_sam' not found` 반환. |
++| 각 노드를 기본 params로 5초간 실행, 크래시/공유 라이브러리 오류 없음 | **검증 불가**. 빌드·설치된 실행 파일이 없으므로 기동 시험을 수행할 수 없음. |
++| `logs/task01_build.md` 작성 | **완료**. 본 파일. |
++
++## 소스 수정 및 재개 지점
++
++두 저장소 모두 `git status --short` 출력이 비어 있다. LIO-SAM 소스 변경이 없으므로 기록할 diff도 없다. `TASKS.md`의 완료 체크는 변경하지 않았다.
++
++사용자가 위 패키지를 설치한 뒤 의존성을 재확인하고 다음 단계부터 재개해야 한다.
++
++1. GTSAM을 `third_party/install` prefix로 빌드·설치한다. 요구된 CMake 옵션(`GTSAM_BUILD_WITH_MARCH_NATIVE=OFF`, `GTSAM_USE_SYSTEM_EIGEN=ON`, `GTSAM_BUILD_TESTS=OFF`, `GTSAM_BUILD_EXAMPLES_ALWAYS=OFF`, `GTSAM_WITH_TBB=ON`)을 적용하고 make는 `-j6` 이하로 제한한다. 현재 swap이 거의 가득 차 있으므로 낮은 병렬도로 시작한다.
++2. LIO-SAM은 `MAKEFLAGS=-j4`, `colcon build --parallel-workers 2` 조건으로 빌드한다. 빌드 호환성 수정이 필요하면 최소 변경과 diff를 기록한다.
++3. ROS + GTSAM 라이브러리/prefix + ws overlay를 설정하는 `env.sh`를 작성한다.
++4. 실행 파일 네 개 확인 및 upstream 기본 `config/params.yaml`을 사용한 각 노드의 5초 기동 시험을 수행하고 이 로그에 결과를 추가한다.
+
+tokens used
+32,360
+TASK-01만 진행했으며, 필수 실행 의존성 `xacro`가 없어 지침에 따라 중단했습니다.
+
+- GTSAM 4.1.1과 LIO-SAM `ros2` 소스 다운로드 완료
+- 빌드 및 5초 기동 검증은 미완료
+- `data/synced_bag` 수정 없음
+
+사용자 설치 필요: `sudo apt install ros-humble-xacro`
+
+확인 결과와 재개 절차를 [logs/task01_build.md](/home/hong/SLAM/logs/task01_build.md)에 기록했습니다.

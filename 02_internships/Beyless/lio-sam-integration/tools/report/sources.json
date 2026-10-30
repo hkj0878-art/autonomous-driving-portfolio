@@ -1,0 +1,540 @@
+{
+  "loop_on_ate": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_on \\| \\d+ \\| ([^|]+?) \\|"
+  },
+  "loop_on_endpoint": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_on \\| \\d+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_on_rpe": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_on \\| \\d+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_on_loop": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_on \\| \\d+ \\| [^|]+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_off_ate": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_off \\| \\d+ \\| ([^|]+?) \\|"
+  },
+  "loop_off_endpoint": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_off \\| \\d+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_off_rpe": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_off \\| \\d+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_off_loop": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| loop_off \\| \\d+ \\| [^|]+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "even_ate": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| even \\| \\d+ \\| ([^|]+?) \\|"
+  },
+  "even_endpoint": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| even \\| \\d+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "even_rpe": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| even \\| \\d+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "even_loop": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| even \\| \\d+ \\| [^|]+ \\| [^|]+ \\| [^|]+ \\| ([^|]+?) \\|"
+  },
+  "loop_on_mme_nats_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "mme_nats"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_on_mme_nats_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "mme_nats"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_on_mpv_m2_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "mpv_m2"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_on_mpv_m2_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "mpv_m2"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_on_overlap_median_m_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "overlap_median_m"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_on_overlap_median_m_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "overlap_median_m"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_on_overlap_p95_m_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "overlap_p95_m"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_on_overlap_p95_m_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "overlap_p95_m"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_on_double_wall_ratio_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "double_wall_ratio"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_on_double_wall_ratio_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "map",
+      "metric": "double_wall_ratio"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_on_se3_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "final",
+      "metric": "ate_se3_2d_rmse_m"
+    },
+    "column": "mean",
+    "format": ".4f"
+  },
+  "loop_on_se3_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_on",
+      "trajectory": "final",
+      "metric": "ate_se3_2d_rmse_m"
+    },
+    "column": "std_sample",
+    "format": ".4f"
+  },
+  "loop_off_mme_nats_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "mme_nats"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_off_mme_nats_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "mme_nats"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_off_mpv_m2_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "mpv_m2"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_off_mpv_m2_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "mpv_m2"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_off_overlap_median_m_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "overlap_median_m"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_off_overlap_median_m_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "overlap_median_m"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_off_overlap_p95_m_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "overlap_p95_m"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_off_overlap_p95_m_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "overlap_p95_m"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_off_double_wall_ratio_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "double_wall_ratio"
+    },
+    "column": "mean",
+    "format": ".6f"
+  },
+  "loop_off_double_wall_ratio_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "map",
+      "metric": "double_wall_ratio"
+    },
+    "column": "std_sample",
+    "format": ".6f"
+  },
+  "loop_off_se3_mean": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "final",
+      "metric": "ate_se3_2d_rmse_m"
+    },
+    "column": "mean",
+    "format": ".4f"
+  },
+  "loop_off_se3_std_sample": {
+    "source": "results/eval/group_summary.csv",
+    "row": {
+      "group": "loop_off",
+      "trajectory": "final",
+      "metric": "ate_se3_2d_rmse_m"
+    },
+    "column": "std_sample",
+    "format": ".4f"
+  },
+  "improvement": {
+    "source": "results/eval/summary.md",
+    "pattern": "\\((21\\.4)% reduction;"
+  },
+  "delta": {
+    "source": "results/eval/summary.md",
+    "pattern": "OFF−ON = ([\\d.]+) m"
+  },
+  "lever_all": {
+    "source": "results/eval/summary.md",
+    "pattern": "^\\| all seven / final \\| 7 \\| ([^|]+?) \\|"
+  },
+  "tangent": {
+    "source": "results/eval/summary.md",
+    "pattern": "GT yaw is a centered ([\\d]+) m trajectory tangent"
+  },
+  "loop_threshold": {
+    "source": "results/eval/summary.md",
+    "pattern": "\\|\\|Δ\\|\\| <([\\d.]+) m"
+  },
+  "gravity_v1": {
+    "source": "results/archive_v1_wrong_rpy/imu_frame_diagnostic.json",
+    "pointer": [
+      "configured_gravity_tilt_deg"
+    ],
+    "format": ".3f"
+  },
+  "gravity_v2": {
+    "source": "results/imu_frame_diagnostic.json",
+    "pointer": [
+      "configured_gravity_tilt_deg"
+    ],
+    "format": ".3f"
+  },
+  "v1_distance": {
+    "source": "results/archive_v1_wrong_rpy/pilot_rate1/run_meta.json",
+    "pointer": [
+      "distance_m"
+    ],
+    "format": ".3f"
+  },
+  "v2_distance": {
+    "source": "results/archive_v2_fitness03/loop_on_r1/run_meta.json",
+    "pointer": [
+      "distance_m"
+    ],
+    "format": ".3f"
+  },
+  "v2_success": {
+    "source": "results/archive_v2_fitness03/loop_on_r1/run_meta.json",
+    "pointer": [
+      "sanity_pass"
+    ]
+  },
+  "lidar_count": {
+    "source": "results/archive_v1_wrong_rpy/data_report/statistics.json",
+    "pointer": [
+      "message_counts",
+      "/points_raw"
+    ]
+  },
+  "imu_count": {
+    "source": "results/archive_v1_wrong_rpy/data_report/statistics.json",
+    "pointer": [
+      "message_counts",
+      "/imu_raw"
+    ]
+  },
+  "gps_count": {
+    "source": "results/archive_v1_wrong_rpy/data_report/statistics.json",
+    "pointer": [
+      "message_counts",
+      "/gps/fix"
+    ]
+  },
+  "offset": {
+    "source": "results/archive_v1_wrong_rpy/data_report/statistics.json",
+    "pointer": [
+      "offset_mean_s"
+    ]
+  },
+  "offset_std": {
+    "source": "results/archive_v1_wrong_rpy/data_report/statistics.json",
+    "pointer": [
+      "offset_std_s"
+    ]
+  },
+  "distance": {
+    "source": "logs/task02.md",
+    "pattern": "누적거리 ([\\d.]+) m"
+  },
+  "closure": {
+    "source": "logs/task02.md",
+    "pattern": "시작–끝 거리 ([\\d.]+) m"
+  },
+  "time_span": {
+    "source": "logs/task02.md",
+    "pattern": "전체 출력 time 범위 \\[0\\.000000000, ([\\d.]+)\\] s"
+  },
+  "normal_error": {
+    "source": "TASKS.md",
+    "pattern": "`R.T @ up_imu` 오차 ([\\d.]+)°"
+  },
+  "old_rpe": {
+    "source": "TASKS.md",
+    "pattern": "\\*\\*RPE 병진 (\\d+)%는 버그"
+  },
+  "pitch": {
+    "source": "results/eval/summary.md",
+    "pattern": "approximately ([\\d.]+)° LiDAR mounting pitch"
+  },
+  "loc_ate": {
+    "source": "results/loc/localization/metrics.json",
+    "pointer": [
+      "se3_lever",
+      "ate_2d_m",
+      "rmse"
+    ],
+    "format": ".4f"
+  },
+  "loc_se3": {
+    "source": "results/loc/localization/metrics.json",
+    "pointer": [
+      "se3",
+      "ate_2d_m",
+      "rmse"
+    ],
+    "format": ".4f"
+  },
+  "loc_matched": {
+    "source": "results/loc/localization/metrics.json",
+    "pointer": [
+      "matched_count"
+    ]
+  },
+  "loc_scans": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "scans"
+    ]
+  },
+  "loc_failures": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "failures"
+    ]
+  },
+  "loc_fitness": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "mean_fitness"
+    ],
+    "format": ".4f"
+  },
+  "loc_ms": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "mean_ms"
+    ],
+    "format": ".1f"
+  },
+  "loc_max_ms": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "max_ms"
+    ],
+    "format": ".1f"
+  },
+  "loc_p95": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "p95_ms"
+    ],
+    "format": ".1f"
+  },
+  "loc_rtf": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "realtime_factor_10hz"
+    ],
+    "format": ".2f"
+  },
+  "loc_rss": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "peak_rss_mib"
+    ],
+    "format": ".1f"
+  },
+  "trials": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "robustness_trials"
+    ]
+  },
+  "successes": {
+    "source": "results/loc/run_stats.json",
+    "pointer": [
+      "robustness_successes"
+    ]
+  },
+  "loc_common": {
+    "source": "results/loc/localization_common_timestamps/metrics.json",
+    "pointer": [
+      "se3_lever",
+      "ate_2d_m",
+      "rmse"
+    ],
+    "format": ".4f"
+  },
+  "map_common": {
+    "source": "results/loc/mapping_common_timestamps/metrics.json",
+    "pointer": [
+      "se3_lever",
+      "ate_2d_m",
+      "rmse"
+    ],
+    "format": ".4f"
+  },
+  "robust_0": {
+    "source": "results/loc/summary.md",
+    "pattern": "^\\| (0\\.5\\ m\\ /\\ 2° \\| [^\\n]+?) \\|$"
+  },
+  "robust_1": {
+    "source": "results/loc/summary.md",
+    "pattern": "^\\| (1\\ m\\ /\\ 5° \\| [^\\n]+?) \\|$"
+  },
+  "robust_2": {
+    "source": "results/loc/summary.md",
+    "pattern": "^\\| (2\\ m\\ /\\ 10° \\| [^\\n]+?) \\|$"
+  },
+  "robust_3": {
+    "source": "results/loc/summary.md",
+    "pattern": "^\\| (3\\ m\\ /\\ 15° \\| [^\\n]+?) \\|$"
+  },
+  "map_resolution": {
+    "source": "results/maps/loop_on_r2/map2d_stats.json",
+    "pointer": [
+      "config",
+      "resolution"
+    ]
+  },
+  "map_unknown": {
+    "source": "results/maps/loop_on_r2/map2d_stats.json",
+    "pointer": [
+      "driving_region",
+      "unknown_fraction"
+    ],
+    "format": ".4f"
+  }
+}

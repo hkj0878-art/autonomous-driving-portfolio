@@ -1,0 +1,17 @@
+[WARN] [1793005147.911976230] [rcl.logging_rosout]: Publisher already registered for provided node name. If this is due to multiple nodes with the same name then all logs for that logger name will go out over the existing publisher. As soon as any node with that name is destructed it will unregister the publisher, preventing any further logs for that name from being published on the rosout topic.
+[INFO] [1793005147.917318840] [rclcpp]: [1;32m----> IMU Preintegration Started.[0m
+[WARN] [1793005228.736699289] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005230.672281301] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005232.655945094] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005235.140193103] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005236.341362167] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005237.699379617] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005238.769074113] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005242.195413907] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005244.407693762] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005246.475540888] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005247.627368181] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005248.564114730] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005249.698827694] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[WARN] [1793005254.573283364] [lio_sam_imuPreintegration]: Large velocity, reset IMU-preintegration!
+[INFO] [1793005272.411275600] [rclcpp]: signal_handler(signum=2)

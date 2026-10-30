@@ -1,0 +1,14 @@
+Collecting plotly
+  Downloading plotly-7.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting narwhals>=1.15.1 (from plotly)
+  Downloading narwhals-2.27.1-py3-none-any.whl.metadata (15 kB)
+Requirement already satisfied: packaging in /usr/lib/python3/dist-packages (from plotly) (21.3)
+Downloading plotly-7.1.0-py3-none-any.whl (9.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.7/9.7 MB 89.9 MB/s  0:00:00
+Downloading narwhals-2.27.1-py3-none-any.whl (483 kB)
+Installing collected packages: narwhals, plotly
+
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+dash 4.4.1 requires pydantic>=2.10, which is not installed.
+dash 4.4.1 requires typing_extensions>=4.1.1, which is not installed.
+Successfully installed narwhals-2.27.1 plotly-7.1.0

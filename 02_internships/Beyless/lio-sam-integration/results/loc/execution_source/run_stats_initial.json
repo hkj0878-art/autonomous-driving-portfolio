@@ -1,0 +1,30 @@
+{
+  "scans": 1089,
+  "lost": false,
+  "failures": 0,
+  "failure_rate": 0.0,
+  "mean_fitness": 0.9998320496368932,
+  "mean_ms": 82.59577886522145,
+  "max_ms": 379.5104478485882,
+  "p95_ms": 169.9802396818995,
+  "realtime_factor_10hz": 1.2107156246226396,
+  "compute_to_sensor_time_ratio": 0.8259577886522145,
+  "robustness_trials": 200,
+  "robustness_successes": 180,
+  "startup_endpoint_hold_s": 0.9498755931854248,
+  "scans_outside_map_pose_interval": 38,
+  "prior_metadata": {
+    "scans_read": 2178,
+    "scans_used": [
+      1052
+    ],
+    "voxel_m": 0.2,
+    "scan_filter": "even",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  },
+  "target_points": 676030,
+  "peak_rss_mib": 525.0859375,
+  "wall_seconds": 566.9697298919782,
+  "open3d_version": "0.20.0"
+}

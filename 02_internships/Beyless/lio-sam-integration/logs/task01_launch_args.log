@@ -1,0 +1,13 @@
+Arguments (pass arguments as '<name>:=<value>'):
+
+    'params_file':
+        ROS 2 parameter YAML file.
+        (default: '/home/hong/SLAM/ws/install/lio_sam/share/lio_sam/config/params.yaml')
+
+    'use_sim_time':
+        no description given
+        (default: 'false')
+
+    'rviz':
+        no description given
+        (default: 'false')

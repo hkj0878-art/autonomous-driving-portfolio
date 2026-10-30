@@ -1,0 +1,17 @@
+{
+  "overall_completion": "PASS",
+  "protected_maps_file_count": 15,
+  "protected_maps_unchanged": true,
+  "params_identical_to_v2": true,
+  "rate": 1.0,
+  "wrapper_unchanged_during_batch": true,
+  "pytest_passed": 52,
+  "final_experiments_verifier_exit": 0,
+  "independent_eval_verifier_exit": 0,
+  "figures_directly_inspected": 12,
+  "even_failed_attempts_preserved": 2,
+  "even_retry_startup_delay_s": 3.0,
+  "loop_true_positives": 7,
+  "loop_false_positives": 2,
+  "representative_run": "loop_on_r2"
+}

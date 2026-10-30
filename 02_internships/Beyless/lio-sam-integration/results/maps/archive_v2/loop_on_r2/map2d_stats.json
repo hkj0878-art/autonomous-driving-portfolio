@@ -1,0 +1,63 @@
+{
+  "run": "loop_on_r2",
+  "frame": "LIO-SAM map",
+  "config": {
+    "resolution": 0.05,
+    "voxel": 0.1,
+    "ground_cell": 2.0,
+    "ground_percentile": 10.0,
+    "obstacle_min": 0.3,
+    "obstacle_max": 2.0,
+    "ground_tolerance": 0.2,
+    "margin": 2.0,
+    "scan_stride": 10,
+    "angular_bin_deg": 0.5,
+    "ray_max_range": 60.0,
+    "log_hit": 0.85,
+    "log_miss": -0.4,
+    "prior_occupied": 2.0,
+    "log_limit": 5.0,
+    "occupied_thresh": 0.65,
+    "free_thresh": 0.25
+  },
+  "origin": [
+    -115.05000000000001,
+    -158.25
+  ],
+  "width_cells": 4835,
+  "height_cells": 5112,
+  "size_m": [
+    241.75,
+    255.60000000000002
+  ],
+  "cells": {
+    "occupied": 130892,
+    "free": 1091908,
+    "unknown": 23493720
+  },
+  "input_points": 1014229,
+  "voxel_points": 658453,
+  "obstacle_points": 209076,
+  "ground_height_range_m": [
+    -6.1988911628723145,
+    8.338542938232422
+  ],
+  "nav2_load_yaml": "map2d_nav2.yaml",
+  "nav2_threshold_note": "Requested free_thresh=0.25 classifies gray 205 as free; companion YAML uses 0.196 to preserve unknown.",
+  "alignment": "omitted: --align-json not provided",
+  "rendering": "matplotlib Agg 3D scatter (headless fallback)",
+  "source_sha256": {
+    "results/loop_on_r2/map/GlobalMap.pcd": "e59e1ebcfd3814ba084232a8247ea2fd73e9c275b58739eb485cfa007c0a724c",
+    "results/loop_on_r2/keyframes_final_tum.txt": "9f0e6a4503a2d7d60e4326876e8638059edff469e9c724fa9d5e5808ebf40c85"
+  },
+  "approximations": [
+    "No per-point deskew; scans use final-keyframe interpolated pose.",
+    "Local ground percentile can fail on slopes, vegetation and sparse cells.",
+    "Static global obstacle prior blocks rays; unobserved and uncertain cells stay unknown.",
+    "2D projection omits overhanging obstacles above 2 m; no robot footprint inflation."
+  ],
+  "scans_total": 2178,
+  "scans_used": 211,
+  "scans_outside_pose_time": 7,
+  "rays": 54113
+}

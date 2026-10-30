@@ -1,0 +1,53 @@
+{
+  "mme_nats": -3.7409346392022917,
+  "mpv_m2": 0.0017292045219145442,
+  "eligible_points": 226585,
+  "total_points": 233936,
+  "eligible_fraction": 0.9685768757266945,
+  "radius_m": 0.3,
+  "min_neighbors": 6,
+  "covariance_floor_m2": 1e-09,
+  "formula": "MME=mean(0.5 ln((2 pi e)^3 det(C))); MPV=mean(lambda_min(C)), sample covariance; lower is locally sharper. Density/scene dependent.",
+  "overlap": {
+    "A_to_B": {
+      "total_points": 382288,
+      "overlap_points": 257058,
+      "overlap_fraction": 0.6724197463692295
+    },
+    "B_to_A": {
+      "total_points": 369492,
+      "overlap_points": 192378,
+      "overlap_fraction": 0.5206553863141827
+    },
+    "median_m": 0.14836114127120578,
+    "p95_m": 0.7627492492191884,
+    "double_wall_ratio": 0.40183474399024555,
+    "threshold_m": 0.2,
+    "overlap_gate_m": 1.0,
+    "note": "Symmetric nearest neighbors restricted to <=1 m mutual spatial support per direction. >0.2 m is a discrepancy proxy, not a semantic wall classifier."
+  },
+  "build": {
+    "scans_read": 2178,
+    "scans_used": [
+      292,
+      266
+    ],
+    "voxel_m": 0.1,
+    "scan_filter": "all",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  },
+  "crop": {
+    "frame": "ENU",
+    "xy_min": [
+      -22.05092367517338,
+      -59.04273805986013
+    ],
+    "xy_max": [
+      50.83086907197742,
+      2.1827250826292164
+    ],
+    "vertical": "unbounded",
+    "note": "Same GNSS XY bounding box for all runs; saved LIO-SAM GlobalMap, revoxelized in ENU at 0.1 m"
+  }
+}

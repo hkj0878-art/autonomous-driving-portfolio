@@ -1,0 +1,535 @@
+make: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[1]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+[  1%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/b64.c.o
+[  1%] Building CXX object CppUnitLite/CMakeFiles/CppUnitLite.dir/TestRegistry.cpp.o
+[  1%] Building CXX object CppUnitLite/CMakeFiles/CppUnitLite.dir/Test.cpp.o
+[  1%] Building CXX object CppUnitLite/CMakeFiles/CppUnitLite.dir/TestResult.cpp.o
+[  3%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/blas.c.o
+[  3%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/csr.c.o
+[  3%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/error.c.o
+[  3%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/evaluate.c.o
+[  5%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/fkvkselect.c.o
+[  5%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/fs.c.o
+[  5%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/getopt.c.o
+[  5%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/gkregex.c.o
+[  7%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/graph.c.o
+[  7%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/htable.c.o
+[  7%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/io.c.o
+[  7%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/itemsets.c.o
+[  9%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/memory.c.o
+[  9%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/mcore.c.o
+[  9%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/omp.c.o
+[  9%] Linking CXX static library libCppUnitLite.a
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+[  9%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/pdb.c.o
+[  9%] Built target CppUnitLite
+[  9%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/pqueue.c.o
+[ 10%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/random.c.o
+[ 10%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/rw.c.o
+[ 10%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/seq.c.o
+[ 10%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/sort.c.o
+[ 12%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/string.c.o
+[ 12%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/timers.c.o
+[ 12%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/tokenizer.c.o
+[ 12%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/__/GKlib/util.c.o
+[ 12%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/auxapi.c.o
+[ 14%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/balance.c.o
+[ 14%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/bucketsort.c.o
+[ 14%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/checkgraph.c.o
+[ 14%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/coarsen.c.o
+[ 16%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/compress.c.o
+[ 16%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/contig.c.o
+[ 16%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/debug.c.o
+[ 16%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/fm.c.o
+[ 18%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/fortran.c.o
+[ 18%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/frename.c.o
+[ 18%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/gklib.c.o
+[ 18%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/graph.c.o
+[ 18%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/initpart.c.o
+[ 20%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/kmetis.c.o
+[ 20%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/kwayfm.c.o
+[ 20%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/kwayrefine.c.o
+[ 20%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/mcutil.c.o
+[ 21%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/mesh.c.o
+[ 21%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/meshpart.c.o
+[ 21%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/minconn.c.o
+[ 21%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/mincover.c.o
+[ 23%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/mmd.c.o
+[ 23%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/ometis.c.o
+[ 23%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/options.c.o
+[ 23%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/parmetis.c.o
+[ 23%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/pmetis.c.o
+[ 25%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/refine.c.o
+[ 25%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/separator.c.o
+[ 25%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/sfm.c.o
+[ 25%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/srefine.c.o
+[ 27%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/stat.c.o
+[ 27%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/timing.c.o
+[ 27%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/util.c.o
+[ 27%] Building C object gtsam/3rdparty/metis/libmetis/CMakeFiles/metis-gtsam.dir/wspace.c.o
+[ 27%] Linking C shared library libmetis-gtsam.so
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+[ 27%] Built target metis-gtsam
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+[ 29%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/DSFVector.cpp.o
+[ 29%] Building C object gtsam/CMakeFiles/gtsam.dir/3rdparty/SuiteSparse_config/SuiteSparse_config.c.o
+[ 29%] Building C object gtsam/CMakeFiles/gtsam.dir/3rdparty/CCOLAMD/Source/ccolamd.c.o
+[ 29%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/Matrix.cpp.o
+[ 29%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/SymmetricBlockMatrix.cpp.o
+[ 29%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/Vector.cpp.o
+[ 30%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/VerticalBlockMatrix.cpp.o
+[ 30%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/cholesky.cpp.o
+[ 30%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/debug.cpp.o
+[ 30%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/timing.cpp.o
+[ 32%] Building CXX object gtsam/CMakeFiles/gtsam.dir/base/types.cpp.o
+[ 32%] Building CXX object gtsam/CMakeFiles/gtsam.dir/basis/Chebyshev.cpp.o
+[ 32%] Building CXX object gtsam/CMakeFiles/gtsam.dir/basis/Chebyshev2.cpp.o
+[ 32%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3.cpp.o
+[ 32%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3Bundler.cpp.o
+[ 34%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3DS2.cpp.o
+[ 34%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3DS2_Base.cpp.o
+[ 34%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3Fisheye.cpp.o
+In file included from /usr/include/eigen3/Eigen/Core:341,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.cpp:19:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h: In function ‘static void Eigen::internal::trmv_selector<Mode, 1>::run(const Lhs&, const Rhs&, Dest&, const typename Dest::Scalar&) [with Lhs = Eigen::Transpose<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, -1, false> >; Rhs = Eigen::Transpose<const Eigen::CwiseBinaryOp<Eigen::internal::scalar_product_op<double, double>, const Eigen::CwiseNullaryOp<Eigen::internal::scalar_constant_op<double>, const Eigen::Matrix<double, 1, -1> >, const Eigen::Transpose<const Eigen::Block<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>, -1, 1, false> > > >; Dest = Eigen::Transpose<Eigen::Block<Eigen::Block<Eigen::Matrix<double, -1, -1, 1>, 1, -1, true>, 1, -1, false> >; int Mode = 6]’:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:332:12: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  327 |     internal::triangular_matrix_vector_product
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  328 |       <Index,Mode,
+      |       ~~~~~~~~~~~~
+  329 |        LhsScalar, LhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  330 |        RhsScalar, RhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  331 |        RowMajor>
+      |        ~~~~~~~~~
+  332 |       ::run(actualLhs.rows(),actualLhs.cols(),
+      |       ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  333 |             actualLhs.data(),actualLhs.outerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  334 |             actualRhsPtr,1,
+      |             ~~~~~~~~~~~~~~~
+  335 |             dest.data(),dest.innerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  336 |             actualAlpha);
+      |             ~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:105:24: note: by argument 5 of type ‘const double*’ to ‘static void Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::run(Index, Index, const LhsScalar*, Index, const RhsScalar*, Index, Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::ResScalar*, Index, const ResScalar&) [with Index = long int; int Mode = 6; LhsScalar = double; bool ConjLhs = false; RhsScalar = double; bool ConjRhs = false; int Version = 0]’ declared here
+  105 | EIGEN_DONT_INLINE void triangular_matrix_vector_product<Index,Mode,LhsScalar,ConjLhs,RhsScalar,ConjRhs,RowMajor,Version>
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 34%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3Unified.cpp.o
+[ 36%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3_S2.cpp.o
+[ 36%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cal3_S2Stereo.cpp.o
+[ 36%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/CalibratedCamera.cpp.o
+[ 36%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Cyclic.cpp.o
+[ 38%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/EssentialMatrix.cpp.o
+[ 38%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Line3.cpp.o
+[ 38%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/OrientedPlane3.cpp.o
+[ 38%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Point2.cpp.o
+[ 38%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Point3.cpp.o
+[ 40%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Pose2.cpp.o
+[ 40%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Pose3.cpp.o
+[ 40%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Rot2.cpp.o
+[ 40%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Rot3.cpp.o
+[ 41%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Rot3M.cpp.o
+[ 41%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/SO3.cpp.o
+[ 41%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/SO4.cpp.o
+[ 41%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/SOn.cpp.o
+[ 43%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Similarity3.cpp.o
+[ 43%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/SimpleCamera.cpp.o
+[ 43%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/StereoCamera.cpp.o
+[ 43%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/StereoPoint2.cpp.o
+[ 43%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/Unit3.cpp.o
+[ 45%] Building CXX object gtsam/CMakeFiles/gtsam.dir/geometry/triangulation.cpp.o
+[ 45%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/BayesTree.cpp.o
+[ 45%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/Factor.cpp.o
+[ 45%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/Key.cpp.o
+[ 47%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/LabeledSymbol.cpp.o
+[ 47%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/Ordering.cpp.o
+[ 47%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/Symbol.cpp.o
+[ 47%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/VariableIndex.cpp.o
+[ 49%] Building CXX object gtsam/CMakeFiles/gtsam.dir/inference/VariableSlots.cpp.o
+[ 49%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicBayesNet.cpp.o
+[ 49%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicBayesTree.cpp.o
+[ 49%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicConditional.cpp.o
+[ 49%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicEliminationTree.cpp.o
+[ 50%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicFactor.cpp.o
+[ 50%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicFactorGraph.cpp.o
+[ 50%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicISAM.cpp.o
+[ 50%] Building CXX object gtsam/CMakeFiles/gtsam.dir/symbolic/SymbolicJunctionTree.cpp.o
+[ 52%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DecisionTreeFactor.cpp.o
+[ 52%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteBayesNet.cpp.o
+[ 52%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteBayesTree.cpp.o
+[ 52%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteConditional.cpp.o
+[ 52%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteEliminationTree.cpp.o
+[ 54%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteFactor.cpp.o
+[ 54%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteFactorGraph.cpp.o
+[ 54%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteJunctionTree.cpp.o
+[ 54%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/DiscreteKey.cpp.o
+[ 56%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/Potentials.cpp.o
+[ 56%] Building CXX object gtsam/CMakeFiles/gtsam.dir/discrete/Signature.cpp.o
+[ 56%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/ConjugateGradientSolver.cpp.o
+[ 56%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/Errors.cpp.o
+[ 58%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianBayesNet.cpp.o
+[ 58%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianBayesTree.cpp.o
+[ 58%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianConditional.cpp.o
+[ 58%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianDensity.cpp.o
+[ 58%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianEliminationTree.cpp.o
+[ 60%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianFactor.cpp.o
+[ 60%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianFactorGraph.cpp.o
+[ 60%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianISAM.cpp.o
+[ 60%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/GaussianJunctionTree.cpp.o
+[ 61%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/HessianFactor.cpp.o
+[ 61%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/IterativeSolver.cpp.o
+[ 61%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/JacobianFactor.cpp.o
+[ 61%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/KalmanFilter.cpp.o
+[ 63%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/LossFunctions.cpp.o
+In file included from /usr/include/eigen3/Eigen/Core:337,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/GaussianFactor.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/HessianFactor.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/HessianFactor.cpp:18:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, 1>; Lhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>; int LhsMode = 18; Rhs = Eigen::Matrix<double, -1, 1>]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 0; int UpLo = 2; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, 1>; Lhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, -1, false>; int LhsMode = 18; Rhs = Eigen::Matrix<double, -1, 1>]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 0; int UpLo = 2; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Transpose<Eigen::Matrix<double, 1, -1> >; Lhs = Eigen::Transpose<const Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, -1, false> >; int LhsMode = 1; Rhs = Eigen::Transpose<const Eigen::Transpose<const Eigen::Matrix<double, -1, 1> > >]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 1; int UpLo = 1; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 63%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/NoiseModel.cpp.o
+[ 63%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/PCGSolver.cpp.o
+[ 63%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/Preconditioner.cpp.o
+[ 63%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/Sampler.cpp.o
+[ 65%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/Scatter.cpp.o
+[ 65%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/SubgraphBuilder.cpp.o
+[ 65%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/SubgraphPreconditioner.cpp.o
+[ 65%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/SubgraphSolver.cpp.o
+[ 67%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/VectorValues.cpp.o
+[ 67%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/iterative.cpp.o
+[ 67%] Building CXX object gtsam/CMakeFiles/gtsam.dir/linear/linearExceptions.cpp.o
+[ 67%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/CustomFactor.cpp.o
+[ 69%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/DoglegOptimizer.cpp.o
+[ 69%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/DoglegOptimizerImpl.cpp.o
+[ 69%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/GaussNewtonOptimizer.cpp.o
+[ 69%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/ISAM2-impl.cpp.o
+[ 69%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/ISAM2.cpp.o
+[ 70%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/ISAM2Clique.cpp.o
+[ 70%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/ISAM2Params.cpp.o
+[ 70%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/LevenbergMarquardtOptimizer.cpp.o
+[ 70%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/LevenbergMarquardtParams.cpp.o
+[ 72%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/LinearContainerFactor.cpp.o
+[ 72%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/Marginals.cpp.o
+[ 72%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearConjugateGradientOptimizer.cpp.o
+[ 72%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearFactor.cpp.o
+In file included from /usr/include/eigen3/Eigen/Core:337,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Manifold.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Lie.h:26,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/VectorSpace.h:11,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/geometry/Point2.h:20,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/nonlinear/NonlinearFactorGraph.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/nonlinear/LinearContainerFactor.h:12,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/nonlinear/LinearContainerFactor.cpp:8:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, 1>; Lhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, -1, false>; int LhsMode = 18; Rhs = Eigen::Matrix<double, -1, 1>]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 0; int UpLo = 2; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 74%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearFactorGraph.cpp.o
+[ 74%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearISAM.cpp.o
+[ 74%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearOptimizer.cpp.o
+[ 74%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/NonlinearOptimizerParams.cpp.o
+[ 74%] Building CXX object gtsam/CMakeFiles/gtsam.dir/nonlinear/Values.cpp.o
+[ 76%] Building CXX object gtsam/CMakeFiles/gtsam.dir/sfm/MFAS.cpp.o
+[ 76%] Building CXX object gtsam/CMakeFiles/gtsam.dir/sfm/ShonanAveraging.cpp.o
+[ 76%] Building CXX object gtsam/CMakeFiles/gtsam.dir/sfm/ShonanFactor.cpp.o
+[ 76%] Building CXX object gtsam/CMakeFiles/gtsam.dir/sfm/TranslationRecovery.cpp.o
+[ 78%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/EssentialMatrixConstraint.cpp.o
+[ 78%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/FrobeniusFactor.cpp.o
+[ 78%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/InitializePose3.cpp.o
+[ 78%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/OrientedPlane3Factor.cpp.o
+[ 80%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/dataset.cpp.o
+[ 80%] Building CXX object gtsam/CMakeFiles/gtsam.dir/slam/lago.cpp.o
+[ 80%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/AHRSFactor.cpp.o
+[ 80%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/AttitudeFactor.cpp.o
+[ 80%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/CombinedImuFactor.cpp.o
+[ 81%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/GPSFactor.cpp.o
+[ 81%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/ImuBias.cpp.o
+[ 81%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/ImuFactor.cpp.o
+[ 81%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/ManifoldPreintegration.cpp.o
+[ 83%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/NavState.cpp.o
+[ 83%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/PreintegratedRotation.cpp.o
+[ 83%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/PreintegrationBase.cpp.o
+[ 83%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/PreintegrationParams.cpp.o
+[ 85%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/ScenarioRunner.cpp.o
+[ 85%] Building CXX object gtsam/CMakeFiles/gtsam.dir/navigation/TangentPreintegration.cpp.o
+[ 85%] Linking CXX shared library libgtsam.so
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+[ 85%] Built target gtsam
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+make[2]: Entering directory '/home/hong/SLAM/third_party/gtsam/build'
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/base/Dummy.cpp.o
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/geometry/Pose3Upright.cpp.o
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/geometry/Event.cpp.o
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/geometry/BearingS2.cpp.o
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/geometry/SimPolygon2D.cpp.o
+[ 87%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/geometry/SimWall2D.cpp.o
+[ 89%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/linear/LPInitSolver.cpp.o
+[ 89%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/linear/LPSolver.cpp.o
+[ 89%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/linear/QPSParser.cpp.o
+[ 89%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/linear/QPSolver.cpp.o
+[ 89%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/discrete/AllDiff.cpp.o
+[ 90%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/discrete/CSP.cpp.o
+[ 90%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/discrete/Domain.cpp.o
+[ 90%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/discrete/Scheduler.cpp.o
+[ 90%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/discrete/SingleValue.cpp.o
+[ 92%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/dynamics/PoseRTV.cpp.o
+[ 92%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/dynamics/SimpleHelicopter.cpp.o
+[ 92%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/BatchFixedLagSmoother.cpp.o
+[ 92%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/ConcurrentBatchFilter.cpp.o
+[ 94%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/ConcurrentBatchSmoother.cpp.o
+[ 94%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/ConcurrentFilteringAndSmoothing.cpp.o
+[ 94%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/ConcurrentIncrementalFilter.cpp.o
+[ 94%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/ConcurrentIncrementalSmoother.cpp.o
+[ 94%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/FixedLagSmoother.cpp.o
+[ 96%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/IncrementalFixedLagSmoother.cpp.o
+[ 96%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/nonlinear/LinearizedFactor.cpp.o
+[ 96%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/AHRS.cpp.o
+[ 96%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/DummyFactor.cpp.o
+[ 98%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/LocalOrientedPlane3Factor.cpp.o
+In file included from /usr/include/eigen3/Eigen/Core:337,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Manifold.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/GenericValue.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/nonlinear/Values.h:28,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/nonlinear/NonlinearFactor.h:23,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/nonlinear/LinearizedFactor.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/nonlinear/LinearizedFactor.cpp:18:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, 1>; Lhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, -1, false>; int LhsMode = 18; Rhs = Eigen::Matrix<double, -1, 1>]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 0; int UpLo = 2; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h: In function ‘static void Eigen::internal::selfadjoint_product_impl<Lhs, LhsMode, false, Rhs, 0, true>::run(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Transpose<Eigen::Matrix<double, 1, -1> >; Lhs = Eigen::Transpose<const Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, -1, false> >; int LhsMode = 1; Rhs = Eigen::Transpose<const Eigen::Transpose<Eigen::Matrix<double, -1, 1> > >]’:
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:229:7: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  227 |     internal::selfadjoint_matrix_vector_product<Scalar, Index, (internal::traits<ActualLhsTypeCleaned>::Flags&RowMajorBit) ? RowMajor : ColMajor,
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                                                 int(LhsUpLo), bool(LhsBlasTraits::NeedToConjugate), bool(RhsBlasTraits::NeedToConjugate)>::run
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  229 |       (
+      |       ^
+  230 |         lhs.rows(),                             // size
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  231 |         &lhs.coeffRef(0,0),  lhs.outerStride(), // lhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  232 |         actualRhsPtr,                           // rhs info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  233 |         actualDestPtr,                          // result info
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  234 |         actualAlpha                             // scale factor
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  235 |       );
+      |       ~
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:41:6: note: by argument 4 of type ‘const double*’ to ‘static void Eigen::internal::selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLhs, ConjugateRhs, Version>::run(Index, const Scalar*, Index, const Scalar*, Scalar*, Scalar) [with Scalar = double; Index = long int; int StorageOrder = 1; int UpLo = 1; bool ConjugateLhs = false; bool ConjugateRhs = false; int Version = 0]’ declared here
+   41 | void selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,Version>::run(
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 98%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/Mechanization_bRn2.cpp.o
+[ 98%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/ProjectionFactorRollingShutter.cpp.o
+[ 98%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/RelativeElevationFactor.cpp.o
+[100%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/SmartStereoProjectionFactorPP.cpp.o
+[100%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/slam/SmartStereoProjectionPoseFactor.cpp.o
+[100%] Building CXX object gtsam_unstable/CMakeFiles/gtsam_unstable.dir/partition/GenericGraph.cpp.o
+In file included from /usr/include/eigen3/Eigen/Core:341,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/GaussianFactor.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/JacobianFactor.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/RegularJacobianFactor.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/slam/JacobianFactorQ.h:20,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/slam/SmartFactorBase.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionFactor.h:23,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionPoseFactor.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionPoseFactor.cpp:22:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h: In function ‘static void Eigen::internal::trmv_selector<Mode, 1>::run(const Lhs&, const Rhs&, Dest&, const typename Dest::Scalar&) [with Lhs = Eigen::Transpose<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, -1, false> >; Rhs = Eigen::Transpose<const Eigen::CwiseBinaryOp<Eigen::internal::scalar_product_op<double, double>, const Eigen::CwiseNullaryOp<Eigen::internal::scalar_constant_op<double>, const Eigen::Matrix<double, 1, -1> >, const Eigen::Transpose<const Eigen::Block<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>, -1, 1, false> > > >; Dest = Eigen::Transpose<Eigen::Block<Eigen::Block<Eigen::Matrix<double, -1, -1, 1>, 1, -1, true>, 1, -1, false> >; int Mode = 6]’:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:332:12: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  327 |     internal::triangular_matrix_vector_product
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  328 |       <Index,Mode,
+      |       ~~~~~~~~~~~~
+  329 |        LhsScalar, LhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  330 |        RhsScalar, RhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  331 |        RowMajor>
+      |        ~~~~~~~~~
+  332 |       ::run(actualLhs.rows(),actualLhs.cols(),
+      |       ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  333 |             actualLhs.data(),actualLhs.outerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  334 |             actualRhsPtr,1,
+      |             ~~~~~~~~~~~~~~~
+  335 |             dest.data(),dest.innerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  336 |             actualAlpha);
+      |             ~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:105:24: note: by argument 5 of type ‘const double*’ to ‘static void Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::run(Index, Index, const LhsScalar*, Index, const RhsScalar*, Index, Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::ResScalar*, Index, const ResScalar&) [with Index = long int; int Mode = 6; LhsScalar = double; bool ConjLhs = false; RhsScalar = double; bool ConjRhs = false; int Version = 0]’ declared here
+  105 | EIGEN_DONT_INLINE void triangular_matrix_vector_product<Index,Mode,LhsScalar,ConjLhs,RhsScalar,ConjRhs,RowMajor,Version>
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/eigen3/Eigen/Core:341,
+                 from /usr/include/eigen3/Eigen/Dense:1,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/OptionalJacobian.h:22,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/base/Matrix.h:27,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/GaussianFactor.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/JacobianFactor.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/linear/RegularJacobianFactor.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/slam/JacobianFactorQ.h:20,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam/slam/SmartFactorBase.h:24,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionFactor.h:23,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionFactorPP.h:21,
+                 from /home/hong/SLAM/third_party/gtsam/gtsam_unstable/slam/SmartStereoProjectionFactorPP.cpp:19:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h: In function ‘static void Eigen::internal::trmv_selector<Mode, 1>::run(const Lhs&, const Rhs&, Dest&, const typename Dest::Scalar&) [with Lhs = Eigen::Transpose<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, -1, false> >; Rhs = Eigen::Transpose<const Eigen::CwiseBinaryOp<Eigen::internal::scalar_product_op<double, double>, const Eigen::CwiseNullaryOp<Eigen::internal::scalar_constant_op<double>, const Eigen::Matrix<double, 1, -1> >, const Eigen::Transpose<const Eigen::Block<const Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>, -1, 1, false> > > >; Dest = Eigen::Transpose<Eigen::Block<Eigen::Block<Eigen::Matrix<double, -1, -1, 1>, 1, -1, true>, 1, -1, false> >; int Mode = 6]’:
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:332:12: warning: ‘result’ may be used uninitialized [-Wmaybe-uninitialized]
+  327 |     internal::triangular_matrix_vector_product
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  328 |       <Index,Mode,
+      |       ~~~~~~~~~~~~
+  329 |        LhsScalar, LhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  330 |        RhsScalar, RhsBlasTraits::NeedToConjugate,
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  331 |        RowMajor>
+      |        ~~~~~~~~~
+  332 |       ::run(actualLhs.rows(),actualLhs.cols(),
+      |       ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  333 |             actualLhs.data(),actualLhs.outerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  334 |             actualRhsPtr,1,
+      |             ~~~~~~~~~~~~~~~
+  335 |             dest.data(),dest.innerStride(),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  336 |             actualAlpha);
+      |             ~~~~~~~~~~~~
+/usr/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:105:24: note: by argument 5 of type ‘const double*’ to ‘static void Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::run(Index, Index, const LhsScalar*, Index, const RhsScalar*, Index, Eigen::internal::triangular_matrix_vector_product<Index, Mode, LhsScalar, ConjLhs, RhsScalar, ConjRhs, 1, Version>::ResScalar*, Index, const ResScalar&) [with Index = long int; int Mode = 6; LhsScalar = double; bool ConjLhs = false; RhsScalar = double; bool ConjRhs = false; int Version = 0]’ declared here
+  105 | EIGEN_DONT_INLINE void triangular_matrix_vector_product<Index,Mode,LhsScalar,ConjLhs,RhsScalar,ConjRhs,RowMajor,Version>
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[100%] Linking CXX shared library libgtsam_unstable.so
+make[2]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+[100%] Built target gtsam_unstable
+make[1]: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'
+make: Leaving directory '/home/hong/SLAM/third_party/gtsam/build'

@@ -1,0 +1,2661 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.1
+--------
+workdir: /home/hong/SLAM
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a17787-3fea-7881-ba09-a47e55253c23
+--------
+user
+TASKS.md의 [CODEX-TASK] TASK-05b를 수행해(추가 정리 항목 포함). .venv Python과 source env.sh를 사용해. sudo는 쓰지 말고 data/와 기존 results는 읽기 전용이다(results/loc/만 쓴다). 완료 기준을 직접 검증해.
+codex
+TASK-05b와 추가 정리 항목을 확인한 뒤 구현하고, 지정된 환경에서 완료 기준까지 직접 검증하겠습니다. `data/`와 기존 결과는 변경하지 않고 결과물은 `results/loc/`에만 기록하겠습니다.
+exec
+/bin/bash -lc "pwd && rg --files -g 'AGENTS.md' -g 'TASKS.md' -g 'env.sh' -g 'pyproject.toml' -g 'requirements*'" in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM
+env.sh
+TASKS.md
+third_party/gtsam/python/requirements.txt
+third_party/gtsam/wrap/requirements.txt
+third_party/gtsam/wrap/pybind11/tests/requirements.txt
+third_party/gtsam/wrap/pybind11/tools/pyproject.toml
+third_party/gtsam/wrap/pybind11/pyproject.toml
+third_party/gtsam/wrap/pybind11/docs/requirements.txt
+
+exec
+/bin/bash -lc 'git status --short' in /home/hong/SLAM
+ exited 128 in 0ms:
+fatal: not a git repository (or any of the parent directories): .git
+
+exec
+/bin/bash -lc 'cat TASKS.md' in /home/hong/SLAM
+ succeeded in 0ms:
+# SLAM 프로젝트 — LIO-SAM (ROS 2 Humble) 매핑 + GNSS 정확도 평가
+
+## 전체 목표
+보유 rosbag(LiDAR+IMU+RTK GNSS)으로 LIO-SAM 매핑 파이프라인을 직접 구성하고, 루프 클로저 유무에 따른 궤적 정확도를 RTK GNSS 기준으로 정량 평가해 포트폴리오용 결과물(2D 지도, 3D PCD, 평가 리포트)을 만든다.
+
+## 데이터 분석 결과 (data/synced_bag, 이미 ROS 2 sqlite3 bag — 변환 불필요, 전처리만 필요)
+| 토픽 | 타입 | 주기 | frame | 비고 |
+|---|---|---|---|---|
+| /front/lidar_point_synced | PointCloud2 | 20 Hz | front_lidar | 128 ring, 수평 FOV 약 -65~+61°(전방 전용, Hesai AT128 계열로 추정), 스캔당 78336점 고정(무효점은 0,0,0), 필드: x y z intensity(f32) ring(u16 @16) timestamp(f64 @18, **절대시각이 2020년 epoch** — 헤더 stamp와 고정 오프셋 약 169765152.46 s), 스캔 내 시간 폭 약 25 ms |
+| /imu/data_synced | Imu | 100 Hz | imu_link | Xsens MTi(추정), orientation 있음(9축, yaw 안정적), z 가속도 +9.8 → z-up |
+| /fix_synced | NavSatFix | 32 Hz | gps | status=2(GBAS/RTK), σ≈1.3–1.5 cm → **정답(GT)으로 사용** |
+- 길이 108.7 s, 주행거리 약 237 m, 약 70×60 m 사각형 **폐루프 1바퀴**(시계방향, 시작-끝 0.47 m), 평지(고도 ±0.1 m)
+- 헤더 stamp(2025-11-11)와 bag 기록시각(2025-11-13)이 다름 → **헤더 stamp 기준**으로 처리
+- /tf, /tf_static 없음 → 외부 파라미터는 사용자 제공 캘리브레이션 사용(아래)
+
+## IMU–LiDAR 외부 파라미터 (사용자 제공, 2026-10-26) — 검증 완료
+제공값(사용자 표기 "T_lb lidar->imu"):
+```
+t = [0.01027, -0.297547, 0.042205]
+R = [ 0.986903,  0.007064,  0.161160,
+     -0.005760,  0.999947, -0.008561,
+     -0.161212,  0.007520,  0.986891 ]   # pitch≈9.28°, roll≈0.44°, yaw≈-0.33°
+```
+**검증**: 첫 5스캔의 RANSAC 지면 법선(lidar frame)과 IMU 중력방향 비교 → `R.T @ up_imu` 오차 0.55°, `R @ up_imu` 18.8°, 단위행렬 9.6°.
+⇒ 제공된 R은 **p_imu = R · p_lidar** (lidar→imu)이다. LIO-SAM의 `extrinsicRot`/`extrinsicRPY`는 IMU 측정을 lidar frame으로 돌리는 행렬(`acc_lidar = extRot · acc_imu`)이므로 **R의 전치(R.T)를 넣어야 한다**.
+LIO-SAM 설정값:
+```yaml
+extrinsicTrans: [0.01027, -0.297547, 0.042205]
+extrinsicRot: [0.986903, -0.005760, -0.161212,
+               0.007064,  0.999947,  0.007520,
+               0.161160, -0.008561,  0.986891]
+extrinsicRPY: [0.986903,  0.007064,  0.161160,     # ⚠️ 정정(2026-10-26): R 원본(전치 아님)
+               -0.005760,  0.999947, -0.008561,
+               -0.161212,  0.007520,  0.986891]
+# 근거: utility.hpp:319 acc=extRot·acc, :331 q_final=q_from·Quat(extRPY) → 일관성 조건 extRPY·extRot=I → extRPY=R.
+# 최초 설계(extRPY=extRot=R.T)는 중력축 18.57° 불일치를 일으킴 (results/imu_frame_diagnostic.json, Codex 발견)
+```
+(translation은 원본 값을 사용한다. LIO-SAM은 회전 없는 lever arm으로만 쓰며, 9° 회전에 따른 차이는 약 5 cm로 무시 가능하다. 리포트 한계 항목에 기재한다.)
+
+## 아키텍처 결정사항
+- LIO-SAM `ros2` 브랜치(TixiaoShan/LIO-SAM)를 그대로 사용하고, 알고리즘 바깥(전처리·설정·평가·지도 내보내기)을 직접 구현한다.
+- GTSAM은 sudo 없이 소스 빌드하여 `~/SLAM/third_party/install`에 설치한다(시스템 경로 수정 금지).
+- 포인트클라우드는 오프라인 전처리로 LIO-SAM velodyne 형식(x,y,z,intensity f32 / ring u16 / time f32 = 스캔 시작 기준 상대초)으로 변환한 새 bag을 만든다. 실시간 변환 노드보다 재현성과 디버깅이 쉽다.
+- GNSS는 평가용 GT로만 쓴다. 기본 실험에서는 LIO-SAM GPS factor를 끈다(GT 누출 방지). GPS 융합은 선택 실험으로 분리한다.
+- 루프 테스트 = 같은 bag을 **루프 클로저 ON/OFF**로 매핑해 ATE/RPE/종점 드리프트를 비교한다.
+- 평가 도구는 venv(`~/SLAM/.venv`)에 둔다. 시스템 numpy 2.x와 ROS Humble의 충돌을 피하기 위해서다.
+- 피할 것: ~/ros2_ws, ~/catkin_ws 수정, 시스템 패키지 설치, 원본 bag 수정.
+
+## 디렉터리 구조
+```
+SLAM/
+  data/synced_bag/          원본(읽기 전용)
+  data/lio_bag/             전처리된 bag
+  third_party/              gtsam 소스/설치
+  ws/src/LIO-SAM            colcon 워크스페이스
+  tools/                    전처리·기록·평가·지도변환 스크립트(+tests)
+  config/                   LIO-SAM params yaml
+  results/<run_name>/       traj_tum.txt, map pcd, metrics.json, plots
+  report/REPORT.md          포트폴리오 리포트
+```
+
+## 태스크 목록
+- [x] TASK-01: 환경 구축 (GTSAM 소스 빌드 + LIO-SAM ros2 빌드)
+- [x] TASK-02: bag 전처리 (point time 변환, 무효점 제거) + 데이터 리포트
+- [x] TASK-03: 외부 파라미터 확인 + LIO-SAM 설정 + 실행/궤적 기록 파이프라인
+- [x] TASK-04: 실험 실행 (loop ON / loop OFF / (선택) GPS 융합)
+- [x] TASK-05: GNSS 대비 정확도 평가 (ATE, RPE, 종점 드리프트, 그래프)
+- [x] TASK-06: 지도 산출물 (3D PCD, 2D occupancy grid PGM/YAML, 렌더 이미지)
+- [ ] TASK-07: 포트폴리오 리포트 (REPORT.md + README 재현 절차)
+
+## 실행 순서 및 의존성
+TASK-01 ─┐
+TASK-02 ─┴→ TASK-03 → TASK-04 → (TASK-05 ∥ TASK-06) → TASK-07
+(TASK-01과 TASK-02는 병렬 가능)
+
+---
+
+### [CODEX-TASK] TASK-01: 환경 구축 (GTSAM + LIO-SAM ros2)
+
+**목적**
+LIO-SAM을 ROS 2 Humble에서 빌드하고 실행할 수 있게 한다.
+
+**입력**
+- 시스템: Ubuntu 22.04, ROS 2 Humble(/opt/ros/humble), 16코어, RAM 14 GB(가용 약 4 GB)
+- 설치되어 있음: libboost-all-dev 1.74, libeigen3-dev 3.4, libpcl-dev 1.12, libtbb-dev
+- 의존성: 없음
+
+**출력**
+- /home/hong/SLAM/third_party/gtsam (소스, 4.1.1 태그 권장 — LIO-SAM 검증 버전), /home/hong/SLAM/third_party/install (설치 prefix)
+- /home/hong/SLAM/ws/src/LIO-SAM (ros2 브랜치), /home/hong/SLAM/ws/install
+- /home/hong/SLAM/env.sh: ROS + GTSAM LD_LIBRARY_PATH/CMAKE_PREFIX_PATH + ws overlay를 source하는 스크립트
+- /home/hong/SLAM/logs/task01_build.md: 사용한 버전, 커맨드, 이슈와 해결 방법
+
+**구현 조건**
+- sudo 사용 불가. 시스템 경로나 /opt에 쓰지 않는다. apt 패키지가 더 필요하면 직접 설치하지 말고 로그에 "사용자 sudo 필요: <명령>"으로 남기고 중단한다.
+- GTSAM cmake: -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_WITH_TBB=ON(문제가 생기면 OFF), CMAKE_INSTALL_PREFIX=third_party/install
+- 메모리가 적으므로 make는 -j6 이하, colcon은 --parallel-workers 2 및 MAKEFLAGS=-j4로 빌드한다.
+- LIO-SAM 소스 수정은 빌드 호환성 문제일 때만 최소한으로 하고, 수정 내용을 diff로 로그에 남긴다.
+- ~/ros2_ws, ~/catkin_ws는 건드리지 않는다.
+
+**완료 기준**
+- [x] `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에 imageProjection, imuPreintegration, featureExtraction, mapOptimization이 나온다
+- [x] 각 노드가 기본 params로 5초 동안 크래시 없이 기동된다(공유 라이브러리 에러 없음)
+- [x] task01_build.md 작성
+
+**컨텍스트**
+작업 루트는 /home/hong/SLAM이다. 전체 설계는 TASKS.md를 참고한다. 이 태스크에서는 데이터 처리를 하지 않는다.
+
+---
+
+### [CODEX-REVISION] TASK-01 재작업 요청
+
+**유지할 것**
+- GTSAM 4.1.1 / LIO-SAM ros2 소스 클론, 버전 기록, 의존성 조사 결과
+
+**수정할 것**
+1. xacro 미설치로 중단 → **xacro는 블로커가 아니다.** 업스트림 run.launch.py의 robot_state_publisher용일 뿐이며 C++ 빌드/노드 실행에는 필요 없다. package.xml exec_depend는 colcon 빌드를 막지 않는다. 설치 요청 없이 그대로 진행한다.
+2. 업스트림 launch 대신 `ws/src/LIO-SAM`을 수정하지 말고 `/home/hong/SLAM/launch/lio_sam_nox.launch.py`를 새로 작성한다. 4개 노드 + static_transform_publisher(map→odom identity 등 업스트림 launch가 내보내는 TF 중 xacro 외 항목)를 포함하고, params 파일 경로와 use_sim_time을 인자로 받는다. rviz는 인자로 on/off한다(기본 off).
+
+**추가할 것**
+- 메모리 주의: swap이 거의 가득 차 있다. GTSAM make -j4, colcon MAKEFLAGS=-j3 --parallel-workers 1로 빌드한다. OOM(killed)이 나면 -j2로 낮춰 재시도한다.
+- 기동 시험은 새 launch로 5초 실행해서 확인한다.
+
+**완료 기준 (재확인)**
+- [x] `source ~/SLAM/env.sh && ros2 pkg executables lio_sam`에 4개 노드가 나온다
+- [x] `ros2 launch /home/hong/SLAM/launch/lio_sam_nox.launch.py`가 5초 동안 크래시와 공유 라이브러리 에러 없이 기동된다
+- [x] logs/task01_build.md 갱신
+
+---
+
+### [CODEX-TASK] TASK-02: bag 전처리 + 데이터 리포트
+
+**목적**
+원본 LiDAR 포인트를 LIO-SAM이 요구하는 형식으로 변환한 bag을 만들어, 디스큐(deskew)와 IMU 동기화가 올바르게 동작하게 한다.
+
+**입력**
+- 파일: /home/hong/SLAM/data/synced_bag (읽기 전용, sqlite3, 4.4 GB, 16360 msgs)
+- 데이터: 상단 "데이터 분석 결과" 표 참고
+- 의존성: 없음 (TASK-01과 병렬 실행, LIO-SAM 빌드 결과 불필요)
+
+**출력**
+- /home/hong/SLAM/tools/preprocess_bag.py (CLI: --in, --out, --overwrite)
+- /home/hong/SLAM/tools/tests/test_preprocess.py (pytest)
+- /home/hong/SLAM/data/lio_bag/ (변환된 rosbag2, sqlite3)
+  - /points_raw  PointCloud2, frame_id `front_lidar`, 필드 순서 x,y,z,intensity(float32), ring(uint16), time(float32), point_step 일관, is_dense=True
+  - /imu_raw     원본 /imu/data_synced 그대로(frame_id `imu_link`)
+  - /gps/fix     원본 /fix_synced 그대로
+  - 메시지 기록 시각(bag timestamp)은 **헤더 stamp**로 다시 기록한다. 원본 bag 기록시각은 2일 어긋나 있어 재생 시 /clock과 헤더가 일치하지 않기 때문이다.
+- /home/hong/SLAM/results/data_report/: data_report.md, gnss_traj.png(ENU 궤적), timing.png(토픽별 stamp 간격)
+
+**구현 조건**
+- rosbag2_py(Reader/Writer)로 스트리밍 처리하고 전체를 메모리에 올리지 않는다. 다른 빌드가 동시에 돌고 있으므로 RAM은 1 GB 이하로 쓴다.
+- 포인트 시간 변환:
+  1. 스캔마다 `offset = header_stamp - min(pt.timestamp)`를 계산한다. 오프셋이 전 스캔에서 일정한지(표준편차, 최대편차) 리포트에 기록한다(예상값 약 169765152.46 s, 편차 1 ms 미만).
+  2. `time = pt.timestamp - min(pt.timestamp)` (float32, 0~약 0.025 s)
+  3. 헤더 stamp는 원본을 유지한다(= 스캔 시작). 오프셋 편차가 1 ms 이상이면 중단하고 리포트에 원인을 쓴다.
+- 무효점 제거: NaN/inf, (0,0,0), range < 0.5 m. 제거 비율을 통계로 남긴다.
+- 포인트 순서는 유지한다. ring 값은 그대로 둔다(0–127).
+- 리포트에 기록할 것: ring별 포인트 수, 링당 수평 포인트 수와 방위각 해상도(°) — TASK-03에서 Horizon_SCAN 결정에 쓴다(LIO-SAM은 360°를 Horizon_SCAN칸으로 나누므로 360/해상도가 필요). 포인트 시간이 링 내 방위각과 어떤 관계인지(스캔 패턴)도 기록한다.
+- 매직 넘버는 모듈 상단 상수로 둔다. 에러는 명시적으로 처리한다(토픽 누락, 필드 누락 → 명확한 예외).
+- 원본 bag 수정 금지.
+
+**완료 기준**
+- [ ] data/lio_bag 생성, `ros2 bag info`에서 3토픽의 메시지 수가 원본과 같다(2178/10884/3298)
+- [ ] 변환된 첫/중간/마지막 스캔에서 time ∈ [0, 0.05), is_dense=True, NaN과 원점 점 없음을 스크립트로 검증한다
+- [ ] bag 기록시각과 헤더 stamp가 일치한다(차이 < 1 ms)
+- [ ] pytest 통과(합성 PointCloud2로 변환 함수 단위 테스트: 시간 변환, 무효점 제거, 필드 레이아웃)
+- [ ] data_report.md와 그림 2장 생성
+
+**컨텍스트**
+ROS 2 Humble: `source /opt/ros/humble/setup.bash`. 시스템 numpy는 2.2.6이며 sensor_msgs_py.point_cloud2.read_points는 동작이 확인됐다. 원본 필드 오프셋: x0 y4 z8 intensity12(f32), ring16(u16), timestamp18(f64, 정렬되지 않음), point_step은 메시지에서 읽는다. LIO-SAM(velodyne 모드)은 is_dense=false면 에러를 내고, ring/time 필드가 없어도 에러를 낸다.
+
+---
+
+## 설계 추가 (2026-10-26): 맵 품질 평가 지표 — TASK-05 확장 + TASK-05b 신설
+TASK-05 평가 항목을 다음 세 그룹으로 확장한다.
+1. **궤적 정확도 (GT 대비)**: ATE RMSE/mean/max (SE3 정렬, 스케일 없음), RPE(10 m/50 m 구간, 위치 % + 회전 deg/m), 종점 드리프트, 루프 ON/OFF 비교
+2. **맵 내부 품질 (GT 불필요)**: MME(Mean Map Entropy), MPV(Mean Plane Variance) — 반경 0.3 m 이웃, 같은 복셀 다운샘플 기준으로 run 간 비교. **루프 겹침 구간 일관성**: 주행 처음 15 s와 마지막 15 s에 쌓인 점군끼리 cloud-to-cloud 거리(median, p95)를 구한다(이중 벽이나 고스팅의 정량 지표)
+3. **맵 기반 재주행(위치추정) 테스트 — TASK-05b**: 루프 ON 맵을 prior map으로 고정하고, 스캔별 scan-to-map 정합(small_gicp 또는 Open3D GICP/NDT, IMU 예측 초기값 + 초기 위치에 1 m/5° 섭동)으로 궤적을 추정해 GNSS와 ATE를 비교한다. 정합 실패율과 fitness도 기록한다.
+   - 공정성: 같은 bag을 쓰므로 **짝수 스캔으로 맵을 만들고 홀수 스캔으로 위치추정**하는 split으로 누출을 줄인다. 리포트에는 "동일 주행 기반 → 낙관적 추정치"라고 명시한다. 같은 경로를 다시 주행한 bag을 받으면 같은 스크립트로 진짜 재주행 평가를 한다.
+
+---
+
+## 리뷰 결과: TASK-01 (재작업), TASK-02 — 둘 다 APPROVE (2026-10-26)
+- TASK-01: GTSAM 4.1.1 + LIO-SAM ros2 빌드, env.sh, launch/lio_sam_nox.launch.py 완료. 위험 요소: OpenCV의 libtbb.so.2와 GTSAM의 libtbb.so.12가 함께 링크됨 → 매핑 부하에서 크래시가 나면 GTSAM_WITH_TBB=OFF로 다시 빌드한다(TASK-03에서 감시).
+- TASK-02: data/lio_bag 생성, 검증 통과(pytest 11). 핵심 수치: 방위각 해상도 0.2° → **Horizon_SCAN=1800**, 유효점 약 3.9만/스캔, 상위 ring 119–127 일부는 항상 비어 있음(정상), 스캔 시간 폭 25 ms, 시간과 방위각이 선형(디스큐 OK).
+
+---
+
+### [CODEX-TASK] TASK-03+04: LIO-SAM 설정 + 실행 파이프라인 + 실험 실행
+
+**목적**
+변환된 bag으로 LIO-SAM을 재현 가능하게 돌리고, 루프 클로저 ON/OFF 실험의 궤적과 지도를 저장한다.
+
+**입력**
+- 파일: data/lio_bag (/points_raw, /imu_raw, /gps/fix), env.sh, launch/lio_sam_nox.launch.py, ws/src/LIO-SAM/config/params.yaml(템플릿)
+- 데이터: 위 "IMU–LiDAR 외부 파라미터" 절의 **LIO-SAM 설정값(전치 적용된 값)** 그대로 사용
+- 의존성: TASK-01, TASK-02 완료
+
+**출력**
+- config/params_base.yaml, config/params_loop_off.yaml (loopClosureEnableFlag만 다름)
+- tools/run_lio_sam.sh `<run_name> <params_yaml> [bag_dir] [rate]`: launch(use_sim_time) → `ros2 bag play --clock` → 재생 종료 후 drain 대기 → save_map 서비스 호출 → 종료. 로그는 results/<run>/run.log에 남긴다.
+- tools/record_traj.py: 실행 중 /lio_sam/mapping/odometry를 TUM으로 저장(`odom_online_tum.txt`, timestamp는 header stamp 초)하고, 루프 클로저 이벤트 수(/lio_sam/mapping/loop_closure_constraints 마커 또는 로그)를 기록
+- tools/pcd_to_tum.py: save_map이 만든 transformations.pcd(PointTypePose: x y z roll pitch yaw time)를 **최종 최적화 keyframe 궤적** TUM(`keyframes_final_tum.txt`)으로 변환한다. 루프 보정이 반영된 이 궤적이 메인 평가 대상이다.
+- results/<run>/: run.log, odom_online_tum.txt, keyframes_final_tum.txt, map/(GlobalMap.pcd, CornerMap.pcd, SurfMap.pcd, trajectory.pcd, transformations.pcd), run_meta.json(params 해시, git commit, 재생 속도, 처리 시간, 키프레임 수, 루프 이벤트 수)
+- 테스트: tools/tests/test_pcd_to_tum.py (합성 PointTypePose → TUM 쿼터니언 변환 정확성)
+
+**구현 조건 (params_base.yaml)**
+- pointCloudTopic /points_raw, imuTopic /imu_raw, odomTopic "odometry/imu", gpsTopic "odometry/gps"(이 토픽은 bag에 없음 → GPS factor가 사실상 비활성임을 로그로 확인. **GNSS는 절대 LIO-SAM 입력으로 넣지 않는다** — 평가 GT 누출 방지)
+- lidarFrame과 baselinkFrame을 **둘 다 "front_lidar"**로 둔다(imuPreintegration.cpp:128의 TF lookup 회피, base_link TF 없음). odometryFrame "odom", mapFrame "map"
+- sensor velodyne, N_SCAN 128, Horizon_SCAN 1800, downsampleRate 1, lidarMinRange 1.0, lidarMaxRange 100.0
+- extrinsicTrans/extrinsicRot/extrinsicRPY: TASKS.md "LIO-SAM 설정값" 그대로
+- IMU 노이즈와 gravity는 업스트림 기본값을 유지한다(값을 바꾸면 이유를 기록한다). useImuHeadingInitialization false
+- loop: historyKeyframeSearchRadius 15, TimeDiff 30, FitnessScore 0.3 기본값으로 시작한다. **루프가 한 번도 안 걸리면** 원인(거리/시간/fitness)을 로그로 분석하고, 한 번에 한 파라미터만 조정해 params_base에 반영한 뒤 근거를 기록한다
+- savePCD **false 유지**. ⚠️ save_map 서비스는 `rm -r $HOME+destination`을 실행한다. destination은 반드시 `/SLAM/results/<run>/map` 형태의 **전용 하위 폴더**만 허용하고, run_lio_sam.sh에서 경로를 검증한다(빈 문자열, '/', 'SLAM', 'SLAM/results' 단독 거부). 서비스 응답이 실패면 run 실패로 처리한다
+- ws/src/LIO-SAM 소스 수정 금지(필요하면 중단하고 이유를 보고)
+
+**실험 (TASK-04)**
+1. 먼저 rate 1.0으로 1회 실행해 실시간 처리 여부를 확인한다(키프레임 수, 처리 지연 로그). 따라가지 못하면 rate 0.5로 정하고 기록한다. 이후 모든 run에 같은 rate를 쓴다
+2. `loop_on_r{1,2,3}`, `loop_off_r{1,2,3}` 각 3회(LIO-SAM은 멀티스레드라 비결정적 → 반복 분산 보고용)
+3. TASK-05b 대비: tools/preprocess_bag.py에 `--keep-every N --phase K` 옵션을 추가한다(기존 테스트 유지 + 새 테스트). `data/lio_bag_even`(짝수 스캔, IMU/GNSS 전부 유지), `data/lio_bag_odd`를 생성하고, `even_loop_on` 1회를 실행한다
+4. 각 run 직후 sanity check: keyframes_final_tum 누적거리가 238.7 m ± 10% 이내인지, 발산(속도 > 30 m/s 점프) 없는지 확인하고 results/experiments_summary.md에 표로 정리한다(run, rate, 처리시간, 키프레임 수, 루프 이벤트 수, 누적거리, 시작-끝 거리(최종 keyframe 기준), 성공 여부)
+
+**완료 기준**
+- [x] 7개 run 모두 결과 폴더와 필수 파일 생성 및 직접 검증. ON/OFF 6개 sanity 통과, even 실패 및 재현 원인 분석 기록(logs/task03_04.md).
+- [ ] loop_on run에서 루프 클로저 이벤트 ≥ 1, loop_off에서 0 — full ON=3/2/3, OFF=0/0/0 통과; even ON=0으로 미충족
+- [x] loop_on의 최종 keyframe 시작-끝 거리가 loop_off보다 작다(GT 0.47 m 참고) — 3쌍 모두 통과
+- [x] pytest 전체 통과(tools/tests) — 25 passed
+- [x] TBB 관련 크래시 여부를 기록한다 — 모든 실행에서 크래시 없음
+- [x] logs/task03_04.md에 설정 근거, 실행 명령, 이슈를 기록한다
+
+**v1 당시 상태 (2026-10-26; 아래 v2 완료 결과로 대체)**: TASK-03 완료. TASK-04는 7개 run 및 even 재시도까지 수행했으나 even 발산/루프 0으로 전체 완료 기준 미충족. 상세: logs/task03_04.md, results/experiments_summary.md. 지정된 extrinsicRPY 변경은 사용자 확인 전까지 수행하지 않는다.
+
+**컨텍스트**
+- `source env.sh` 필요. 메모리는 RAM 14 GB, swap은 거의 가득 참. 동시에 두 run을 돌리지 않는다.
+- 평가 지표 계산(ATE 등)은 TASK-05 범위이므로 여기서는 하지 않는다.
+- 데이터 특성: 전방 약 120° FOV 단일 LiDAR, 약 70×60 m 사각 루프 1바퀴, 108 s, 시계방향 주행, 평지.
+
+---
+
+## 리뷰 결과: TASK-03+04 — REVISE (2026-10-26)
+### 완료 기준 충족 여부
+- ON/OFF 6회: 통과 (종점 ON 0.82±0.21 m / OFF 10.80±9.16 m, 루프 2–3회 / 0회)
+- even_loop_on: 실패 (발산, 5.7 km)
+- pytest 25 통과, TBB 크래시 없음, save_map 경로 보호 적용
+### 발견된 문제
+1. **extrinsicRPY 설계 오류(Claude 명세 실수)** — 심각도 높음. 1배속 발산과 even 발산의 유력한 원인. Codex가 정확히 진단했고, 명세를 임의로 바꾸지 않고 보고한 판단도 옳았다.
+2. rate 0.5로 정한 근거가 잘못된 설정 위에서 측정됨 → 다시 측정해야 함
+### 판정: REVISE (설정 정정 후 재실험)
+
+### [CODEX-REVISION] TASK-03+04 재작업 요청
+
+**유지할 것**
+- run_lio_sam.sh, record_traj.py, pcd_to_tum.py, verify_experiments.py, run_experiments.sh, split bag, 경로 보호 로직, 테스트 전부
+- 기존 results/* 는 **삭제하지 말고** results/archive_v1_wrong_rpy/ 로 이동한다(포트폴리오의 "디버깅 사례"로 쓸 것). ARCHIVE_NOTE.md에 이유를 기록한다.
+
+**수정할 것**
+1. config/params_base.yaml, params_loop_off.yaml의 extrinsicRPY를 위 정정값(R 원본)으로 바꾼다. extrinsicRot(=R.T)와 extrinsicTrans는 유지한다.
+2. 수정 후 imu_frame_diagnostic을 다시 계산해 중력축 기울기가 < 1°인지 확인한다(results/imu_frame_diagnostic.json 갱신).
+3. rate 재결정: pilot_rate1 → 통과하면 rate 1.0을 쓰고, 실패하면 pilot_rate05로 결정한다. 지연 계측은 둘 다 기록한다.
+4. 같은 rate로 loop_on_r{1,2,3}, loop_off_r{1,2,3}, even_loop_on을 새로 실행한다.
+
+**추가할 것**
+- experiments_summary.md에 v1(잘못된 RPY) 대비 v2 비교 표를 짧게 추가한다(종점거리, 발산 여부)
+- run_experiments.sh를 실행하는 동안 그 스크립트 파일을 편집하지 않는다(v1 래퍼 오류 재발 방지)
+
+**완료 기준 (재확인)**
+- [x] 중력축 진단 < 1° — 0.095264°
+- [x] 7개 run 모두 sanity PASS (even 포함). even이 여전히 실패하면 원인 분석(10 Hz 입력에 따른 mappingProcessInterval/keyframe 임계 등)과 한 번에 한 파라미터씩 조정한 시도를 기록한다(최대 2회)
+- [x] loop_on 루프 ≥ 1, loop_off 0, loop_on 종점거리 < loop_off — ON=2/2/2, OFF=0/0/0, even=2; 종점 비교 3/3 통과
+- [x] pytest 전체 통과, logs/task03_04.md에 v2 절 추가 — 25 passed
+
+
+**v2 최종 상태 (2026-10-26): TASK-03+04 완료.** 승인된 extrinsicRPY=R 정정, 중력축 0.095264°, rate=1.0. RPY 정정 후 기본 fitness=0.3 배치도 전체 보존했고, ON r2 루프 누락 분석 및 fitness만 0.5로 조정한 trial 후 전체 7회를 재실행했다. 최종 7개 sanity/loop 기준 PASS, ON/OFF 종점 비교 3/3 PASS, 독립 검증 exit=0, pytest 25 passed. v1은 results/archive_v1_wrong_rpy/, v2 기본 임계값 배치는 results/archive_v2_fitness03/에 보존. 상세: logs/task03_04.md의 v2 절, results/experiments_summary.md, results/verification_v2.json.
+
+---
+
+## 리뷰 결과: TASK-03+04 v2 — APPROVE (2026-10-26)
+- 중력축 0.095°, 1배속 실시간 처리 가능(지연 평균 0.14 s), 7/7 PASS, 루프 ON 2/2/2 · OFF 0/0/0, 종점 ON 0.28±0.06 m / OFF 1.05±0.76 m
+- historyKeyframeFitnessScore 0.3→0.5 완화: 근거(r2 루프 누락) 타당. 다만 **잘못된 루프(false positive) 위험**이 있으므로 TASK-05에서 루프 제약 전후 ATE로 검증하고 리포트에 명시한다
+- 주의: "시작–끝 거리"는 정확도 지표가 아니다(GT 자체가 0.47 m). 정확도는 TASK-05에서 판단한다
+
+## 공용 Python 환경
+`/home/hong/SLAM/.venv` (system-site-packages, open3d 0.20.0, scipy 1.15.3, evo, numpy 2.2.6; rosbag2_py 사용 가능). 실행: `source /opt/ros/humble/setup.bash && .venv/bin/python ...`
+
+---
+
+### [CODEX-TASK] TASK-05: GNSS 대비 정확도 평가 + 맵 내부 품질 지표
+
+**목적**
+루프 ON/OFF/even run의 궤적 정확도와 맵 품질을 재현 가능한 수치로 산출한다(포트폴리오 핵심 근거).
+
+**입력**
+- results/{loop_on_r1..3, loop_off_r1..3, even_loop_on}/ (keyframes_final_tum.txt, odom_online_tum.txt, map/*.pcd)
+- data/lio_bag (/gps/fix = GT, /points_raw)
+- 의존성: TASK-03+04 v2
+
+**출력** (코드는 tools/eval/, 테스트는 tools/tests/)
+- tools/eval/gnss_gt.py: NavSatFix → ENU(첫 fix 원점, WGS84→ECEF→ENU) TUM `results/gt_gnss_enu_tum.txt`. status<2 또는 cov σ>0.05 m는 제외하고 개수를 기록한다
+- tools/eval/traj_eval.py: 궤적 하나 + GT → metrics.json
+  - 시간 동기: GT를 추정 stamp에 선형보간(최근접 GT 간격 > 0.2 s면 제외)
+  - **정렬**: (a) SE3 Umeyama(스케일 없음, 전체 궤적) (b) **SE3 + lever arm 동시추정**: `p_gnss = R·(p_est + R_est·l) + t`를 비선형 최소제곱으로 푼다. GNSS 안테나와 LiDAR 사이 오프셋 l(바디 프레임, 3D)이 미지수이기 때문이다. 추정된 l을 기록하고, |l| > 3 m면 경고한다
+  - ATE: RMSE/mean/median/max/std (정렬 a, b 모두)
+  - RPE(KITTI 스타일, 구간 10/25/50/100 m): GT 자세는 GNSS 위치 + 궤적 접선 yaw(roll/pitch=0, 평지 근사)로 만든다. 병진 오차 %와 yaw 오차 deg/100m. 근사라는 점을 metrics에 명시한다
+  - 오차 시계열(error_vs_time.csv)
+- tools/eval/build_map_from_poses.py: bag 스캔(+선택적 스캔 필터: even/odd/all) + 추정 궤적(SLERP 보간) → 누적 점군(voxel 다운샘플, 점마다 상대시간 필드 보존). TASK-05b와 TASK-06에서도 재사용하므로 함수/CLI를 깔끔하게 분리한다. 디스큐는 하지 않는다(근사이므로 명시)
+- tools/eval/map_quality.py:
+  - MME(Mean Map Entropy, 반경 0.3 m), MPV(Mean Plane Variance, 반경 0.3 m) — 입력은 같은 voxel 0.1 m 다운샘플, 같은 영역(GT bounding box 내)으로 run 간 비교 가능하게 한다
+  - **루프 겹침 일관성**: build_map_from_poses로 처음 15 s 점군 A와 마지막 15 s 점군 B를 만들고, A↔B 겹침 영역에서 nearest-neighbor 거리 median/p95와 "이중 벽" 비율(> 0.2 m)을 구한다
+- tools/eval/run_all_eval.py: 위를 모든 run에 적용 → results/eval/summary.csv, results/eval/summary.md
+  - loop ON vs OFF (mean±std, n=3), even_loop_on, online odometry vs final keyframes
+  - **루프 제약 검증**: loop ON run에서 루프 제약이 들어간 keyframe 쌍의 GT 거리를 계산한다(< 2 m여야 true positive). TASK-04에서 fitness를 0.5로 완화했기 때문이다
+- results/eval/figs/: traj_overlay_{run}.png(GT vs est, ENU), traj_on_vs_off.png, ate_vs_time.png(ON/OFF 겹쳐 그림), rpe_bar.png, loop_overlap_{on,off}.png(겹침 구간 top-view, 두 시기 점군 색 구분)
+
+**구현 조건**
+- ATE와 Umeyama는 직접 구현하고 단위테스트를 쓴다(합성 궤적에 알려진 R,t와 lever arm을 넣어 복원되는지). evo로 ATE(SE3)를 교차검증해 차이 < 1 mm인지 기록한다
+- 그림은 matplotlib Agg, 축 단위(m), 범례, 제목, 색약 친화 팔레트(예: Okabe-Ito). 포트폴리오용으로 dpi 200
+- 매직 넘버는 config dataclass/상수로 둔다. 실패한 run이나 누락 파일은 명시적으로 에러 처리한다
+- results/<run>/ 원본 파일은 수정하지 않는다. 출력은 results/eval/ 아래에만 쓴다
+- 메모리: 점군 처리 시 RAM 4 GB 이하(voxel 누적 사용). TASK-06이 동시에 실행된다 — tools/maps/, results/maps/는 건드리지 않는다
+
+**완료 기준**
+- [x] 7개 run × (final, online) metrics.json과 summary.md/csv 생성
+- [x] Umeyama/lever-arm 단위테스트 통과, evo 교차검증 차이 < 1 mm
+- [x] 루프 true/false positive 판정 표
+- [x] MME/MPV/겹침 일관성 표(ON vs OFF)
+- [x] 그림 생성 및 직접 확인(빈 그림, 축 뒤집힘 없음)
+- [x] pytest 전체 통과, logs/task05.md 작성(방법, 근사/한계, 결과 해석 3줄)
+
+---
+
+### [CODEX-TASK] TASK-06: 지도 산출물 (3D PCD + 2D occupancy grid)
+
+**목적**
+포트폴리오용 3D 점군 지도와 Nav2 호환 2D 지도를 만든다.
+
+**입력**
+- results/<run>/map/GlobalMap.pcd (기본 run: loop_on_r2 — 종점 중앙값 run. TASK-05의 ATE 중앙값 run으로 나중에 교체할 수 있게 `--run` 인자화)
+- results/<run>/keyframes_final_tum.txt, data/lio_bag/points_raw (자유공간 레이캐스팅용)
+- 의존성: TASK-03+04 v2
+
+**출력** (코드는 tools/maps/, 결과는 results/maps/<run>/)
+- 3D: map_full.pcd(원본 복사), map_0p10.pcd(voxel 0.1 m), map_0p10_enu.pcd(옵션: `--align-json`으로 TASK-05의 SE3 정렬을 적용한 ENU 지도. 파일이 없으면 생략하고 로그에 남긴다)
+- 3D 렌더: map_top.png(top-down, 높이 컬러맵), map_oblique.png(사선 뷰, open3d offscreen 렌더링이 안 되면 matplotlib 3D scatter 다운샘플로 대체), 궤적 겹쳐 그리기
+- 2D: map2d.pgm + map2d.yaml(Nav2 map_server 형식: image, resolution 0.05, origin, negate 0, occupied_thresh 0.65, free_thresh 0.25, mode trinary)
+  - 지면 제거: 지도 z는 중력 정렬되어 있다. 로컬 지면 높이를 2 m 셀별 하위 퍼센타일로 추정하고, 지면 위 0.3–2.0 m 점을 장애물로 둔다(상수화)
+  - 자유공간: keyframe 위치(또는 bag 스캔 서브샘플)에서 장애물 셀까지 2D 레이캐스팅(Bresenham, log-odds). 미관측은 unknown
+  - map2d.png(컬러 프리뷰 + 궤적), map2d_stats.json(셀 수: occupied/free/unknown, 크기 m)
+- tools/tests/test_maps.py: 지면 제거, 레이캐스팅, YAML 형식 단위테스트(합성 데이터)
+
+**구현 조건**
+- .venv 사용. RAM 4 GB 이하. TASK-05가 동시에 실행된다 — tools/eval/, results/eval/는 건드리지 않는다
+- Nav2 YAML 필드명과 PGM(P5, 0=occupied 254=free 205=unknown) 규칙을 정확히 지킨다
+- 매직 넘버는 상수화하고, 에러 처리를 명시한다
+
+**완료 기준**
+- [ ] results/maps/loop_on_r2/에 위 파일 전부 생성
+- [ ] PGM/YAML이 Nav2 형식 검증 스크립트(직접 작성: 헤더, 값 집합, origin/resolution 일관성)를 통과
+- [ ] 렌더 이미지를 직접 확인(건물/도로 윤곽 식별 가능, 궤적이 도로 위에 있음)
+- [ ] pytest 통과, logs/task06.md 작성
+
+---
+
+### [CODEX-REVISION] TASK-05 재작업 요청 (Claude 결정, 2026-10-26)
+
+**유지할 것**
+- tools/eval/* 구현과 테스트 47개 전부
+
+**수정할 것**
+1. GNSS 필터: **수평 σ(cov[0], cov[4])에만 0.05 m 기준을 적용한다.** 수직 σ 5–6 cm는 RTK에서 정상이다. 수직 σ는 통계로만 기록한다.
+2. ATE는 **2D(수평, x-y)**와 **3D**를 모두 보고하고, 2D를 주 지표로 둔다(평지이고 GT 수직 노이즈가 5 cm 수준이기 때문). 정렬은 SE3로 하되 2D ATE는 정렬 후 x-y 성분만으로 계산한다.
+3. 루프 쌍 기록: tools/record_traj.py가 /lio_sam/mapping/loop_closure_constraints(MarkerArray)의 선분 양 끝점을 받아 `loop_pairs.json`으로 저장하게 한다(끝점 좌표, 수신 시각, 최종 keyframe에 최근접 매칭한 index 쌍과 매칭 거리). 마커 구조는 LIO-SAM 소스(mapOptmization.cpp visualizeLoopClosure)를 확인해서 맞춘다. 단위테스트를 추가한다.
+4. **실험 재배치(v3)**: 현재 results의 7개 canonical run과 파일럿을 results/archive_v3_preloop_pairs/로 옮기고(삭제 금지, ARCHIVE_NOTE.md 작성), 같은 설정(params 해시 동일, rate 1.0, fitness 0.5)으로 tools/run_experiments.sh를 다시 실행해 7개 run을 새로 만든다. 실행 중 스크립트 파일 편집 금지. results/maps/는 건드리지 않는다(TASK-06은 나중에 재생성).
+5. 루프 검증: loop_pairs의 각 쌍에 대해 두 keyframe 시각의 GT 수평거리를 구하고, < 2 m면 true positive로 판정한다. 표로 정리한다.
+
+**완료 기준 (재확인)**
+- [x] v3 7개 run PASS(verify_experiments.py exit 0), loop_on 각 run에 loop_pairs.json(≥1쌍)
+- [x] 7 run × (final, online) metrics.json, results/eval/summary.md/csv: 2D/3D ATE(SE3, SE3+lever arm), RPE, ON vs OFF mean±std
+- [x] evo 교차검증 < 1 mm, 루프 TP/FP 표, MME/MPV/겹침 일관성 표, 그림 직접 확인
+- [x] **ATE(2D, SE3+lever) 중앙값 loop_on run 이름**을 summary.md 맨 위에 명시한다(TASK-06 대표 run). 그 run의 SE3 정렬 파라미터를 results/eval/<run>/align_se3.json(4x4 행렬, 프레임 설명)으로 저장한다
+- [x] pytest 전체 통과, logs/task05.md 갱신
+
+**TASK-05 v3 완료 (2026-10-26):** 최종 canonical 7개 검증 PASS, 14개 궤적 평가·7개 맵 품질·그림 12장 직접 확인, pytest 52 passed. even 최초/재시도 2회 발산은 archive_v3_failed_attempts에 보존했으며, 입력 구독자 준비 확인 + DDS 3초 대기 후 동일 params/rate 재시도 성공. 루프 9쌍 중 TP 7 / FP 2(문서의 GT 수평 <2 m 기준). 대표 run loop_on_r2와 SE3 4x4 정렬 파일 생성. results/maps 및 save_map 보호 유지. 상세: results/eval/summary.md, results/eval/independent_verification.json, logs/task05.md.
+
+---
+
+## 리뷰 결과: TASK-05 rev1 — REVISE (평가 방법 버그, 재실험 불필요)
+- 잘 된 점: v3 7 run, evo 교차검증 5e-15 m, 루프 쌍 기록, 투명한 실패 기록
+- 문제 1 (높음) — **RPE 병진 17%는 버그**: est 회전에 LiDAR 장착 pitch 9.3°가 포함된 채로 GT(roll/pitch=0)와 비교됨 → 2·sin(4.65°)≈16% 체계 오차. ATE < 1 m와 모순된다.
+- 문제 2 (높음) — **lever arm 2–10 m는 관측 불가능한 해**: 평면 운동(yaw 회전만)에서는 l_z를 관측할 수 없고, LiDAR frame이 9° 기울어 있어 x/z가 섞인다. 다만 traj_on_vs_off.png의 코너 패턴은 실제 수평 lever arm이 있음을 시사한다.
+- 문제 3 (중간) — **루프 TP/FP 기준 오류**: keyframe 간 GT 거리 < 2 m는 잘못된 기준이다(2.5 m 떨어진 쌍도 ICP로 정상 정합 가능). 판정 기준은 "제약 일관성"이어야 한다.
+- 문제 4 (낮음) — yaw RPE 10 m는 GNSS 접선 노이즈가 지배한다(1.4 cm / 2 m 기준선 → 약 0.6° 노이즈).
+
+### [CODEX-REVISION] TASK-05 rev2 (평가 코드만 수정, 실험 재실행 금지)
+
+**유지할 것**: v3 run 결과, ATE SE3 계산, evo 교차검증, 맵 품질, 그림 체계, 테스트
+
+**수정할 것**
+1. **yaw-only body frame**: 정렬된 est 회전에서 yaw만 추출해서(roll/pitch 제거) RPE와 lever arm 계산에 쓴다. 근거(LiDAR pitch 9.3° 장착)를 metrics 노트에 기록한다.
+2. **lever arm = 수평 2-DoF**: `p_gnss = R_align·p_est + t + Rz(yaw_est)·[lx, ly, 0]`. 3-DoF 결과는 진단용으로만 남기고 주 지표에서 제외한다. 추정된 (lx, ly)를 run 간 비교(mean±std)해서 일관성을 확인한다 — 일관되면 실제 장착 오프셋의 근거가 된다.
+3. **RPE 재설계**: GT 접선 기준선을 5 m로 늘리고 병진 RPE는 10/25/50/100 m로 보고한다. yaw RPE는 25 m 이상만 보고한다. **노이즈 바닥 검증**: GT 자체(+σ 1.4 cm 가우시안 노이즈 10회)를 추정값으로 넣었을 때 RPE를 계산해 표에 함께 싣는다.
+4. **루프 판정 기준 교체**: 각 루프 쌍 (i,j)에 대해 정렬 후 최종 추정 상대위치 `p_i − p_j`와 GT 상대위치 `g_i − g_j`(같은 시각 보간)의 차이 |Δ|를 구한다. **|Δ| < 0.5 m → CONSISTENT(TP)**, 그 이상이면 INCONSISTENT. GT 거리 기준은 참고 열로만 남긴다. (같은 방향으로 통과한 쌍이라 lever 효과는 상쇄된다는 점도 기록한다.)
+5. summary.md 맨 위에 **헤드라인 표**를 둔다(포트폴리오용): 그룹별(ON/OFF/even) 2D ATE RMSE [SE3+lever2D], 종점 오차, RPE 100 m %, 루프 일관성 비율, MME. mean±std (n=3).
+6. 결과 해석 3–5줄(logs/task05.md 및 summary.md): 루프 클로저 이득의 크기와 통계적 신뢰도를 n=3 기준으로 정직하게 쓴다(차이가 std보다 작으면 그렇게 쓴다).
+
+**완료 기준**
+- [ ] RPE 100 m 병진 오차가 ATE와 상식적으로 일관된다(대략 < 1–2 %), 노이즈 바닥 표 포함
+- [ ] 2-DoF lever: 모든 run에서 |l| < 3 m이고 run 간 std 보고
+- [ ] 루프 판정 표 교체
+- [ ] 헤드라인 표와 해석, 그림 갱신(traj_overlay에 lever 보정 궤적 추가)
+- [ ] pytest 전체 통과(합성 테스트: 9° pitch가 들어간 est 회전에서 RPE가 0에 가깝게 나오는지, 2-DoF lever 복원)
+
+---
+
+### [CODEX-REVISION] TASK-06 rev1 (포트폴리오 품질)
+**배경**: v3 재실험으로 results/loop_on_r2가 새 데이터로 바뀌었다. 기존 results/maps/loop_on_r2는 v2 기반이므로 results/maps/archive_v2/로 옮기고 다시 생성한다.
+
+**수정할 것**
+1. 대표 run = loop_on_r2 (v3). ENU 지도: results/eval/loop_on_r2/align_se3.json을 적용한다(SE3 부분은 TASK-05 rev2의 영향을 받지 않음).
+2. 2D 자유공간: scan_stride 10 → 2로 낮추고, 레이캐스팅에 bag 원본 스캔의 수평 슬라이스(지면 위 0.3–2.0 m)를 쓴다. unknown 비율을 주행 영역(궤적 30 m 버퍼) 기준으로 보고한다.
+3. 출력 영역 자르기: 궤적 bounding box + 30 m 여백(2D/3D 렌더 모두). 원본 전체 PCD는 그대로 두고 crop본을 따로 저장한다.
+4. YAML 통일: map2d.yaml에 **free_thresh 0.196**(Nav2/ROS 관례값, unknown 205 보존)을 쓰고 보조 YAML을 제거한다. 근거를 주석으로 남긴다.
+5. 3D 렌더 품질: Open3D OffscreenRenderer(EGL)를 먼저 시도하고, 안 되면 matplotlib을 쓰되 crop 영역에서 voxel 0.2 m, 높이 컬러, 점 크기와 시점을 조정해 건물 윤곽이 잘 보이게 한다. 이미지 3장: top, oblique, 루프 겹침 구간 확대(ON vs OFF 나란히 — results/loop_off_r2 지도도 같은 방식으로 crop/렌더).
+6. 위성/항공사진 오버레이는 하지 않는다(외부 타일 사용 금지).
+
+**완료 기준**
+- [ ] results/maps/loop_on_r2/에 전체/crop PCD, ENU PCD, PGM/YAML(Nav2 검증 통과), PNG 3–4장
+- [ ] 주행 영역 unknown 비율이 기존보다 줄었음을 수치로 보고
+- [ ] 이미지 직접 확인, pytest 통과, logs/task06.md 갱신
+
+---
+
+## 리뷰 결과: TASK-05 rev2, TASK-06 rev1 — APPROVE (2026-10-26)
+- 헤드라인(2D ATE, SE3+lever2D): ON 0.306±0.114 m / OFF 0.389±0.220 m / even 0.240 m, RPE 100 m 약 1.47%, 루프 일관성 9/9
+- **lever arm 수평 추정 lx=−1.55±0.03 m, ly=−0.12±0.08 m (7 run 일관)** → GNSS 안테나가 LiDAR보다 약 1.55 m 뒤에 있음. 사용자 확인 대기(선택)
+- 루프 클로저 이득(약 21%)은 n=3의 std보다 작다 → 리포트에 "짧은 단일 루프에서는 오도메트리 드리프트가 작아 이득이 제한적"이라고 정직하게 쓴다
+- 지도: 2D unknown 82.9→73.6%, EGL 렌더 성공, 루프 겹침 ON/OFF 비교 그림 우수
+- 남은 문제: 제거된 보조 YAML을 요구하는 낡은 테스트 1개 실패 → 다음 태스크에서 정리
+
+---
+
+### [CODEX-TASK] TASK-05b: 맵 기반 재주행(위치추정) 테스트
+
+**목적**
+"지도를 만들고 다시 주행해서 GT와 비교"하는 평가를, 맵 생성에 쓰지 않은 스캔(held-out)으로 수행한다.
+
+**입력**
+- 맵: results/even_loop_on (짝수 스캔 + IMU로 만든 LIO-SAM 결과) → tools/eval/build_map_from_poses.py로 짝수 스캔만 써서 prior map 생성(voxel 0.2 m)
+- 쿼리: data/lio_bag_odd (홀수 스캔 1089개 — 맵 생성에 한 번도 쓰이지 않음)
+- GT: results/gt_gnss_enu_tum.txt, 평가 함수: tools/eval/traj_eval.py(SE3+lever2D)
+- 의존성: TASK-05 rev2, TASK-06 rev1
+
+**출력** (tools/loc/, results/loc/)
+- tools/loc/localize.py: prior map 위 scan-to-map 위치추정
+  - 스캔 전처리: 범위 1–80 m, voxel 0.3 m. 디스큐는 하지 않는다(한계로 기록)
+  - 정합: Open3D GICP(registration_generalized_icp, max corr 1.0 m → 수렴 후 0.5 m 2단계). 맵 KD-tree와 공분산은 한 번만 계산한다
+  - 예측: 등속 모델(직전 두 포즈). IMU는 쓰지 않는다(순수 LiDAR-to-map 위치추정 평가)
+  - 실패 판정: fitness < 0.3 또는 inlier RMSE > 0.3 m → 예측값 유지 + 실패 카운트. 연속 5회 실패 → LOST
+  - 출력: TUM 궤적, 스캔별 fitness/rmse/반복수/처리시간 CSV
+- tools/loc/run_loc_eval.py
+  1. **기본 실험**: 초기 포즈 = even_loop_on의 해당 시각 포즈(정답 근처). 전 구간 위치추정 → ATE(2D, SE3+lever2D와 SE3 둘 다)를 TASK-05 테이블과 같은 형식으로 낸다. 비교 기준선: even_loop_on 매핑 궤적 ATE
+  2. **초기값 강건성**: 시작 시각 5곳(루프 상 균등 분포) × 섭동 수준 {0.5 m/2°, 1 m/5°, 2 m/10°, 3 m/15°} × 10 시드. 각 시도에서 처음 30스캔만 돌려 **수렴 성공률**(30스캔 후 맵 프레임 오차 < 0.3 m, yaw < 1°)을 구한다. 맵 프레임 기준 정답은 even_loop_on 포즈를 보간한 값이다(GT 체인 오차 없이 정합 능력만 본다)
+  3. 처리 속도: 스캔당 평균/최대 ms, 실시간 계수(10 Hz 기준)
+- results/loc/: summary.md(헤드라인 표 + 해석 3줄 + 한계), loc_traj_tum.txt, per_scan.csv, robustness.csv, figs/(loc_traj_overlay.png, loc_error_vs_time.png, robustness_heatmap.png(섭동 × 시작위치 성공률), fitness_vs_time.png)
+
+**구현 조건**
+- .venv Python. RAM 4 GB 이하. 매직 넘버는 상수/dataclass로 둔다
+- 기존 결과(results/<run>, results/eval, results/maps)는 읽기 전용이다
+- 공정성 문구를 summary 맨 위에 명시한다: "동일 주행의 held-out(홀수) 스캔 → 진짜 재주행보다 낙관적. 다른 날 주행 bag으로 같은 스크립트를 재사용 가능"
+- 다른 bag을 넣을 수 있도록 CLI 인자화(--map-run, --query-bag, --gt)
+
+**추가 정리**
+- tools/maps 테스트 중 제거된 보조 YAML(map2d_nav2.yaml)을 요구하는 낡은 테스트를 rev1 결정(단일 map2d.yaml, free_thresh 0.196)에 맞게 수정한다
+
+**완료 기준**
+- [ ] 기본 실험 궤적이 LOST 없이 완주하고 ATE 표가 나온다
+- [ ] 강건성 4×5×10 = 200회 시도, 성공률 히트맵
+- [ ] 단위테스트: 합성 점군에 알려진 변환 → GICP 복원, 실패 판정 로직, 등속 예측
+- [ ] **전체 pytest 0 실패**
+- [ ] 그림 직접 확인, logs/task05b.md 작성
+
+exec
+/bin/bash -lc "ls -la; cat env.sh; find .. -name AGENTS.md -not -path '*/third_party/*' -print" in /home/hong/SLAM
+ succeeded in 4400ms:
+total 96
+drwxrwxr-x 12 hong hong  4096 Oct 26 17:25 .
+drwxr-x--- 62 hong hong  4096 Oct 26 18:24 ..
+drwxrwxr-x  2 hong hong  4096 Oct 26 17:05 config
+drwxrwxr-x  6 hong hong  4096 Oct 26 16:03 data
+-rw-rw-r--  1 hong hong   453 Oct 26 13:58 env.sh
+drwxrwxr-x  3 hong hong  4096 Oct 26 14:04 launch
+drwxrwxr-x  3 hong hong  4096 Oct 26 18:25 logs
+drwxrwxr-x  3 hong hong  4096 Oct 26 14:00 .pytest_cache
+drwxrwxr-x 15 hong hong  4096 Oct 26 18:12 results
+-rw-rw-r--  1 hong hong 42371 Oct 26 18:25 TASKS.md
+drwxrwxr-x  4 hong hong  4096 Oct 26 14:02 third_party
+drwxrwxr-x  6 hong hong  4096 Oct 26 17:37 tools
+drwxrwxr-x  7 hong hong  4096 Oct 26 17:25 .venv
+drwxrwxr-x  6 hong hong  4096 Oct 26 14:02 ws
+#!/usr/bin/env bash
+# Source this file from bash: source /home/hong/SLAM/env.sh
+_slam_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source /opt/ros/humble/setup.bash
+export CMAKE_PREFIX_PATH="${_slam_root}/third_party/install${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
+export LD_LIBRARY_PATH="${_slam_root}/third_party/install/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+source "${_slam_root}/ws/install/local_setup.bash"
+unset _slam_root
+../Downloads/shorts_ai_football/AGENTS.md
+../.codex/.tmp/plugins/plugins/vercel/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/data-analytics/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/prototype/AGENTS.md
+../.codex/.tmp/plugins/plugins/product-design/templates/mobile-app/AGENTS.md
+../.codex/.tmp/plugins/plugins/zoom/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/react-best-practices/AGENTS.md
+../.codex/.tmp/plugins/plugins/build-web-apps/skills/supabase-best-practices/AGENTS.md
+
+exec
+/bin/bash -lc 'cat tools/eval/build_map_from_poses.py; cat tools/eval/traj_eval.py' in /home/hong/SLAM
+ succeeded in 0ms:
+"""Streaming voxel map with pose SLERP, scan parity and acquisition-time provenance.
+
+No per-point deskew: each scan uses its header pose. relative_time_s and stamp_s
+are voxel means (not original individual returns). count weights allow incremental
+voxel aggregation without changing centroids. Input bags and trajectories are read-only.
+"""
+import argparse
+from pathlib import Path
+import numpy as np
+from scipy.spatial.transform import Rotation, Slerp
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import PointCloud2
+from .gnss_gt import bag_reader
+from .traj_eval import load_tum
+
+VOXEL_M = 0.1
+MERGE_EVERY_SCANS = 20
+MAX_VOXELS = 3_000_000
+
+
+def voxel_reduce(rows, voxel=VOXEL_M):
+    """Nx6: xyz, relative-time, header-stamp, weight. Weighted voxel means."""
+    if voxel<=0: raise ValueError('Voxel size must be positive')
+    if not len(rows): return np.empty((0,6))
+    keys=np.floor(rows[:,:3]/voxel).astype(np.int64)
+    _, inverse=np.unique(keys,axis=0,return_inverse=True)
+    n=int(inverse.max())+1
+    if n>MAX_VOXELS: raise MemoryError(f'Voxel budget exceeded ({n}); increase voxel size')
+    weights=np.bincount(inverse,weights=rows[:,5],minlength=n)
+    means=np.column_stack([np.bincount(inverse,weights=rows[:,k]*rows[:,5],minlength=n)/weights for k in range(5)])
+    return np.column_stack((means,weights))
+
+
+def cloud_rows(msg):
+    names=['x','y','z','time']; fields={f.name:f for f in msg.fields}
+    if not set(names)<=fields.keys(): raise ValueError('Cloud missing xyz/time')
+    if any(fields[n].datatype!=7 or fields[n].count!=1 for n in names): raise ValueError('Expected float32 xyz/time')
+    endian='>' if msg.is_bigendian else '<'
+    dt=np.dtype(dict(names=names,formats=[endian+'f4']*4,
+                     offsets=[fields[n].offset for n in names],itemsize=msg.point_step))
+    a=np.ndarray((msg.height,msg.width),dtype=dt,buffer=msg.data,strides=(msg.row_step,msg.point_step)).reshape(-1)
+    xyz=np.column_stack([a[n] for n in names[:3]])
+    mask=np.isfinite(xyz).all(axis=1)&np.isfinite(a['time'])&(np.linalg.norm(xyz,axis=1)>0)
+    return xyz[mask],a['time'][mask]
+
+
+def build_map(bag, trajectory, scan_filter='all', voxel=VOXEL_M, windows=None, alignment=None):
+    if scan_filter not in ('all','even','odd'): raise ValueError('Invalid scan filter')
+    trajectory=np.asarray(trajectory)
+    interp=Slerp(trajectory[:,0], Rotation.from_quat(trajectory[:,4:]))
+    reader=bag_reader(bag,['/points_raw'])
+    windows=windows or [(float(trajectory[0,0]),float(trajectory[-1,0]))]
+    accumulated=[np.empty((0,6)) for _ in windows]; pending=[[] for _ in windows]
+    scanned=0; used=[0]*len(windows)
+    while reader.has_next():
+        _,raw,_=reader.read_next()
+        index=scanned; scanned+=1
+        if scan_filter!='all' and index%2 != (0 if scan_filter=='even' else 1): continue
+        msg=deserialize_message(raw,PointCloud2)
+        t=msg.header.stamp.sec+msg.header.stamp.nanosec*1e-9
+        if t<trajectory[0,0] or t>trajectory[-1,0]: continue
+        targets=[i for i,(lo,hi) in enumerate(windows) if lo<=t<=hi]
+        if not targets: continue
+        xyz,relative=cloud_rows(msg)
+        rotation=interp([t]).as_matrix()[0]
+        translation=np.array([np.interp(t,trajectory[:,0],trajectory[:,k]) for k in range(1,4)])
+        xyz=xyz@rotation.T+translation
+        if alignment is not None:
+            r,trans=alignment; xyz=xyz@np.asarray(r).T+np.asarray(trans)
+        rows=voxel_reduce(np.column_stack((xyz,relative,np.full(len(xyz),t),np.ones(len(xyz)))),voxel)
+        for i in targets:
+            pending[i].append(rows); used[i]+=1
+            if len(pending[i])>=MERGE_EVERY_SCANS:
+                accumulated[i]=voxel_reduce(np.concatenate([accumulated[i],*pending[i]]),voxel); pending[i]=[]
+    for i in range(len(windows)):
+        if pending[i]: accumulated[i]=voxel_reduce(np.concatenate([accumulated[i],*pending[i]]),voxel)
+        if not len(accumulated[i]): raise ValueError(f'No scans covered window {windows[i]}')
+    return accumulated,dict(scans_read=scanned,scans_used=used,voxel_m=voxel,scan_filter=scan_filter,
+                            deskew=False,relative_time='voxel weighted mean of original scan-relative seconds')
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--bag',required=True); p.add_argument('--traj',required=True)
+    p.add_argument('--out',required=True); p.add_argument('--scan-filter',choices=['all','even','odd'],default='all')
+    p.add_argument('--voxel',type=float,default=VOXEL_M)
+    a=p.parse_args(); maps,meta=build_map(a.bag,load_tum(a.traj),a.scan_filter,a.voxel)
+    import json
+    target=Path(a.out); target.parent.mkdir(parents=True,exist_ok=True)
+    np.savez_compressed(target,xyz=maps[0][:,:3],relative_time_s=maps[0][:,3],stamp_s=maps[0][:,4],count=maps[0][:,5],metadata=json.dumps(meta))
+"""Position-only SE3 ATE, joint antenna lever arm fit and distance-based RPE."""
+import argparse
+from dataclasses import dataclass
+import json
+from pathlib import Path
+import numpy as np
+from scipy.optimize import least_squares
+from scipy.spatial.transform import Rotation
+
+@dataclass(frozen=True)
+class EvalConfig:
+    max_gt_gap_s: float = 0.2
+    lever_warning_m: float = 3.0
+    segment_lengths_m: tuple = (10., 25., 50., 100.)
+    tangent_baseline_m: float = 5.0
+    motion_yaw_min_step_m: float = 0.02
+
+
+def load_tum(path):
+    a = np.loadtxt(path, ndmin=2)
+    if a.shape[1] != 8 or len(a)<3 or not np.isfinite(a).all() or (np.diff(a[:,0])<=0).any():
+        raise ValueError(f'Invalid TUM trajectory: {path}')
+    if not np.allclose(np.linalg.norm(a[:,4:],axis=1),1,atol=1e-4):
+        raise ValueError(f'Invalid quaternion: {path}')
+    return a
+
+
+def associate(est, gt, max_gap=0.2):
+    t = est[:,0]; j=np.searchsorted(gt[:,0], t, side='right')
+    j=np.clip(j,1,len(gt)-1)
+    mask=(t>=gt[0,0]) & (t<=gt[-1,0]) & ((gt[j,0]-gt[j-1,0])<=max_gap)
+    idx=np.flatnonzero(mask); j=j[mask]
+    f=(t[mask]-gt[j-1,0])/(gt[j,0]-gt[j-1,0])
+    points=gt[j-1,1:4]*(1-f[:,None])+gt[j,1:4]*f[:,None]
+    if len(points)<3: raise ValueError('Fewer than three synchronized poses')
+    return est[mask], points, idx
+
+
+def umeyama(x, y):
+    """Return rigid R,t taking x to y; no scale fit, determinant +1."""
+    x=np.asarray(x); y=np.asarray(y)
+    if x.shape != y.shape or x.ndim!=2 or x.shape[1]!=3 or len(x)<3:
+        raise ValueError('Alignment needs paired Nx3 points')
+    xc=x-x.mean(axis=0); yc=y-y.mean(axis=0)
+    u, _, vt=np.linalg.svd(yc.T@xc/len(x))
+    sign=np.eye(3); sign[-1,-1]=np.linalg.det(u@vt)
+    r=u@sign@vt; t=y.mean(axis=0)-r@x.mean(axis=0)
+    return r,t
+
+
+def fit_lever(x, rotations, y):
+    r,t=umeyama(x,y)
+    def residual(v):
+        rp=Rotation.from_rotvec(v[:3]).as_matrix()
+        return ((x+np.einsum('nij,j->ni',rotations,v[6:]))@rp.T+v[3:6]-y).ravel()
+    solution=least_squares(residual, np.r_[Rotation.from_matrix(r).as_rotvec(),t,[0.,0.,0.]],
+                           xtol=1e-11, ftol=1e-11, gtol=1e-11, max_nfev=1000)
+    if not solution.success: raise ValueError(f'Lever arm solver failed: {solution.message}')
+    singular=np.linalg.svd(solution.jac,compute_uv=False)
+    return (Rotation.from_rotvec(solution.x[:3]).as_matrix(),solution.x[3:6],solution.x[6:],
+            dict(jacobian_singular_values=singular.tolist(), jacobian_condition=float(singular[0]/max(singular[-1],1e-15)),
+                 note='Planar motion weakly observes vertical lever arm; joint fit may absorb trajectory errors.'))
+
+
+def yaw_only(rotations):
+    """ENU body heading: strip LiDAR mounting roll/pitch after alignment."""
+    yaw = np.arctan2(rotations[:, 1, 0], rotations[:, 0, 0])
+    return Rotation.from_euler('z', yaw).as_matrix()
+
+
+def fit_lever_2d(x, rotations, y):
+    """Joint rigid alignment and horizontal yaw-body lever; lz fixed to zero.
+
+    p_gnss = R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0].
+    SE3 without lever is retained independently for maps and evo validation.
+    """
+    r, t = umeyama(x, y)
+    def residual(v):
+        rp = Rotation.from_rotvec(v[:3]).as_matrix()
+        body = yaw_only(np.einsum('ij,njk->nik', rp, rotations))
+        return (x @ rp.T + v[3:6] + body @ np.r_[v[6:8], 0.] - y).ravel()
+    solution = least_squares(residual, np.r_[Rotation.from_matrix(r).as_rotvec(), t, 0., 0.],
+                             xtol=1e-11, ftol=1e-11, gtol=1e-11, max_nfev=1000)
+    if not solution.success:
+        raise ValueError(f'Horizontal lever solver failed: {solution.message}')
+    singular = np.linalg.svd(solution.jac, compute_uv=False)
+    return (Rotation.from_rotvec(solution.x[:3]).as_matrix(), solution.x[3:6],
+            np.r_[solution.x[6:8], 0.], dict(
+                model='R_align p_est + t + Rz(yaw(R_align R_est)) [lx,ly,0]',
+                dof=2, jacobian_singular_values=singular.tolist(),
+                jacobian_condition=float(singular[0]/max(singular[-1], 1e-15)),
+                note='Yaw-only body removes approximately 9.3 degree LiDAR mounting pitch; in-sample nuisance fit, not independent antenna calibration.'))
+
+
+def stats(v):
+    v=np.asarray(v)
+    return dict(rmse=float(np.sqrt(np.mean(v*v))), mean=float(v.mean()), median=float(np.median(v)),
+                max=float(v.max()), std=float(v.std()))
+
+
+def tangent_yaw(points, baseline=5.):
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(points[:,:2],axis=0),axis=1))]
+    left=np.clip(np.searchsorted(s,s-baseline/2,side="right")-1,0,len(s)-1)
+    right=np.clip(np.searchsorted(s,s+baseline/2),0,len(s)-1)
+    delta=points[right,:2]-points[left,:2]
+    if np.any(np.linalg.norm(delta,axis=1)<1e-6): raise ValueError('GNSS tangent undefined')
+    return np.unwrap(np.arctan2(delta[:,1],delta[:,0]))
+
+
+def rpe(points, est_rotation, gt_positions, cfg):
+    """All start poses, first end pose at or beyond target GT arc length (KITTI)."""
+    est_rotation=yaw_only(est_rotation)
+    s=np.r_[0,np.cumsum(np.linalg.norm(np.diff(gt_positions,axis=0),axis=1))]
+    yaw=tangent_yaw(gt_positions,cfg.tangent_baseline_m)
+    gr=Rotation.from_euler('z',yaw).as_matrix(); result={}
+    for length in cfg.segment_lengths_m:
+        translation=[]; angles=[]; actual=[]
+        for i in range(len(s)):
+            j=int(np.searchsorted(s,s[i]+length))
+            if j>=len(s): continue
+            d=s[j]-s[i]
+            gt_delta=gr[i].T@(gt_positions[j]-gt_positions[i])
+            est_delta=est_rotation[i].T@(points[j]-points[i])
+            gt_rel=gr[i].T@gr[j]; est_rel=est_rotation[i].T@est_rotation[j]
+            err=est_rel.T@gt_rel
+            translation.append(np.linalg.norm(est_delta-gt_delta)/d*100)
+            angles.append(abs(np.arctan2(err[1,0],err[0,0]))*180/np.pi/d*100)
+            actual.append(d)
+        result[str(int(length))]=dict(count=len(actual), translation_percent=stats(translation) if actual else None,
+                                       yaw_deg_per_100m=stats(angles) if actual else None,
+                                       mean_actual_length_m=float(np.mean(actual)) if actual else None)
+    return result
+
+
+def evaluate(est, gt, out=None, config=EvalConfig()):
+    matched,y,idx=associate(est,gt,config.max_gt_gap_s); x=matched[:,1:4]
+    rot=Rotation.from_quat(matched[:,4:]).as_matrix()
+    r,t=umeyama(x,y); rb,tb,l,diagnostic=fit_lever_2d(x,rot,y)
+    r3,t3,l3,diagnostic3=fit_lever(x,rot,y)
+    aligned=x@r.T+t
+    antenna=x@rb.T+tb+yaw_only(np.einsum('ij,njk->nik',rb,rot))@l
+    antenna3=(x+rot@l3)@r3.T+t3
+    rpe_result=rpe(antenna,np.einsum('ij,njk->nik',rb,rot),y,config)
+    rpe_se3=rpe(aligned,np.einsum('ij,njk->nik',r,rot),y,config)
+    for result in (rpe_result,rpe_se3):
+        for length, value in result.items():
+            if float(length)<25: value['yaw_deg_per_100m']=None
+    ea=np.linalg.norm(aligned-y,axis=1); eb=np.linalg.norm(antenna-y,axis=1)
+    ea2=np.linalg.norm((aligned-y)[:,:2],axis=1); eb2=np.linalg.norm((antenna-y)[:,:2],axis=1)
+    from evo.core.geometry import umeyama_alignment
+    er,et,_=umeyama_alignment(x.T,y.T,with_scale=False)
+    evo_rmse=float(np.sqrt(np.mean(np.sum((x@er.T+et-y)**2,axis=1))))
+    diff=abs(evo_rmse-stats(ea)['rmse'])
+    if diff>=0.001: raise AssertionError(f'evo ATE mismatch {diff}')
+    endpoint_error=(aligned[-1]-aligned[0])-(y[-1]-y[0])
+    metrics=dict(input_count=len(est), matched_count=len(matched), excluded_count=len(est)-len(matched),
+                 interval_s=[float(matched[0,0]),float(matched[-1,0])],
+                 primary_metric="2D horizontal ATE after SE3 + yaw-only horizontal 2-DoF lever fit; no scale",
+                 se3=dict(R=r.tolist(),t=t.tolist(),ate_m=stats(ea),ate_3d_m=stats(ea),ate_2d_m=stats(ea2)),
+                 se3_lever=dict(R=rb.tolist(),t=tb.tolist(),lever_arm_body_m=l.tolist(),lever_norm_m=float(np.linalg.norm(l)),
+                                warning=bool(np.linalg.norm(l)>config.lever_warning_m),ate_m=stats(eb),ate_3d_m=stats(eb),ate_2d_m=stats(eb2),diagnostic=diagnostic),
+                 se3_lever_3d_diagnostic=dict(R=r3.tolist(),t=t3.tolist(),lever_arm_body_m=l3.tolist(),
+                     ate_3d_m=stats(np.linalg.norm(antenna3-y,axis=1)),diagnostic=diagnostic3,
+                     note='Legacy unconstrained 3-DoF fit: diagnostic only, excluded from primary metrics.'),
+                 endpoint=dict(gt_displacement_m=float(np.linalg.norm(y[-1]-y[0])),
+                               est_displacement_m=float(np.linalg.norm(aligned[-1]-aligned[0])),
+                               displacement_error_m=float(np.linalg.norm(endpoint_error)),
+                               displacement_error_vector_enu_m=endpoint_error.tolist()),
+                 rpe=rpe_result, rpe_se3_diagnostic=rpe_se3,
+                 rpe_note='Yaw-only aligned body frame removes approximately 9.3 degree LiDAR mounting pitch. GT uses 5 m centered tangent yaw, flat roll/pitch approximation. Translation: 10/25/50/100 m; yaw: >=25 m only. Primary RPE uses lever2D-corrected antenna positions and the jointly fitted alignment yaw, matching primary ATE. SE3-only RPE is retained in rpe_se3_diagnostic; it retains antenna/body origin mismatch. Lever alignment and calibration are in-sample, so these metrics are optimistic. All start poses overlap and are correlated.',
+                 evo_crosscheck=dict(ate_rmse_m=evo_rmse, absolute_difference_m=diff),
+                 online_note='Online trajectory is causal accumulated poses; it is not a saved before-loop trajectory. Final vs online does not isolate a single loop factor.')
+    if out is not None:
+        out=Path(out); out.mkdir(parents=True,exist_ok=True)
+        (out/'metrics.json').write_text(json.dumps(metrics,indent=2,allow_nan=False))
+        np.savetxt(out/'error_vs_time.csv',np.column_stack((matched[:,0],ea,eb,ea2,eb2)),delimiter=',',
+                   header='timestamp,se3_error_3d_m,se3_lever_error_3d_m,se3_error_2d_m,se3_lever_error_2d_m',comments='')
+    return metrics,dict(t=matched[:,0],gt=y,aligned=aligned,antenna=antenna,error=eb2)
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(); p.add_argument('--traj',required=True); p.add_argument('--gt',required=True); p.add_argument('--out',required=True)
+    a=p.parse_args(); evaluate(load_tum(a.traj),load_tum(a.gt),a.out)
+
+exec
+/bin/bash -lc "rg --files tools; rg -n 'nav2|free_thresh' tools/tests/test_maps.py; source env.sh && .venv/bin/python -c 'import open3d as o; print(o.__version__)'" in /home/hong/SLAM
+ succeeded in 662ms:
+tools/record_traj.py
+tools/preprocess_bag.py
+tools/tests/test_maps.py
+tools/tests/test_eval.py
+tools/tests/test_run_safety.py
+tools/tests/test_loop_pairs.py
+tools/tests/__pycache__/test_maps.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_pcd_to_tum.cpython-310.pyc
+tools/tests/__pycache__/test_preprocess.cpython-310.pyc
+tools/tests/__pycache__/test_run_safety.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_pcd_to_tum.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_eval.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_preprocess.cpython-310-pytest-6.2.5.pyc
+tools/tests/__pycache__/test_run_safety.cpython-310.pyc
+tools/tests/test_preprocess.py
+tools/tests/test_pcd_to_tum.py
+tools/verify_experiments.py
+tools/run_lio_sam.sh
+tools/pcd_to_tum.py
+tools/maps/render_egl.py
+tools/maps/export_maps.py
+tools/maps/compare_archive.py
+tools/maps/verify_maps.py
+tools/maps/__pycache__/verify_maps.cpython-310.pyc
+tools/maps/__pycache__/export_maps.cpython-310.pyc
+tools/__pycache__/pcd_to_tum.cpython-310.pyc
+tools/maps/README.md
+tools/maps/test_revision.py
+tools/__pycache__/run_lio_sam.cpython-310.pyc
+tools/run_experiments.sh
+tools/experiment_progress.py
+tools/__pycache__/verify_split_bags.cpython-310.pyc
+tools/diagnose_imu_frames.py
+tools/run_lio_sam.py
+tools/verify_preprocess.py
+tools/__pycache__/preprocess_bag.cpython-310.pyc
+tools/__pycache__/diagnose_imu_frames.cpython-310.pyc
+tools/__pycache__/verify_preprocess.cpython-310.pyc
+tools/__pycache__/verify_experiments.cpython-310.pyc
+tools/__pycache__/record_traj.cpython-310.pyc
+tools/verify_split_bags.py
+tools/eval/verify_eval.py
+tools/eval/traj_eval.py
+tools/eval/REVISION2.md
+tools/eval/test_revision2.py
+tools/eval/report_rev2.py
+tools/eval/__init__.py
+tools/eval/map_quality.py
+tools/eval/run_all_eval.py
+tools/eval/__pycache__/traj_eval.cpython-310.pyc
+tools/eval/__pycache__/gnss_gt.cpython-310.pyc
+tools/eval/__pycache__/run_all_eval.cpython-310.pyc
+tools/eval/__pycache__/verify_eval.cpython-310.pyc
+tools/eval/__pycache__/__init__.cpython-310.pyc
+tools/eval/__pycache__/map_quality.cpython-310.pyc
+tools/eval/__pycache__/build_map_from_poses.cpython-310.pyc
+tools/eval/README.md
+tools/eval/build_map_from_poses.py
+tools/eval/gnss_gt.py
+10:from maps.verify_maps import validate, read_pgm, nav2_decode
+59:def test_nav2_yaml_pgm_and_vertical_orientation(tmp_path):
+84:def test_nav2_roundtrip_and_spec_threshold_conflict(tmp_path):
+87:    compatible = yaml.safe_load((tmp_path/'map2d_nav2.yaml').read_text())
+89:    assert nav2_decode(values,requested).tolist() == [100,0,0]
+90:    assert nav2_decode(values,compatible).tolist() == [100,0,-1]
+0.20.0
+
+codex
+짝수 스캔으로 만든 고정 맵과 홀수 1,089개 스캔을 분리해 평가하겠습니다. 기본 주행에는 등속 예측과 GICP만 사용하고, 강건성 평가는 200회 모두 실행하겠습니다. 기존 평가 함수는 재사용하며, 낡은 지도 YAML 테스트도 함께 수정하겠습니다.
+exec
+/bin/bash -lc "cat tools/tests/test_maps.py; cat tools/eval/gnss_gt.py | head -65; cat tools/maps/test_revision.py | head -35; ls results/even_loop_on; du -sh data/lio_bag*; free -h; source env.sh && .venv/bin/python -c 'import open3d as o; print(o.pipelines.registration.registration_generalized_icp.__doc__)'" in /home/hong/SLAM
+ succeeded in 661ms:
+import json
+from pathlib import Path
+import sys
+import numpy as np
+import pytest
+import yaml
+
+sys.path.insert(0, str(Path(__file__).parents[1]))
+from maps.export_maps import Config, GroundModel, obstacle_mask, bresenham_batch, write_grid
+from maps.verify_maps import validate, read_pgm, nav2_decode
+
+
+def test_local_ground_removes_floor_and_high_returns():
+    cfg = Config()
+    points = []
+    for x,z in [(0.,0.),(2.,1.)]:
+        points.extend([[x+.1+i*.01,.1,z] for i in range(30)])
+        points.extend([[x+.1,.1,z+.5],[x+.1,.1,z+2.5]])
+    points = np.array(points)
+    ground = GroundModel(points,cfg)
+    mask = obstacle_mask(points,ground,cfg)
+    assert np.flatnonzero(mask).tolist() == [30,62]
+    np.testing.assert_allclose(ground.at(np.array([[.5,.5,0],[2.5,.5,0]])), [0,1])
+
+
+def test_bresenham_stops_at_wall_and_leaves_unobserved_unknown():
+    blocked = np.zeros((7,8),bool); blocked[2,4] = True
+    free, hit = set(), set()
+    for f,h in bresenham_batch([1,2],[[6,2]],blocked.shape,blocked):
+        free.update(f); hit.update(h)
+    assert free == {2*8+2,2*8+3}
+    assert hit == {2*8+4}
+    assert 2*8+5 not in free
+    assert 2*8+1 not in free
+
+
+@pytest.mark.parametrize('end',[[1,1],[6,1],[1,6],[6,6],[2,6],[6,2],[3,3]])
+def test_bresenham_all_octants_and_endpoint(end):
+    blocked = np.zeros((8,8),bool)
+    visited = []
+    for f,h in bresenham_batch([3,3],[end],blocked.shape,blocked):
+        assert not len(h)
+        visited.extend(f.tolist())
+    assert len(visited) == max(abs(end[0]-3),abs(end[1]-3))
+    if end != [3,3]:
+        assert visited[-1] == end[1]*8+end[0]
+
+
+def fixture_grid(tmp_path):
+    pixels = np.array([[254,254,205],[0,205,205]],np.uint8)
+    cfg = Config(); origin = [-.1,.2]
+    write_grid(tmp_path,pixels,origin,cfg)
+    stats = dict(width_cells=3,height_cells=2,size_m=[.15,.1],origin=origin,
+                 cells=dict(occupied=1,free=2,unknown=3))
+    (tmp_path/'map2d_stats.json').write_text(json.dumps(stats))
+    return pixels
+
+
+def test_nav2_yaml_pgm_and_vertical_orientation(tmp_path):
+    pixels = fixture_grid(tmp_path)
+    np.testing.assert_array_equal(read_pgm(tmp_path/'map2d.pgm'), pixels[::-1])
+    assert validate(tmp_path,check_sources=False)['valid']
+    meta = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    assert meta['origin'] == [-.1,.2,0.]
+
+
+def test_validator_rejects_corrupt_pgm(tmp_path):
+    fixture_grid(tmp_path)
+    with (tmp_path/'map2d.pgm').open('ab') as f:
+        f.write(b'x')
+    with pytest.raises(ValueError,match='payload'):
+        validate(tmp_path,check_sources=False)
+
+
+def test_validator_rejects_wrong_resolution(tmp_path):
+    fixture_grid(tmp_path)
+    path = tmp_path/'map2d.yaml'
+    meta = yaml.safe_load(path.read_text()); meta['resolution'] = .1
+    path.write_text(yaml.safe_dump(meta))
+    with pytest.raises(ValueError,match='parameters'):
+        validate(tmp_path,check_sources=False)
+
+
+def test_nav2_roundtrip_and_spec_threshold_conflict(tmp_path):
+    fixture_grid(tmp_path)
+    requested = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    compatible = yaml.safe_load((tmp_path/'map2d_nav2.yaml').read_text())
+    values = np.array([0,254,205])
+    assert nav2_decode(values,requested).tolist() == [100,0,0]
+    assert nav2_decode(values,compatible).tolist() == [100,0,-1]
+"""Extract quality-filtered GNSS positions; all products live under results/eval."""
+import argparse
+import json
+from pathlib import Path
+import numpy as np
+import rosbag2_py
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import NavSatFix
+
+A = 6378137.0
+E2 = 6.6943799901413165e-3
+MAX_SIGMA_M = 0.05
+
+
+def bag_reader(path, topics):
+    reader = rosbag2_py.SequentialReader()
+    reader.open(rosbag2_py.StorageOptions(uri=str(path), storage_id='sqlite3'),
+                rosbag2_py.ConverterOptions('', ''))
+    present = {t.name for t in reader.get_all_topics_and_types()}
+    if not set(topics) <= present:
+        raise ValueError(f'Missing bag topics: {set(topics)-present}')
+    reader.set_filter(rosbag2_py.StorageFilter(topics=topics))
+    return reader
+
+
+def ecef(lla):
+    lat, lon = np.radians(lla[:, :2]).T
+    h = lla[:, 2]
+    n = A / np.sqrt(1-E2*np.sin(lat)**2)
+    return np.column_stack(((n+h)*np.cos(lat)*np.cos(lon),
+                            (n+h)*np.cos(lat)*np.sin(lon), (n*(1-E2)+h)*np.sin(lat)))
+
+
+def to_enu(lla, origin):
+    lat, lon = np.radians(origin[:2])
+    matrix = np.array([[-np.sin(lon), np.cos(lon), 0],
+                       [-np.sin(lat)*np.cos(lon), -np.sin(lat)*np.sin(lon), np.cos(lat)],
+                       [np.cos(lat)*np.cos(lon), np.cos(lat)*np.sin(lon), np.sin(lat)]])
+    return (ecef(np.asarray(lla))-ecef(np.asarray(origin)[None])) @ matrix.T
+
+
+def extract(bag, out, sigma_axes="xy"):
+    if sigma_axes not in ("xy", "xyz"): raise ValueError("sigma_axes must be xy or xyz")
+    axis_count = 2 if sigma_axes == "xy" else 3
+    reader = bag_reader(bag, ['/gps/fix'])
+    rows = []; stats = dict(total=0, rejected_status=0, rejected_covariance=0, rejected_invalid=0)
+    origin = None
+    vertical_sigmas=[]
+    while reader.has_next():
+        _, raw, _ = reader.read_next()
+        m = deserialize_message(raw, NavSatFix)
+        stats['total'] += 1
+        lla = [m.latitude, m.longitude, m.altitude]
+        if origin is None:
+            if not np.isfinite(lla).all():
+                raise ValueError('First fix cannot define a finite ENU origin')
+            origin = lla
+        if m.status.status < 2:
+            stats['rejected_status'] += 1; continue
+        covariance = np.array(m.position_covariance).reshape(3, 3)
+        if np.isfinite(covariance[2,2]) and covariance[2,2]>=0:
+            vertical_sigmas.append(float(np.sqrt(covariance[2,2])))
+        if (m.position_covariance_type == 0 or not np.isfinite(covariance).all()
+                or (np.diag(covariance) < 0).any()
+                or np.sqrt(np.diag(covariance)[:axis_count]).max() > MAX_SIGMA_M):
+"""TASK-06 rev1 tests, kept inside the authorized tools/maps scope."""
+import json
+import sys
+from pathlib import Path
+import numpy as np
+import pytest
+import yaml
+sys.path.insert(0,str(Path(__file__).parent))
+from export_maps import Config, trajectory_bounds, crop_points, driving_region, write_grid
+from verify_maps import nav2_decode, validate
+
+
+def test_single_yaml_preserves_unknown(tmp_path):
+    pixels=np.array([[254,254,205],[0,205,205]],np.uint8)
+    (tmp_path/'map2d_nav2.yaml').write_text('obsolete')
+    write_grid(tmp_path,pixels,[-.1,.2],Config())
+    assert not (tmp_path/'map2d_nav2.yaml').exists()
+    meta=yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    assert meta['free_thresh']==.196
+    assert nav2_decode([0,254,205],meta).tolist()==[100,0,-1]
+    (tmp_path/'map2d_stats.json').write_text(json.dumps(dict(width_cells=3,height_cells=2,size_m=[.15,.1],origin=[-.1,.2],cells=dict(occupied=1,free=2,unknown=3))))
+    assert validate(tmp_path,False)['requested_yaml_preserves_unknown']
+
+
+def test_crop_uses_trajectory_bounds():
+    poses=np.array([[0,0,1,0],[1,10,5,0]])
+    bounds=trajectory_bounds(poses,30)
+    np.testing.assert_allclose(bounds,[[-30,-29],[40,35]])
+    xyz=np.array([[-30,-29,100],[40,35,-100],[40.01,0,0],[0,35.01,0]])
+    np.testing.assert_array_equal(crop_points(xyz,bounds),xyz[:2])
+
+
+def test_buffer_follows_polyline_not_only_keyframes():
+    poses=np.array([[0,0,0,0],[1,10,0,0]])
+    cfg=Config(resolution=1,margin=1)
+keyframes_final_tum.txt
+loop_pairs.json
+map
+odom_online_tum.txt
+params.yaml
+recorder_status.json
+ros_logs
+run.log
+run_meta.json
+1.8G	data/lio_bag
+890M	data/lio_bag_even
+890M	data/lio_bag_odd
+               total        used        free      shared  buff/cache   available
+Mem:            14Gi       7.4Gi       1.8Gi        98Mi       5.7Gi       7.1Gi
+Swap:          4.5Gi       4.5Gi       0.0Ki
+registration_generalized_icp(source: open3d.pybind.geometry.PointCloud, target: open3d.pybind.geometry.PointCloud, max_correspondence_distance: typing.SupportsFloat, init: typing.Annotated[numpy.typing.ArrayLike, numpy.float64, , estimation_method: open3d.pybind.pipelines.registration.TransformationEstimationForGeneralizedICP = TransformationEstimationForGeneralizedICP(epsilon=0.001), criteria: open3d.pybind.pipelines.registration.ICPConvergenceCriteria = ICPConvergenceCriteria(relative_fitness=1.000000e-06, relative_rmse=1.000000e-06, max_iteration=30)) -> open3d.pybind.pipelines.registration.RegistrationResult
+Function for Generalized ICP registration
+
+Args:
+    source (open3d.pybind.geometry.PointCloud): The source point cloud.
+    target (open3d.pybind.geometry.PointCloud): The target point cloud.
+    max_correspondence_distance (typing.SupportsFloat): Maximum correspondence points-pair distance.
+    init (typing.Annotated[numpy.typing.ArrayLike, numpy.float64, ): Initial transformation estimation
+    estimation_method (open3d.pybind.pipelines.registration.TransformationEstimationForGeneralizedICP, optional, default=TransformationEstimationForGeneralizedICP(epsilon=0.001)): Estimation method. One of (``TransformationEstimationPointToPoint``, ``TransformationEstimationPointToPlane``, ``TransformationEstimationSymmetric``, ``TransformationEstimationForGeneralizedICP``, ``TransformationEstimationForColoredICP``)
+    criteria (open3d.pybind.pipelines.registration.ICPConvergenceCriteria, optional, default=ICPConvergenceCriteria(relative_fitness=1.000000e-06, relative_rmse=1.000000e-06, max_iteration=30)): Convergence criteria
+
+Returns:
+    open3d.pybind.pipelines.registration.RegistrationResult
+
+
+web search: 
+web search: https://www.open3d.org/docs/release/python_api/open3d.pipelines.registration.registration_generalized_icp.html
+web search: 
+web search: https://raw.githubusercontent.com/isl-org/Open3D/main/cpp/open3d/pipelines/registration/GeneralizedICP.cpp
+exec
+/bin/bash -lc "source env.sh && OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -c 'import open3d as o; print(o.pipelines.registration.TransformationEstimationForGeneralizedICP.compute_transformation.__doc__)'" in /home/hong/SLAM
+ succeeded in 634ms:
+compute_transformation(self: open3d.pybind.pipelines.registration.TransformationEstimation, source: open3d.pybind.geometry.PointCloud, target: open3d.pybind.geometry.PointCloud, corres: open3d.pybind.utility.Vector2iVector) -> typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 4]"]
+Compute transformation from source to target point cloud given correspondences.
+
+Args:
+    source (open3d.pybind.geometry.PointCloud): Source point cloud.
+    target (open3d.pybind.geometry.PointCloud): Target point cloud.
+    corres (open3d.pybind.utility.Vector2iVector): Correspondence set between source and target point cloud.
+
+Returns:
+    typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 4]"]
+
+
+exec
+/bin/bash -lc "mkdir -p tools/loc results/loc; source env.sh && .venv/bin/python - <<'PY'
+from pathlib import Path
+import json,hashlib
+paths=list(Path('data').rglob('*'))+[p for p in Path('results').rglob('*') if not p.is_relative_to('results/loc')]
+rows={str(p):[p.stat().st_size,p.stat().st_mtime_ns] for p in paths if p.is_file()}
+Path('results/loc/input_manifest_before.json').write_text(json.dumps(rows,indent=2))
+PY" in /home/hong/SLAM
+ succeeded in 7ms:
+exec
+/bin/bash -lc "cat > tools/loc/__init__.py <<'EOF'
+\"\"\"Fixed-prior, held-out LiDAR localization evaluation.\"\"\"
+EOF
+cat > tools/loc/localize.py <<'EOF'
+\"\"\"Open3D GICP with a fixed target and cached target correspondences.
+
+The public registration_generalized_icp API rebuilds the target tree on each call
+and hides iteration counts. We expose its ICP outer loop, calling the identical
+Open3D TransformationEstimationForGeneralizedICP solver with a persistent scipy
+cKDTree. Covariances are the GICP planar epsilon/1/1 model from 20-NN normals.
+The reference public API is cross-checked by a synthetic regression test.
+\"\"\"
+import argparse
+import copy
+import csv
+from dataclasses import dataclass
+from pathlib import Path
+from time import perf_counter
+import numpy as np
+import open3d as o3d
+from scipy.spatial import cKDTree
+from scipy.spatial.transform import Rotation, Slerp
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import PointCloud2
+from tools.eval.gnss_gt import bag_reader
+from tools.eval.build_map_from_poses import cloud_rows
+from tools.eval.traj_eval import load_tum
+
+@dataclass(frozen=True)
+class Config:
+    min_range_m: float = 1.
+    max_range_m: float = 80.
+    scan_voxel_m: float = .3
+    map_voxel_m: float = .2
+    correspondence_m: tuple = (1., .5)
+    max_iterations: int = 30
+    convergence_fitness: float = 1e-6
+    convergence_rmse: float = 1e-6
+    min_fitness: float = .3
+    max_rmse_m: float = .3
+    lost_failures: int = 5
+    covariance_knn: int = 20
+    covariance_epsilon: float = .001
+    robustness_scans: int = 30
+    success_position_m: float = .3
+    success_yaw_deg: float = 1.
+
+
+def output_dir(path):
+    path=Path(path).resolve(); root=Path('results/loc').resolve()
+    if path"'!=root and root not in path.parents:
+        raise ValueError('"'Outputs must be under results/loc/')
+    path.mkdir(parents=True,exist_ok=True)
+    return path
+
+
+def cloud(xyz, cfg=Config(), downsample=False):
+    xyz=np.asarray(xyz,dtype=float)
+    if xyz.ndim"'!=2 or xyz.shape[1]!=3 or not np.isfinite(xyz).all():
+        raise ValueError('"'Expected finite Nx3 points')
+    p=o3d.geometry.PointCloud(o3d.utility.Vector3dVector(xyz))
+    if downsample: p=p.voxel_down_sample(cfg.scan_voxel_m)
+    if len(p.points)<cfg.covariance_knn: raise ValueError('Too few points for GICP')
+    p.estimate_normals(o3d.geometry.KDTreeSearchParamKNN(cfg.covariance_knn))
+    normals=np.asarray(p.normals)
+    cov=np.eye(3)[None]-(1-cfg.covariance_epsilon)*normals[:,:,None]*normals[:,None,:]
+    p.covariances=o3d.utility.Matrix3dVector(cov)
+    return p
+
+
+def query_scans(bag, cfg=Config()):
+    reader=bag_reader(bag,['/points_raw']); previous=-np.inf
+    while reader.has_next():
+        _,raw,_=reader.read_next(); start=perf_counter()
+        msg=deserialize_message(raw,PointCloud2)
+        stamp=msg.header.stamp.sec+msg.header.stamp.nanosec*1e-9
+        if stamp<=previous: raise ValueError('Query scan stamps must increase')
+        previous=stamp
+        xyz,_=cloud_rows(msg); r=np.linalg.norm(xyz,axis=1)
+        p=cloud(xyz[(r>=cfg.min_range_m)&(r<=cfg.max_range_m)],cfg,True)
+        yield stamp,p,(perf_counter()-start)*1000
+
+
+def poses_at(trajectory, times):
+    times=np.asarray(times)
+    if np.any(times<trajectory[0,0]) or np.any(times>trajectory[-1,0]):
+        raise ValueError('Initialization/reference outside map-pose interval')
+    out=np.repeat(np.eye(4)[None],len(times),axis=0)
+    out[:,:3,:3]=Slerp(trajectory[:,0],Rotation.from_quat(trajectory[:,4:]))(times).as_matrix()
+    out[:,:3,3]=np.column_stack([np.interp(times,trajectory[:,0],trajectory[:,i]) for i in (1,2,3)])
+    return out
+
+
+def predict(history, stamp):
+    \"\"\"World linear velocity + constant body angular velocity, actual dt.\"\"\"
+    if not history: raise ValueError('Prediction requires an initialized pose')
+    t1,p1=history[-1]
+    if stamp<t1: raise ValueError('Prediction time precedes history')
+    if len(history)<2: return p1.copy()
+    t0,p0=history[-2]
+    if t1<=t0: raise ValueError('Nonpositive history time step')
+    ratio=(stamp-t1)/(t1-t0)
+    p=p1.copy(); p[:3,3]+=ratio*(p1[:3,3]-p0[:3,3])
+    delta=Rotation.from_matrix(p0[:3,:3].T@p1[:3,:3]).as_rotvec()
+    p[:3,:3]=p1[:3,:3]@Rotation.from_rotvec(delta*ratio).as_matrix()
+    return p
+
+
+def accepted(fitness, rmse, cfg=Config()):
+    return bool(np.isfinite([fitness,rmse]).all() and fitness>=cfg.min_fitness and 0<=rmse<=cfg.max_rmse_m)
+
+
+class Localizer:
+    def __init__(self,target,cfg=Config()):
+        self.cfg=cfg; self.target=target
+        self.tree=cKDTree(np.asarray(target.points))
+        self.estimator=o3d.pipelines.registration.TransformationEstimationForGeneralizedICP(cfg.covariance_epsilon)
+
+    def correspondences(self,source,distance):
+        d,j=self.tree.query(np.asarray(source.points),distance_upper_bound=distance,workers=1)
+        good=np.isfinite(d)
+        pairs=np.column_stack((np.flatnonzero(good),j[good])).astype(np.int32)
+        fitness=float(good.mean()); rmse=float(np.sqrt(np.mean(d[good]**2))) if good.any() else float('inf')
+        return o3d.utility.Vector2iVector(pairs),fitness,rmse
+
+    def register(self,source,initial):
+        start=perf_counter(); moving=copy.deepcopy(source); moving.transform(initial)
+        pose=initial.copy(); iterations=0; stages=[]
+        for distance in self.cfg.correspondence_m:
+            pairs,fitness,rmse=self.correspondences(moving,distance)
+            count=0; converged=False
+            for _ in range(self.cfg.max_iterations):
+                if len(pairs)<6: break
+                update=self.estimator.compute_transformation(moving,self.target,pairs)
+                if not np.isfinite(update).all(): break
+                pose=update@pose; moving.transform(update); count+=1
+                pairs,new_fitness,new_rmse=self.correspondences(moving,distance)
+                converged=(abs(new_fitness-fitness)<self.cfg.convergence_fitness and
+                           abs(new_rmse-rmse)<self.cfg.convergence_rmse)
+                fitness,rmse=new_fitness,new_rmse
+                if converged: break
+            iterations+=count; stages.append(dict(iterations=count,converged=converged))
+        return pose,dict(fitness=fitness,inlier_rmse_m=rmse,iterations=iterations,
+                         coarse_iterations=stages[0]['iterations'],fine_iterations=stages[1]['iterations'],
+                         coarse_converged=stages[0]['converged'],fine_converged=stages[1]['converged'],
+                         registration_ms=(perf_counter()-start)*1000)
+
+
+def track(localizer, scans, initial):
+    history=[]; failures=0
+    for index,(stamp,source,preprocess_ms) in enumerate(scans):
+        start=perf_counter()
+        prediction=predict(history,stamp) if history else initial.copy()
+        pose,detail=localizer.register(source,prediction)
+        ok=accepted(detail['fitness'],detail['inlier_rmse_m'],localizer.cfg)
+        failures=0 if ok else failures+1
+        if not ok: pose=prediction
+        history.append((stamp,pose)); history=history[-2:]
+        row=dict(index=index,timestamp=stamp,**detail,preprocess_ms=preprocess_ms,
+                 total_ms=preprocess_ms+(perf_counter()-start)*1000,accepted=ok,
+                 consecutive_failures=failures,lost=failures>=localizer.cfg.lost_failures)
+        yield stamp,pose,row
+        if row['lost']: break
+
+
+def tum_row(stamp,pose):
+    return np.r_[stamp,pose[:3,3],Rotation.from_matrix(pose[:3,:3]).as_quat()]
+
+
+def write_csv(path,rows):
+    if not rows: raise ValueError('Cannot write empty table')
+    with Path(path).open('w') as f:
+        writer=csv.DictWriter(f,fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--prior',required=True); p.add_argument('--query-bag',required=True)
+    p.add_argument('--initial-traj',required=True); p.add_argument('--out',default='results/loc/standalone')
+    a=p.parse_args(); out=output_dir(a.out)
+    target=cloud(np.load(a.prior)['xyz']); scans=iter(query_scans(a.query_bag)); first=next(scans)
+    from itertools import chain
+    initial=poses_at(load_tum(a.initial_traj),[first[0]])[0]
+    result=list(track(Localizer(target),chain([first],scans),initial))
+    np.savetxt(out/'loc_traj_tum.txt',np.array([tum_row(t,p) for t,p,_ in result]),fmt='%.9f')
+    write_csv(out/'per_scan.csv',[r for _,_,r in result])
+
+if __name__=='__main__': main()
+EOF
+.venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/tests/test_maps.py'); s=p.read_text(); s=s[:s.index('def test_nav2_roundtrip_and_spec_threshold_conflict')]+'''def test_nav2_roundtrip_single_yaml_preserves_unknown(tmp_path):
+    fixture_grid(tmp_path)
+    meta = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+    assert meta['free_thresh'] == .196
+    assert not (tmp_path/'map2d_nav2.yaml').exists()
+    assert nav2_decode(np.array([0,254,205]),meta).tolist() == [100,0,-1]
+'''; p.write_text(s)
+PY" in /home/hong/SLAM
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'source env.sh && OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.eval.build_map_from_poses --bag data/lio_bag --traj results/even_loop_on/keyframes_final_tum.txt --out results/loc/prior_map.npz --scan-filter even --voxel 0.2 > results/loc/build_map.log 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc "cat > tools/tests/test_loc.py <<'EOF'
+\"\"\"GICP recovery and public API equivalence, state/prediction boundary behavior.\"\"\"
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).parents[2]))
+import numpy as np
+import open3d as o3d
+import pytest
+from scipy.spatial.transform import Rotation
+from tools.loc.localize import Config, Localizer, accepted, cloud, predict, track, poses_at, output_dir
+
+
+def test_known_rigid_transform_and_public_gicp_equivalence():
+    rng=np.random.default_rng(45)
+    # Three differently oriented, finite planes constrain all six pose DoF.
+    uv=rng.uniform(-3,3,(1000,2))
+    xyz=np.r_[np.c_[uv,np.zeros(1000)],np.c_[uv[:,0],np.full(1000,3.),uv[:,1]],
+              np.c_[np.full(1000,-3.),uv]]
+    truth=np.eye(4); truth[:3,:3]=Rotation.from_euler('xyz',[2,-3,4],degrees=True).as_matrix()
+    truth[:3,3]=[.12,-.08,.1]
+    source=cloud((xyz-truth[:3,3])@truth[:3,:3]); target=cloud(xyz)
+    loc=Localizer(target); result,detail=loc.register(source,np.eye(4))
+    np.testing.assert_allclose(result,truth,atol=1e-4)
+    reference=np.eye(4)
+    for distance in loc.cfg.correspondence_m:
+        reference=o3d.pipelines.registration.registration_generalized_icp(
+            source,target,distance,reference,loc.estimator,
+            o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=loc.cfg.max_iterations)).transformation
+    np.testing.assert_allclose(result,reference,atol=1e-6)
+    assert detail['iterations']>0 and accepted(detail['fitness'],detail['inlier_rmse_m'])
+
+
+def test_constant_velocity_actual_dt_and_rotation():
+    a=np.eye(4); b=np.eye(4); b[:3,3]=[1,2,0]
+    b[:3,:3]=Rotation.from_euler('z',10,degrees=True).as_matrix()
+    c=predict([(1.,a),(1.5,b)],2.5)
+    np.testing.assert_allclose(c[:3,3],[3,6,0])
+    np.testing.assert_allclose(c[:3,:3],Rotation.from_euler('z',30,degrees=True).as_matrix())
+    np.testing.assert_array_equal(predict([(1.,a)],2.),a)
+    with pytest.raises(ValueError): predict([(1.,a),(1.,b)],2.)
+
+
+@pytest.mark.parametrize('fitness,rmse,ok',[(.3,.3,True),(.299,.1,False),(.8,.301,False),
+    (np.nan,.1,False),(.8,np.inf,False),(.8,-.1,False),(0,0,False)])
+def test_failure_thresholds(fitness,rmse,ok):
+    assert accepted(fitness,rmse)==ok
+
+
+def test_rejection_keeps_prediction_and_fifth_consecutive_failure_lost():
+    class Fake:
+        cfg=Config()
+        def register(self,source,initial):
+            bad=initial.copy(); bad[0,3]=100
+            return bad,dict(fitness=.1,inlier_rmse_m=.5)
+    rows=list(track(Fake(),[(i,None,0) for i in range(10)],np.eye(4)))
+    assert len(rows)==5 and rows[-1][2]['lost']
+    for _,pose,row in rows:
+        np.testing.assert_array_equal(pose,np.eye(4)); assert not row['accepted']
+
+
+def test_pose_interpolation_and_output_guard():
+    traj=np.array([[0,0,0,0,0,0,0,1],[1,1,2,0,0,0,0,1],[2,2,4,0,0,0,0,1]])
+    np.testing.assert_allclose(poses_at(traj,[.5])[0,:3,3],[.5,1,0])
+    with pytest.raises(ValueError): poses_at(traj,[-1])
+    with pytest.raises(ValueError): output_dir('results/eval')
+EOF
+source env.sh && OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m pytest -q tools/tests/test_loc.py > results/loc/test_loc_initial.log 2>&1" in /home/hong/SLAM
+ succeeded in 1155ms:
+codex
+맵 생성과 합성 점군 테스트를 시작했습니다. Open3D 공개 GICP 함수는 호출마다 맵 검색 트리를 다시 만들고 실제 반복 수를 반환하지 않습니다. 고정 KD-tree를 유지하면서 동일한 Open3D GICP 변환 계산기를 호출하도록 구성했고, 공개 함수와 결과가 일치하는지 테스트하고 있습니다. 이 구현 방식은 로그에 명시하겠습니다.
+exec
+/bin/bash -lc 'tail -15 results/loc/test_loc_initial.log; tail -5 results/loc/build_map.log; ls -lh results/loc' in /home/hong/SLAM
+ succeeded in 0ms:
+...........                                                              [100%]
+11 passed in 0.49s
+[INFO] [1793006891.463819010] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+total 112K
+-rw-rw-r-- 1 hong hong  118 Oct 26 18:28 build_map.log
+-rw-rw-r-- 1 hong hong 101K Oct 26 18:27 input_manifest_before.json
+-rw-rw-r-- 1 hong hong   99 Oct 26 18:28 test_loc_initial.log
+
+exec
+/bin/bash -lc "source env.sh && OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python - <<'PY'
+from tools.loc.localize import *
+tr=load_tum('results/even_loop_on/keyframes_final_tum.txt'); print(tr[[0,-1],:4])
+for i,(t,p,ms) in enumerate(query_scans('data/lio_bag_odd')):
+ print(i,t,len(p.points),ms,t-tr[0,0])
+ if i==1: break
+PY" in /home/hong/SLAM
+ succeeded in 980ms:
+[INFO] [1793006920.561599655] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+[[ 1.76285214e+09  7.40470000e-05 -9.12560000e-05  1.26890000e-05]
+ [ 1.76285225e+09 -3.48680390e-02 -9.53189210e-02  1.29730269e-01]]
+0 1762852140.6711159 4013 48.238552175462246 -0.9498755931854248
+1 1762852140.7711427 3992 6.878476124256849 -0.849848747253418
+
+ succeeded in 46040ms:
+exec
+/bin/bash -lc "cat > tools/loc/run_loc_eval.py <<'EOF'
+\"\"\"Reproducible full-sequence and 200-trial held-out localization benchmark.
+
+Run from the repository root after source env.sh, with .venv/bin/python -m.
+All generated products, caches, evaluation and resumable trial data stay in loc.
+\"\"\"
+import argparse
+from dataclasses import asdict
+import hashlib
+import json
+from pathlib import Path
+from time import perf_counter
+import resource
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import open3d as o3d
+from scipy.spatial.transform import Rotation
+from tools.eval.build_map_from_poses import build_map
+from tools.eval.traj_eval import evaluate, load_tum
+from .localize import (Config, Localizer, cloud, output_dir, poses_at, query_scans,
+                       track, tum_row, write_csv)
+
+LEVELS=((.5,2.),(1.,5.),(2.,10.),(3.,15.))
+SEEDS=10
+STARTS=5
+FAIRNESS='동일 주행의 held-out(홀수) 스캔 → 진짜 재주행보다 낙관적. 다른 날 주행 bag으로 같은 스크립트를 재사용 가능'
+
+
+def save_json(path,value):
+    Path(path).write_text(json.dumps(value,indent=2,ensure_ascii=False,allow_nan=False))
+
+
+def fingerprint(paths):
+    return {str(p):hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in paths}
+
+
+def make_plots(out, data, baseline_data, scans, robust):
+    figs=out/'figs'; figs.mkdir(exist_ok=True)
+    def save(name):
+        plt.tight_layout(); plt.savefig(figs/name,dpi=200); plt.close()
+    plt.figure(figsize=(7,6)); plt.plot(*data['gt'][:,:2].T,color='black',label='RTK GNSS')
+    plt.plot(*data['aligned'][:,:2].T,color='#0072B2',lw=1,label='Localization SE3')
+    plt.plot(*data['antenna'][:,:2].T,color='#D55E00',lw=1,label='Localization SE3+lever2D')
+    plt.plot(*baseline_data['antenna'][:,:2].T,color='#009E73',lw=1,label='Even mapping SE3+lever2D')
+    plt.axis('equal'); plt.xlabel('East (m)'); plt.ylabel('North (m)'); plt.title('Held-out localization vs GNSS'); plt.legend(fontsize=8)
+    save('loc_traj_overlay.png')
+    plt.figure(figsize=(9,4)); plt.plot(data['t']-data['t'][0],data['error'],color='#0072B2',label='Localization')
+    plt.plot(baseline_data['t']-data['t'][0],baseline_data['error'],color='#D55E00',label='Even mapping')
+    plt.xlabel('Elapsed time (s)'); plt.ylabel('2D error (m)'); plt.legend(); plt.title('SE3+lever2D horizontal error')
+    save('loc_error_vs_time.png')
+    plt.figure(figsize=(9,4)); t=np.array([r['timestamp'] for r in scans]); t-=t[0]
+    plt.plot(t,[r['fitness'] for r in scans],color='#0072B2',label='Fitness')
+    plt.plot(t,[r['inlier_rmse_m'] for r in scans],color='#D55E00',label='Inlier RMSE (m)')
+    plt.axhline(.3,color='black',ls='--',lw=.8,label='Acceptance thresholds (0.3)')
+    plt.xlabel('Elapsed time (s)'); plt.ylabel('Fitness / RMSE (m)'); plt.title('Fine-stage GICP quality'); plt.legend()
+    save('fitness_vs_time.png')
+    heat=np.array([[np.mean([r['success'] for r in robust if r['level']==i and r['start']==j])*100
+                    for j in range(STARTS)] for i in range(len(LEVELS))])
+    plt.figure(figsize=(8,4)); plt.imshow(heat,vmin=0,vmax=100,cmap='cividis',aspect='auto')
+    plt.xticks(range(STARTS),[f'Start {j+1}' for j in range(STARTS)])
+    plt.yticks(range(len(LEVELS)),[f'{m:g} m / {deg:g} deg' for m,deg in LEVELS])
+    for i in range(len(LEVELS)):
+        for j in range(STARTS): plt.text(j,i,f'{heat[i,j]:.0f}%',ha='center',va='center',color='white' if heat[i,j]<50 else 'black')
+    plt.colorbar(label='Success rate (%)'); plt.title('30-scan convergence: 10 seeds per cell')
+    save('robustness_heatmap.png')
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--map-run',default='results/even_loop_on')
+    p.add_argument('--map-bag',default='data/lio_bag')
+    p.add_argument('--map-scan-filter',choices=['all','even'],default='even',help='Use all for an already-even split bag')
+    p.add_argument('--query-bag',default='data/lio_bag_odd')
+    p.add_argument('--gt',default='results/gt_gnss_enu_tum.txt')
+    p.add_argument('--out',default='results/loc'); p.add_argument('--resume',action='store_true')
+    a=p.parse_args(); out=output_dir(a.out); cfg=Config(); began=perf_counter()
+    mapping=load_tum(Path(a.map_run)/'keyframes_final_tum.txt'); gt=load_tum(a.gt)
+    input_hashes=fingerprint([Path(a.map_run)/'keyframes_final_tum.txt',Path(a.gt)])
+    signature=dict(args={k:v for k,v in vars(a).items() if k"'!='"'resume'},config=asdict(cfg),input_sha256=input_hashes,
+                   code_sha256=fingerprint([Path(__file__),Path(__file__).with_name('localize.py')]))
+    signature=json.loads(json.dumps(signature))
+    sigpath=out/'configuration.json'
+    if a.resume and sigpath.exists() and json.loads(sigpath.read_text())"'!=signature:
+        raise ValueError('"'Resume configuration/input/code changed; use a separate --out')
+    save_json(sigpath,signature)
+    prior=out/'prior_map.npz'
+    if not a.resume or not prior.exists():
+        print('Building even-only prior map',flush=True)
+        maps,meta=build_map(a.map_bag,mapping,a.map_scan_filter,cfg.map_voxel_m)
+        np.savez_compressed(prior,xyz=maps[0][:,:3],metadata=json.dumps(meta)); del maps
+    with np.load(prior) as archive:
+        xyz=archive['xyz']; prior_meta=json.loads(str(archive['metadata']))
+    if prior_meta['scan_filter']"'!=a.map_scan_filter or prior_meta['"'voxel_m']"'!=cfg.map_voxel_m:
+        raise ValueError('"'Prior map cache configuration mismatch')
+    localizer=Localizer(cloud(xyz,cfg),cfg); del xyz
+    print(f'Prior target: {len(localizer.target.points)} points',flush=True)
+    # Read once, retain only the 5 x 30 robustness windows; baseline streams.
+    times=[]
+    for t,_,_ in query_scans(a.query_bag,cfg): times.append(t)
+    times=np.array(times)
+    supported=np.flatnonzero((times>=mapping[0,0])&(times<=mapping[-1,0]))
+    if len(supported)<cfg.robustness_scans: raise ValueError('Insufficient supported query scans')
+    # Equally spaced on map trajectory arc length, including late-loop window.
+    refs=poses_at(mapping,times[supported]); arc=np.r_[0,np.cumsum(np.linalg.norm(np.diff(refs[:,:3,3],axis=0),axis=1))]
+    last=len(supported)-cfg.robustness_scans
+    start_idx=supported[np.searchsorted(arc,np.linspace(0,arc[last],STARTS))]
+    if len(set(start_idx))"'!=STARTS: raise ValueError('"'Trajectory too short for five distinct starts')
+    needed=set(int(i+k) for i in start_idx for k in range(cfg.robustness_scans)); cached={}
+    trajectory=out/'loc_traj_tum.txt'; table=out/'per_scan.csv'
+    if a.resume and trajectory.exists() and table.exists():
+        import csv
+        with table.open() as f:
+            scan_rows=list(csv.DictReader(f))
+        for row in scan_rows:
+            for k in row:
+                row[k]=(row[k]=='True') if k in ('accepted','lost','coarse_converged','fine_converged') else float(row[k])
+    else:
+        first_stamp=times[0]
+        # Mapping keyframes begin ~0.95 s after the bag. Explicit zero-order
+        # endpoint initialization covers this unobserved startup; no GNSS used.
+        initial=poses_at(mapping,[np.clip(first_stamp,mapping[0,0],mapping[-1,0])])[0]
+        rows=[]; scan_rows=[]
+        def stream():
+            for i,scan in enumerate(query_scans(a.query_bag,cfg)):
+                if i in needed: cached[i]=scan
+                yield scan
+        for t,pose,row in track(localizer,stream(),initial):
+            rows.append(tum_row(t,pose)); scan_rows.append(row)
+            if len(rows)%100==0: print(f'Baseline {len(rows)}/{len(times)} fitness={row[\"fitness\"]:.3f} ms={row[\"total_ms\"]:.1f}',flush=True)
+        np.savetxt(trajectory,np.array(rows),fmt='%.9f'); write_csv(table,scan_rows)
+    if len(scan_rows)"'!=len(times) or any(r['"'lost'] for r in scan_rows):
+        raise RuntimeError('Baseline LOST or incomplete; per_scan.csv retained for diagnosis')
+    if len(cached)"'!=len(needed):
+        for i,scan in enumerate(query_scans(a.query_bag,cfg)):
+            if i in needed: cached[i]=scan
+            if i>=max(needed): break
+    metrics,data=evaluate(load_tum(trajectory),gt,out/'"'localization')
+    baseline,baseline_data=evaluate(mapping,gt,out/'mapping_baseline')
+    # Common timestamps remove keyframe vs dense-query sampling as a confound.
+    common_ref=poses_at(mapping,times[supported])
+    common_tum=np.array([tum_row(t,pose) for t,pose in zip(times[supported],common_ref)])
+    common_base,_=evaluate(common_tum,gt,out/'mapping_common_timestamps')
+    common_loc,_=evaluate(load_tum(trajectory)[supported],gt,out/'localization_common_timestamps')
+    robust_path=out/'robustness_trials'; robust_path.mkdir(exist_ok=True)
+    robust=[]
+    for level,(distance,angle) in enumerate(LEVELS):
+        for start,index in enumerate(start_idx):
+            scans=[cached[int(index+k)] for k in range(cfg.robustness_scans)]
+            initial_reference=poses_at(mapping,[scans[0][0]])[0]
+            final_reference=poses_at(mapping,[scans[-1][0]])[0]
+            for seed in range(SEEDS):
+                path=robust_path/f'l{level}_s{start}_seed{seed}.json'
+                if a.resume and path.exists():
+                    robust.append(json.loads(path.read_text())); continue
+                rng=np.random.default_rng(np.random.SeedSequence([start,seed]))
+                direction=rng.uniform(-np.pi,np.pi); sign=rng.choice([-1,1])
+                initial=initial_reference.copy()
+                initial[:2,3]+=distance*np.array([np.cos(direction),np.sin(direction)])
+                initial[:3,:3]=Rotation.from_euler('z',sign*angle,degrees=True).as_matrix()@initial[:3,:3]
+                result=list(track(localizer,scans,initial)); _,final,last_row=result[-1]
+                error=float(np.linalg.norm(final[:3,3]-final_reference[:3,3]))
+                yaw=lambda r: np.arctan2(r[1,0],r[0,0])
+                delta=yaw(final[:3,:3])-yaw(final_reference[:3,:3])
+                yaw_error=float(abs(np.degrees(np.arctan2(np.sin(delta),np.cos(delta)))))
+                success=(len(result)==cfg.robustness_scans and not last_row['lost'] and
+                         error<cfg.success_position_m and yaw_error<cfg.success_yaw_deg)
+                row=dict(level=level,start=start,seed=seed,start_index=int(index),start_timestamp=scans[0][0],
+                         perturbation_m=distance,perturbation_deg=angle,direction_rad=direction,yaw_sign=int(sign),
+                         completed_scans=len(result),lost=last_row['lost'],position_error_m=error,
+                         yaw_error_deg=yaw_error,success=bool(success),
+                         rejected_scans=sum(not r['accepted'] for _,_,r in result),
+                         total_ms=sum(r['total_ms'] for _,_,r in result))
+                save_json(path,row); robust.append(row)
+            write_csv(out/'robustness.csv',robust)
+            print(f'Robustness {len(robust)}/200; level {distance}m/{angle}deg, start {start+1}: '+
+                  f'{sum(r[\"success\"] for r in robust if r[\"level\"]==level and r[\"start\"]==start)}/10',flush=True)
+    write_csv(out/'robustness.csv',robust)
+    make_plots(out,data,baseline_data,scan_rows,robust)
+    speed=np.array([r['total_ms'] for r in scan_rows]); failures=sum(not r['accepted'] for r in scan_rows)
+    result=dict(scans=len(scan_rows),lost=False,failures=failures,failure_rate=failures/len(scan_rows),
+                mean_fitness=float(np.mean([r['fitness'] for r in scan_rows])),
+                mean_ms=float(speed.mean()),max_ms=float(speed.max()),p95_ms=float(np.percentile(speed,95)),
+                realtime_factor_10hz=float(100/speed.mean()),compute_to_sensor_time_ratio=float(speed.mean()/100),
+                robustness_trials=len(robust),robustness_successes=sum(r['success'] for r in robust),
+                startup_endpoint_hold_s=float(max(mapping[0,0]-times[0],0)),
+                scans_outside_map_pose_interval=int(len(times)-len(supported)),
+                prior_metadata=prior_meta,target_points=len(localizer.target.points),
+                peak_rss_mib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024,
+                wall_seconds=perf_counter()-began,open3d_version=o3d.__version__)
+    save_json(out/'run_stats.json',result)
+    lines=[FAIRNESS,'', '# TASK-05b — fixed-prior localization','',
+           '| Trajectory | 2D ATE SE3 RMSE (m) | 2D ATE SE3+lever2D RMSE (m) |','|---|---:|---:|']
+    for name,m in [('Held-out localization (all scans)',metrics),('Even mapping (keyframes)',baseline),
+                   ('Localization (common timestamps)',common_loc),('Even mapping (common timestamps)',common_base)]:
+        lines.append(f'| {name} | {m[\"se3\"][\"ate_2d_m\"][\"rmse\"]:.4f} | {m[\"se3_lever\"][\"ate_2d_m\"][\"rmse\"]:.4f} |')
+    lines+=['',f'완주 {len(scan_rows)}/{len(times)} scans, LOST=0; 실패 {failures} ({failures/len(times):.2%}).',
+        f'Fitness mean {result[\"mean_fitness\"]:.4f}. 처리 평균/최대 {speed.mean():.1f}/{speed.max():.1f} ms, p95 {result[\"p95_ms\"]:.1f} ms.',
+        f'10 Hz 기준 실시간 계수 = sensor budget / compute time = **{100/speed.mean():.2f}×** (1 이상이면 실시간).',
+        f'최대 RSS {result[\"peak_rss_mib\"]:.0f} MiB. Scan 시간은 전처리+예측+정합이며 bag I/O·초기 맵 구축·평가/그림은 제외한다.',
+        '', '## Initial-pose robustness','', '| Perturbation | Success / trials | Rate |','|---|---:|---:|']
+    for i,(m,deg) in enumerate(LEVELS):
+        successes=sum(r['success'] for r in robust if r['level']==i)
+        lines.append(f'| {m:g} m / {deg:g}° | {successes}/50 | {successes/50:.0%} |')
+    improvement=common_base['se3_lever']['ate_2d_m']['rmse']-common_loc['se3_lever']['ate_2d_m']['rmse']
+    lines+=['','## Interpretation', '',
+        f'공통 시각의 lever2D ATE 기준 위치추정과 매핑 차이는 {improvement:+.4f} m (양수는 위치추정 개선)이다.',
+        f'홀수 스캔 {len(times)}개를 고정 prior에 정합했고 GNSS는 평가에만 사용했다. IMU 입력과 매핑 포즈의 매 스캔 재초기화는 없다.',
+        f'강건성 {len(robust)}회 중 {result[\"robustness_successes\"]}회가 30스캔 후 3D 위치 <0.3 m 및 yaw <1°를 만족했다. 실패 정합은 예측값 유지, 5회 연속 실패는 LOST 처리했다.',
+        '', '## Method and limitations', '',
+        f'- Prior: {a.map_bag}, {a.map_scan_filter} scans only, 0.2 m voxel, fixed even mapping final poses. Metadata: "'`{prior_meta}`.'"',
+        '- Query: 1–80 m, 0.3 m voxel, no deskew; constant world velocity/body angular velocity prediction from the last two output poses, actual timestamp intervals.',
+        '- GICP: 1.0 → 0.5 m correspondence gates, max 30 iterations/stage, absolute fitness/RMSE change <1e-6. Map 20-NN planar covariances and KD-tree built once; scan covariance built once per scan.',
+        '- Open3D public registration_generalized_icp rebuilds the tree and hides iterations. The cached loop uses its TransformationEstimationForGeneralizedICP solver; synthetic and real-scan cross-checks compare against the public API. Source: https://github.com/isl-org/Open3D/blob/main/cpp/open3d/pipelines/registration/GeneralizedICP.cpp',
+        f'- 첫 map keyframe은 첫 홀수 스캔보다 {result[\"startup_endpoint_hold_s\"]:.3f} s 늦다. 최초 포즈는 가장 가까운 첫 keyframe으로 고정 초기화(시작 정지 가정); 범위 밖 {result[\"scans_outside_map_pose_interval\"]}개도 전부 위치추정했다. 강건성 기준 포즈에는 외삽을 쓰지 않았다.',
+        '- 5 starts are equally spaced by map-path arc length over feasible 30-scan windows. Per seed: exact horizontal perturbation magnitude, random uniform direction, random yaw sign; paired directions/signs across levels. No translation z perturbation. End errors use even-pose SLERP/linear interpolation, not GNSS.',
+        '- Robustness is relative to the even mapping trajectory, which also has map/trajectory approximation errors. Success is not a GNSS accuracy claim. Early LOST trials count as failures; no extra recovery or tuning by seed.',
+        '- Same-run held-out scans share the environment, IMU-derived map geometry and mapping drift. Split reduces direct scan reuse but cannot establish independent revisit performance. Map poses are used only for initial poses and robustness scoring.',
+        '- SE3/lever2D alignments are globally fitted to GNSS for evaluation; lever estimates are nuisance fits. GNSS tangent and flat-ground approximations are inherited from TASK-05. No GNSS/IMU enters localization.',
+        '- 新しい別日bagでは --map-run/--map-bag/--query-bag/--gt と別の --out を指定する。初期位置はmap frame内の既知の開始位置が必要(本CLIはmap-run軌跡の同時刻から取得するため、時刻の異なる再走行では初期姿勢を別途指定する)。',
+        '', 'Reproduce:', '', '"'```bash'"', 'source env.sh',
+        'OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume', '"'```'"']
+    (out/'summary.md').write_text('\\n'.join(lines)+'\\n')
+    print(json.dumps(result,indent=2),flush=True)
+
+if __name__=='__main__': main()
+EOF
+source env.sh && OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval > results/loc/run.log 2>&1" in /home/hong/SLAM
+ exited 1 in 1012ms:
+exec
+/bin/bash -lc "ps -eo pid,etime,rss,args | rg 'tools.eval.build_map|tools.loc.run_loc'; ls -lh results/loc; tail -8 results/loc/run.log; tail -3 results/loc/build_map.log" in /home/hong/SLAM
+ succeeded in 0ms:
+ 282371       00:00  3532 /bin/bash -c ps -eo pid,etime,rss,args | rg 'tools.eval.build_map|tools.loc.run_loc'; ls -lh results/loc; tail -8 results/loc/run.log; tail -3 results/loc/build_map.log
+ 282373       00:00  4620 rg tools.eval.build_map|tools.loc.run_loc
+total 21M
+-rw-rw-r-- 1 hong hong  118 Oct 26 18:28 build_map.log
+-rw-rw-r-- 1 hong hong 101K Oct 26 18:27 input_manifest_before.json
+-rw-rw-r-- 1 hong hong  21M Oct 26 18:28 prior_map.npz
+-rw-rw-r-- 1 hong hong 1.7K Oct 26 18:30 run.log
+-rw-rw-r-- 1 hong hong   99 Oct 26 18:28 test_loc_initial.log
+    arr = _read(fname, dtype=dtype, comment=comment, delimiter=delimiter,
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_npyio_impl.py", line 1022, in _read
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_datasource.py", line 192, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_datasource.py", line 529, in open
+    raise FileNotFoundError(f"{path} not found.")
+FileNotFoundError: results/gt_gnss_enu_tum.txt not found.
+[INFO] [1793006891.463819010] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+
+exec
+/bin/bash -lc "rg --files results | rg 'gt.*tum|gnss.*tum'; cat .venv/pyvenv.cfg; ls -l .venv/bin/python*; head -20 results/loc/run.log; ls -lh results/loc/prior_map.npz" in /home/hong/SLAM
+ succeeded in 0ms:
+results/eval/gt_gnss_enu_tum.txt
+home = /usr/bin
+include-system-site-packages = true
+version = 3.10.12
+lrwxrwxrwx 1 hong hong  7 Oct 26 17:25 .venv/bin/python -> python3
+lrwxrwxrwx 1 hong hong 16 Oct 26 17:25 .venv/bin/python3 -> /usr/bin/python3
+lrwxrwxrwx 1 hong hong  7 Oct 26 17:25 .venv/bin/python3.10 -> python3
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/hong/SLAM/tools/loc/run_loc_eval.py", line 226, in <module>
+    if __name__=='__main__': main()
+  File "/home/hong/SLAM/tools/loc/run_loc_eval.py", line 78, in main
+    mapping=load_tum(Path(a.map_run)/'keyframes_final_tum.txt'); gt=load_tum(a.gt)
+  File "/home/hong/SLAM/tools/eval/traj_eval.py", line 20, in load_tum
+    a = np.loadtxt(path, ndmin=2)
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_npyio_impl.py", line 1395, in loadtxt
+    arr = _read(fname, dtype=dtype, comment=comment, delimiter=delimiter,
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_npyio_impl.py", line 1022, in _read
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_datasource.py", line 192, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+  File "/home/hong/.local/lib/python3.10/site-packages/numpy/lib/_datasource.py", line 529, in open
+-rw-rw-r-- 1 hong hong 21M Oct 26 18:28 results/loc/prior_map.npz
+
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+import numpy,matplotlib,open3d
+print(numpy.__version__,numpy.__file__,matplotlib.__version__,open3d.__version__)
+PY" in /home/hong/SLAM
+ exited 1 in 557ms:
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/__init__.py", line 115, in <module>
+    import open3d.visualization
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/visualization/__init__.py", line 14, in <module>
+    from .draw_plotly import get_plotly_fig
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/visualization/draw_plotly.py", line 10, in <module>
+    import plotly.graph_objects as go
+ModuleNotFoundError: No module named 'plotly'
+
+exec
+/bin/bash -lc ".venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/loc/run_loc_eval.py'); s=p.read_text().replace(\"default='results/gt_gnss_enu_tum.txt'\",\"default='results/eval/gt_gnss_enu_tum.txt'\")
+s=s.replace('- 新しい別日bagでは --map-run/--map-bag/--query-bag/--gt と別の --out を指定する。初期位置はmap frame内の既知の開始位置が必要(本CLIはmap-run軌跡の同時刻から取得するため、時刻の異なる再走行では初期姿勢を別途指定する)。','- 별도 날짜의 bag에는 --map-run/--map-bag/--query-bag/--gt 및 별도 --out을 사용한다. 맵 좌표계의 초기 포즈를 --initial-pose-tum으로 제공할 수 있다. 강건성 평가에는 쿼리 시각에 대응하는 별도의 --reference-traj가 필요하다.')
+p.write_text(s)
+PY
+source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/run.log 2>&1" in /home/hong/SLAM
+ exited 1 in 1399ms:
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python -m pip install plotly > results/loc/dependencies.log 2>&1' in /home/hong/SLAM
+ succeeded in 1991ms:
+exec
+/bin/bash -lc "tail -8 results/loc/dependencies.log; source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+import numpy,matplotlib
+print(numpy.__version__,numpy.__file__,matplotlib.__version__)
+import open3d
+print(open3d.__version__)
+PY" in /home/hong/SLAM
+ exited 1 in 471ms:
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.7/9.7 MB 89.9 MB/s  0:00:00
+Downloading narwhals-2.27.1-py3-none-any.whl (483 kB)
+Installing collected packages: narwhals, plotly
+
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+dash 4.4.1 requires pydantic>=2.10, which is not installed.
+dash 4.4.1 requires typing_extensions>=4.1.1, which is not installed.
+Successfully installed narwhals-2.27.1 plotly-7.1.0
+1.21.5 /usr/lib/python3/dist-packages/numpy/__init__.py 3.5.1
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/__init__.py", line 115, in <module>
+    import open3d.visualization
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/visualization/__init__.py", line 14, in <module>
+    from .draw_plotly import get_plotly_fig
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/open3d/visualization/draw_plotly.py", line 12, in <module>
+    from dash import html
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/__init__.py", line 5, in <module>
+    from .dependencies import (  # noqa: F401,E402
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/dependencies.py", line 4, in <module>
+    from .development.base_component import Component
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/development/__init__.py", line 1, in <module>
+    from . import base_component  # noqa:F401
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/development/base_component.py", line 11, in <module>
+    from .._utils import patch_collections_abc, stringify_id, OrderedSet
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/_utils.py", line 22, in <module>
+    from .types import RendererHooks
+  File "/home/hong/SLAM/.venv/lib/python3.10/site-packages/dash/types.py", line 4, in <module>
+    from pydantic import Field, GetCoreSchemaHandler, GetJsonSchemaHandler
+ModuleNotFoundError: No module named 'pydantic'
+
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python -m pip install 'numpy==1.26.4' 'scipy==1.15.3' 'matplotlib==3.10.8' pydantic typing_extensions evo > results/loc/dependencies_isolated.log 2>&1" in /home/hong/SLAM
+exec
+/bin/bash -lc ".venv/bin/python - <<'PY'
+from pathlib import Path
+p=Path('tools/loc/run_loc_eval.py'); s=p.read_text()
+s=s.replace(\"p.add_argument('--out',default='results/loc'); p.add_argument('--resume',action='store_true')\", \"p.add_argument('--initial-pose',nargs=7,type=float,metavar=('X','Y','Z','QX','QY','QZ','QW'))\\n    p.add_argument('--reference-traj',help='Query-time map-frame reference TUM for revisit robustness scoring')\\n    p.add_argument('--out',default='results/loc'); p.add_argument('--resume',action='store_true')\")
+s=s.replace(\"input_hashes=fingerprint([Path(a.map_run)/'keyframes_final_tum.txt',Path(a.gt)])\", \"reference=load_tum(a.reference_traj) if a.reference_traj else mapping\\n    input_paths=[Path(a.map_run)/'keyframes_final_tum.txt',Path(a.gt)]\\n    if a.reference_traj: input_paths.append(Path(a.reference_traj))\\n    input_hashes=fingerprint(input_paths)\")
+s=s.replace(\"supported=np.flatnonzero((times>=mapping[0,0])&(times<=mapping[-1,0]))\", \"supported=np.flatnonzero((times>=reference[0,0])&(times<=reference[-1,0]))\")
+s=s.replace(\"refs=poses_at(mapping,times[supported])\", \"refs=poses_at(reference,times[supported])\")
+s=s.replace(\"initial=poses_at(mapping,[np.clip(first_stamp,mapping[0,0],mapping[-1,0])])[0]\", \"initial=poses_at(reference,[np.clip(first_stamp,reference[0,0],reference[-1,0])])[0]\\n        if a.initial_pose is not None:\\n            values=np.asarray(a.initial_pose)\\n            if not np.isfinite(values).all() or not np.isclose(np.linalg.norm(values[3:]),1,atol=1e-4):\\n                raise ValueError('Initial pose must be finite with unit quaternion')\\n            initial=np.eye(4); initial[:3,3]=values[:3]; initial[:3,:3]=Rotation.from_quat(values[3:]).as_matrix()\")
+s=s.replace(\"common_ref=poses_at(mapping,times[supported])\", \"common_ref=poses_at(reference,times[supported])\")
+s=s.replace(\"initial_reference=poses_at(mapping,[scans[0][0]])[0]\", \"initial_reference=poses_at(reference,[scans[0][0]])[0]\")
+s=s.replace(\"final_reference=poses_at(mapping,[scans[-1][0]])[0]\", \"final_reference=poses_at(reference,[scans[-1][0]])[0]\")
+s=s.replace(\"--initial-pose-tum\", \"--initial-pose\")
+s=s.replace(\"OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv\", \"PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv\")
+p.write_text(s)
+PY" in /home/hong/SLAM
+ succeeded in 0ms:
+ succeeded in 8736ms:
+codex
+합성 변환 복원, 공개 GICP 함수와의 일치, 실패 판정, 등속 예측 테스트 11개가 통과했습니다. 실제 입력에서는 문서와 달리 GT가 `results/eval/`에 있고, 첫 맵 keyframe이 첫 쿼리보다 약 0.95초 늦습니다. 시작 구간은 첫 keyframe으로 초기화해 모든 쿼리를 처리하고, 이 가정을 결과에 기록하겠습니다. 또한 `.venv`가 사용자 전역 패키지를 섞어 읽고 있어 환경을 분리하고 있습니다.
+exec
+/bin/bash -lc "tail -8 results/loc/dependencies_isolated.log; source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python - <<'PY'
+import numpy,open3d,scipy,matplotlib,evo
+print(numpy.__version__,open3d.__version__,scipy.__version__,matplotlib.__version__)
+PY" in /home/hong/SLAM
+ succeeded in 613ms:
+  Attempting uninstall: matplotlib
+    Found existing installation: matplotlib 3.5.1
+    Not uninstalling matplotlib at /usr/lib/python3/dist-packages, outside environment /home/hong/SLAM/.venv
+    Can't uninstall 'matplotlib'. No files were found to uninstall.
+
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+ipython 8.39.0 requires exceptiongroup; python_version < "3.11", which is not installed.
+Successfully installed annotated-types-0.8.0 contourpy-1.3.2 matplotlib-3.10.8 numpy-1.26.4 pandas-2.3.3 pydantic-2.14.1 pydantic-core-2.50.1 pyparsing-3.3.3 python-dateutil-3.0.0 ruamel.yaml-0.19.1 scipy-1.15.3 typing-inspection-0.4.4 typing_extensions-4.16.0 tzdata-2026.5
+1.26.4 0.20.0 1.15.3 3.10.8
+
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/run.log 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m pytest -q > results/loc/pytest.log 2>&1' in /home/hong/SLAM
+ exited 2 in 1050ms:
+exec
+/bin/bash -lc "tail -10 results/loc/run.log; tail -6 results/loc/pytest.log; ps -eo pid,etime,rss,args | rg 'run_loc_eval|pytest -q'" in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM/.venv/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Prior target: 676030 points
+[INFO] [1793007162.976771624] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+    from gtsam import gtsam, utils
+E   ImportError: cannot import name 'gtsam' from partially initialized module 'gtsam' (most likely due to a circular import) (/home/hong/SLAM/third_party/gtsam/python/gtsam/__init__.py)
+=========================== short test summary info ============================
+ERROR  - ImportError: cannot import name 'gtsam' from partially initialized m...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.55s
+ 283582       00:06  3764 /bin/bash -c source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/run.log 2>&1
+ 283595       00:06 403744 .venv/bin/python -m tools.loc.run_loc_eval --resume
+ 283680       00:00  3552 /bin/bash -c tail -10 results/loc/run.log; tail -6 results/loc/pytest.log; ps -eo pid,etime,rss,args | rg 'run_loc_eval|pytest -q'
+ 283684       00:00  4324 rg run_loc_eval|pytest -q
+
+exec
+/bin/bash -lc "cat > pytest.ini <<'EOF'
+[pytest]
+# Project tests only; vendored GTSAM/pybind11 have separate build environments.
+testpaths = tools
+norecursedirs = __pycache__
+EOF
+source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m pytest -q > results/loc/pytest.log 2>&1" in /home/hong/SLAM
+ succeeded in 2005ms:
+exec
+/bin/bash -lc 'tail -10 results/loc/run.log; tail -12 results/loc/pytest.log' in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM/.venv/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Prior target: 676030 points
+[INFO] [1793007162.976771624] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+[INFO] [1793007174.944700725] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+Baseline 100/1089 fitness=1.000 ms=47.9
+Baseline 200/1089 fitness=0.999 ms=70.7
+Baseline 300/1089 fitness=0.999 ms=51.4
+.......................................................................  [100%]
+71 passed in 1.37s
+
+exec
+/bin/bash -lc "cat > tools/loc/verify_loc.py <<'EOF'
+\"\"\"Independent acceptance audit. Only writes results/loc/verification.json.\"\"\"
+import argparse
+import csv
+import json
+from pathlib import Path
+import numpy as np
+import open3d as o3d
+from scipy.spatial.transform import Rotation
+from rclpy.serialization import deserialize_message
+from sensor_msgs.msg import PointCloud2
+from tools.eval.gnss_gt import bag_reader
+from tools.eval.traj_eval import load_tum
+from .localize import Localizer, cloud, output_dir, query_scans, poses_at
+
+
+def scan_stamps(path):
+    r=bag_reader(path,['/points_raw']); times=[]
+    while r.has_next():
+        _,raw,_=r.read_next(); msg=deserialize_message(raw,PointCloud2)
+        times.append(msg.header.stamp.sec*1_000_000_000+msg.header.stamp.nanosec)
+    return np.array(times,dtype=np.int64)
+
+
+def main():
+    p=argparse.ArgumentParser(); p.add_argument('--out',default='results/loc')
+    a=p.parse_args(); out=output_dir(a.out)
+    before=json.loads((out/'input_manifest_before.json').read_text())
+    current_paths=list(Path('data').rglob('*'))+[p for p in Path('results').rglob('*') if not p.is_relative_to('results/loc')]
+    after={str(p):[p.stat().st_size,p.stat().st_mtime_ns] for p in current_paths if p.is_file()}
+    assert before==after,'Read-only input file set, size or mtime changed'
+    original=scan_stamps('data/lio_bag'); odd=scan_stamps('data/lio_bag_odd'); even=scan_stamps('data/lio_bag_even')
+    np.testing.assert_array_equal(original[::2],even)
+    np.testing.assert_array_equal(original[1::2],odd)
+    assert not len(np.intersect1d(odd,even))
+    traj=load_tum(out/'loc_traj_tum.txt')
+    assert len(traj)==len(odd)==1089
+    np.testing.assert_allclose(traj[:,0],odd/1e9,atol=1e-6,rtol=0)
+    with (out/'per_scan.csv').open() as f: rows=list(csv.DictReader(f))
+    assert len(rows)==len(odd) and all(r['lost']=='False' for r in rows)
+    for r in rows:
+        success=(float(r['fitness'])>=.3 and float(r['inlier_rmse_m'])<=.3)
+        assert (r['accepted']=='True')==success
+        assert 0<int(r['iterations'])<=60
+    with (out/'robustness.csv').open() as f: robust=list(csv.DictReader(f))
+    keys={(int(r['level']),int(r['start']),int(r['seed'])) for r in robust}
+    assert keys=={(i,j,k) for i in range(4) for j in range(5) for k in range(10)}
+    for r in robust:
+        success=(int(r['completed_scans'])==30 and r['lost']=='False' and
+                 float(r['position_error_m'])<.3 and float(r['yaw_error_deg'])<1)
+        assert (r['success']=='True')==success
+    stats=json.loads((out/'run_stats.json').read_text()); assert stats['peak_rss_mib']<4096
+    for name in ('localization','mapping_baseline','localization_common_timestamps','mapping_common_timestamps'):
+        m=json.loads((out/name/'metrics.json').read_text())
+        assert m['matched_count']>3 and m['se3']['ate_2d_m']['rmse']>=0
+        assert m['evo_crosscheck']['absolute_difference_m']<.001
+    from PIL import Image
+    for name in ('loc_traj_overlay','loc_error_vs_time','robustness_heatmap','fitness_vs_time'):
+        with Image.open(out/'figs'/f'{name}.png') as im:
+            assert im.width>500 and im.height>300 and np.asarray(im).std()>5
+    # Public API versus cached implementation on three actual held-out scans.
+    target=cloud(np.load(out/'prior_map.npz')['xyz']); loc=Localizer(target)
+    mapping=load_tum('results/even_loop_on/keyframes_final_tum.txt'); checks=[]
+    for i,(t,source,_) in enumerate(query_scans('data/lio_bag_odd')):
+        if i not in (20,500,1000): continue
+        initial=poses_at(mapping,[t])[0]
+        cached,detail=loc.register(source,initial); public=initial
+        for distance in loc.cfg.correspondence_m:
+            result=o3d.pipelines.registration.registration_generalized_icp(
+                source,target,distance,public,loc.estimator,
+                o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=loc.cfg.max_iterations))
+            public=result.transformation
+        pos=float(np.linalg.norm(cached[:3,3]-public[:3,3]))
+        angle=float(Rotation.from_matrix(cached[:3,:3]@public[:3,:3].T).magnitude())
+        assert pos<1e-5 and angle<1e-5,(pos,angle)
+        checks.append(dict(scan=i,position_difference_m=pos,rotation_difference_rad=angle,
+                           fitness_difference=abs(detail['fitness']-result.fitness),
+                           rmse_difference_m=abs(detail['inlier_rmse_m']-result.inlier_rmse)))
+        if i==1000: break
+    audit=dict(passed=True,input_files_unchanged=len(before),input_protection_check='file set + size + mtime_ns',
+               even_scans=len(even),odd_scans=len(odd),split_disjoint=True,
+               baseline_scans=len(rows),lost_count=0,robustness_trials=len(keys),
+               peak_rss_mib=stats['peak_rss_mib'],real_scan_public_api_crosschecks=checks)
+    (out/'verification.json').write_text(json.dumps(audit,indent=2))
+    print(json.dumps(audit,indent=2))
+
+if __name__=='__main__': main()
+EOF" in /home/hong/SLAM
+ succeeded in 0ms:
+codex
+프로젝트 전체 pytest는 71개 모두 통과했습니다. 기본 주행은 현재 300스캔까지 LOST 없이 진행됐고, 정합 fitness는 약 0.999입니다. 완료 후에는 200회 강건성 실험에 이어 스캔 분리, 실제 스캔의 공개 GICP 함수와의 일치, 입력 파일 보존 여부를 독립 검증하겠습니다.
+exec
+/bin/bash -lc "tail -12 results/loc/run.log; ps -eo pid,etime,rss,args | rg 'run_loc_eval'" in /home/hong/SLAM
+ succeeded in 0ms:
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Prior target: 676030 points
+[INFO] [1793007162.976771624] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+[INFO] [1793007174.944700725] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+Baseline 100/1089 fitness=1.000 ms=47.9
+Baseline 200/1089 fitness=0.999 ms=70.7
+Baseline 300/1089 fitness=0.999 ms=51.4
+Baseline 400/1089 fitness=1.000 ms=101.5
+Baseline 500/1089 fitness=1.000 ms=89.6
+Baseline 600/1089 fitness=1.000 ms=61.1
+Baseline 700/1089 fitness=1.000 ms=48.0
+Baseline 800/1089 fitness=1.000 ms=36.3
+ 283582       01:26  3764 /bin/bash -c source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/run.log 2>&1
+ 283595       01:26 489700 .venv/bin/python -m tools.loc.run_loc_eval --resume
+ 284614       00:00  3604 /bin/bash -c tail -12 results/loc/run.log; ps -eo pid,etime,rss,args | rg 'run_loc_eval'
+ 284617       00:00  4180 rg run_loc_eval
+
+exec
+/bin/bash -lc 'tail -10 results/loc/run.log; ls results/loc; source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python -m pip freeze --local > results/loc/venv_packages.txt' in /home/hong/SLAM
+ succeeded in 238ms:
+Baseline 100/1089 fitness=1.000 ms=47.9
+Baseline 200/1089 fitness=0.999 ms=70.7
+Baseline 300/1089 fitness=0.999 ms=51.4
+Baseline 400/1089 fitness=1.000 ms=101.5
+Baseline 500/1089 fitness=1.000 ms=89.6
+Baseline 600/1089 fitness=1.000 ms=61.1
+Baseline 700/1089 fitness=1.000 ms=48.0
+Baseline 800/1089 fitness=1.000 ms=36.3
+Baseline 900/1089 fitness=1.000 ms=102.7
+Baseline 1000/1089 fitness=1.000 ms=115.4
+build_map.log
+configuration.json
+dependencies_isolated.log
+dependencies.log
+input_manifest_before.json
+localization
+localization_common_timestamps
+loc_traj_tum.txt
+mapping_baseline
+mapping_common_timestamps
+per_scan.csv
+prior_map.npz
+pytest.log
+robustness_trials
+run.log
+test_loc_initial.log
+
+exec
+/bin/bash -lc "cat > tools/loc/README.md <<'EOF'
+# Held-out fixed-map localization
+
+From "'`/home/hong/SLAM`:
+
+```bash
+source env.sh
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 '"\\
+  .venv/bin/python -m tools.loc.run_loc_eval --resume
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \\
+  .venv/bin/python -m pytest -q
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \\
+  .venv/bin/python -m tools.loc.verify_loc
+"'```
+
+`run_loc_eval --help` exposes map run/bag, scan parity, query bag, GNSS GT,
+initial pose and query-time map reference arguments. `--map-bag` defaults to the
+full original preprocessed bag, and **only even indices** are used in the prior.
+For an already-even bag, select `--map-scan-filter all` to avoid splitting twice.
+All outputs are constrained to `results/loc/` (including child experiment dirs).
+Use a separate `--out results/loc/<experiment>` for different inputs; resume
+rejects changed configuration, trajectory/GT hashes or implementation hashes.
+
+Default: 1089 odd scans, range 1–80 m, voxel 0.3 m, fixed 0.2 m prior,
+20-neighbor planar GICP covariances, epsilon 0.001, 1.0/0.5 m correspondence
+gates, 30 iterations per stage. No IMU/GNSS or ongoing map poses enter tracking.
+Mapping poses initialize the baseline and each robustness trial only. The first
+map pose is later than the first scan; this explicit endpoint hold is disclosed
+in the summary. Interpolation for robustness references never extrapolates.
+
+`localize.py` provides the reusable registration, predictor, failure state and
+streaming tracker. Its standalone CLI consumes a prior NPZ plus initial TUM.
+`run_loc_eval.py` produces the baseline, paired-seed 200-trial benchmark,
+GNSS metrics and plots. Trial JSON checkpoints are retained for inspection.
+`verify_loc.py` independently audits the default experiment, parity separation,
+input file preservation, trajectory coverage, thresholds and all trial cells,
+and compares cached GICP with the public Open3D API on three real scans.
+
+Open3D'"'s public "'`registration_generalized_icp` rebuilds the target search tree
+on every invocation and does not expose iterations. The cached outer loop uses
+its actual `TransformationEstimationForGeneralizedICP.compute_transformation`
+solver with the same convergence criteria and planar covariance model, using
+one persistent scipy cKDTree. Unit tests and the real-scan audit compare it with
+the public API. This is an explicit API adaptation to meet fixed-tree caching
+and actual iteration accounting; it is not a different registration solver.
+Reference: [Open3D implementation](https://github.com/isl-org/Open3D/blob/main/cpp/open3d/pipelines/registration/GeneralizedICP.cpp).
+
+The two ATE variants use the unchanged TASK-05 `evaluate()` function. In
+addition to the requested keyframe baseline, a common-timestamp comparison
+avoids differences caused by keyframe versus dense-scan sampling. The primary
+lever2D fit remains an in-sample nuisance estimate, and the same-journey split
+is an optimistic estimate of true revisit performance.
+
+`PYTHONNOUSERSITE=1` is necessary here because the user site contains numpy 2.x
+and a conflicting matplotlib. Dependencies installed for this task are confined
+to `.venv`; the recorded environment is `results/loc/venv_packages.txt`.
+The project `pytest.ini` limits discovery to `tools/`; vendored GTSAM/pybind11
+source tests need their own build environments and are not project tests.
+EOF
+source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 /usr/bin/time -v .venv/bin/python -m tools.eval.build_map_from_poses --bag data/lio_bag --traj results/even_loop_on/keyframes_final_tum.txt --out results/loc/prior_rebuild_check.npz --scan-filter even --voxel 0.2 > results/loc/map_resource_check.log 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc "tail -8 results/loc/run.log; source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+import json
+from pathlib import Path
+for n in ['localization','mapping_baseline','localization_common_timestamps','mapping_common_timestamps']:
+ p=Path('results/loc')/n/'metrics.json'
+ if p.exists():
+  m=json.loads(p.read_text()); print(n,m['se3']['ate_2d_m']['rmse'],m['se3_lever']['ate_2d_m']['rmse'])
+PY" in /home/hong/SLAM
+ succeeded in 0ms:
+Baseline 600/1089 fitness=1.000 ms=61.1
+Baseline 700/1089 fitness=1.000 ms=48.0
+Baseline 800/1089 fitness=1.000 ms=36.3
+Baseline 900/1089 fitness=1.000 ms=102.7
+Baseline 1000/1089 fitness=1.000 ms=115.4
+Robustness 10/200; level 0.5m/2.0deg, start 1: 10/10
+Robustness 20/200; level 0.5m/2.0deg, start 2: 10/10
+Robustness 30/200; level 0.5m/2.0deg, start 3: 10/10
+localization 0.6892727192170858 0.2589050620342636
+mapping_baseline 0.6637367058063953 0.23955099708221575
+localization_common_timestamps 0.6971166951958809 0.25857293363939354
+mapping_common_timestamps 0.7066391395360447 0.25857012422688835
+
+codex
+홀수 스캔 1,089개를 모두 LOST 없이 처리했습니다. 위치추정의 2D ATE는 SE3 기준 0.689 m, lever2D 보정 후 0.259 m입니다. 매핑 궤적과 같은 시각에서 비교하면 둘 다 약 0.259 m로 차이가 거의 없어, 이번 결과를 정확도 개선으로 해석하기는 어렵습니다. 강건성 실험은 현재 30/200회까지 완료됐습니다.
+exec
+/bin/bash -lc 'tail -8 results/loc/run.log; tail -20 results/loc/map_resource_check.log; du -sh results/loc' in /home/hong/SLAM
+ succeeded in 0ms:
+Baseline 800/1089 fitness=1.000 ms=36.3
+Baseline 900/1089 fitness=1.000 ms=102.7
+Baseline 1000/1089 fitness=1.000 ms=115.4
+Robustness 10/200; level 0.5m/2.0deg, start 1: 10/10
+Robustness 20/200; level 0.5m/2.0deg, start 2: 10/10
+Robustness 30/200; level 0.5m/2.0deg, start 3: 10/10
+Robustness 40/200; level 0.5m/2.0deg, start 4: 10/10
+Robustness 50/200; level 0.5m/2.0deg, start 5: 10/10
+[INFO] [1793007332.917052396] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+22M	results/loc
+
+exec
+/bin/bash -lc "ps -eo pid,etime,rss,args | rg 'run_loc_eval|build_map_from_poses'; source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+import csv
+from pathlib import Path
+with Path('results/loc/per_scan.csv').open() as f: rows=list(csv.DictReader(f))
+import numpy as np
+print('failures',sum(r['accepted']"'!='"'True' for r in rows),'mean/max ms',np.mean([float(r['total_ms']) for r in rows]),max(float(r['total_ms']) for r in rows))
+PY" in /home/hong/SLAM
+ succeeded in 82ms:
+ 283582       03:40  3764 /bin/bash -c source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/run.log 2>&1
+ 283595       03:40 505564 .venv/bin/python -m tools.loc.run_loc_eval --resume
+ 285621       00:49  3800 /bin/bash -c cat > tools/loc/README.md <<'EOF' # Held-out fixed-map localization  From `/home/hong/SLAM`:  ```bash source env.sh PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \   .venv/bin/python -m tools.loc.run_loc_eval --resume PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \   .venv/bin/python -m pytest -q PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \   .venv/bin/python -m tools.loc.verify_loc ```  `run_loc_eval --help` exposes map run/bag, scan parity, query bag, GNSS GT, initial pose and query-time map reference arguments. `--map-bag` defaults to the full original preprocessed bag, and **only even indices** are used in the prior. For an already-even bag, select `--map-scan-filter all` to avoid splitting twice. All outputs are constrained to `results/loc/` (including child experiment dirs). Use a separate `--out results/loc/<experiment>` for different inputs; resume rejects changed configuration, trajectory/GT hashes or implementation hashes.  Default: 1089 odd scans, range 1–80 m, voxel 0.3 m, fixed 0.2 m prior, 20-neighbor planar GICP covariances, epsilon 0.001, 1.0/0.5 m correspondence gates, 30 iterations per stage. No IMU/GNSS or ongoing map poses enter tracking. Mapping poses initialize the baseline and each robustness trial only. The first map pose is later than the first scan; this explicit endpoint hold is disclosed in the summary. Interpolation for robustness references never extrapolates.  `localize.py` provides the reusable registration, predictor, failure state and streaming tracker. Its standalone CLI consumes a prior NPZ plus initial TUM. `run_loc_eval.py` produces the baseline, paired-seed 200-trial benchmark, GNSS metrics and plots. Trial JSON checkpoints are retained for inspection. `verify_loc.py` independently audits the default experiment, parity separation, input file preservation, trajectory coverage, thresholds and all trial cells, and compares cached GICP with the public Open3D API on three real scans.  Open3D's public `registration_generalized_icp` rebuilds the target search tree on every invocation and does not expose iterations. The cached outer loop uses its actual `TransformationEstimationForGeneralizedICP.compute_transformation` solver with the same convergence criteria and planar covariance model, using one persistent scipy cKDTree. Unit tests and the real-scan audit compare it with the public API. This is an explicit API adaptation to meet fixed-tree caching and actual iteration accounting; it is not a different registration solver. Reference: [Open3D implementation](https://github.com/isl-org/Open3D/blob/main/cpp/open3d/pipelines/registration/GeneralizedICP.cpp).  The two ATE variants use the unchanged TASK-05 `evaluate()` function. In addition to the requested keyframe baseline, a common-timestamp comparison avoids differences caused by keyframe versus dense-scan sampling. The primary lever2D fit remains an in-sample nuisance estimate, and the same-journey split is an optimistic estimate of true revisit performance.  `PYTHONNOUSERSITE=1` is necessary here because the user site contains numpy 2.x and a conflicting matplotlib. Dependencies installed for this task are confined to `.venv`; the recorded environment is `results/loc/venv_packages.txt`. The project `pytest.ini` limits discovery to `tools/`; vendored GTSAM/pybind11 source tests need their own build environments and are not project tests. EOF source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 /usr/bin/time -v .venv/bin/python -m tools.eval.build_map_from_poses --bag data/lio_bag --traj results/even_loop_on/keyframes_final_tum.txt --out results/loc/prior_rebuild_check.npz --scan-filter even --voxel 0.2 > results/loc/map_resource_check.log 2>&1
+ 285636       00:48  1384 /usr/bin/time -v .venv/bin/python -m tools.eval.build_map_from_poses --bag data/lio_bag --traj results/even_loop_on/keyframes_final_tum.txt --out results/loc/prior_rebuild_check.npz --scan-filter even --voxel 0.2
+ 285637       00:48 245220 .venv/bin/python -m tools.eval.build_map_from_poses --bag data/lio_bag --traj results/even_loop_on/keyframes_final_tum.txt --out results/loc/prior_rebuild_check.npz --scan-filter even --voxel 0.2
+ 286203       00:00  3536 /bin/bash -c ps -eo pid,etime,rss,args | rg 'run_loc_eval|build_map_from_poses'; source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY' import csv from pathlib import Path with Path('results/loc/per_scan.csv').open() as f: rows=list(csv.DictReader(f)) import numpy as np print('failures',sum(r['accepted']!='True' for r in rows),'mean/max ms',np.mean([float(r['total_ms']) for r in rows]),max(float(r['total_ms']) for r in rows)) PY
+ 286205       00:00  4380 rg run_loc_eval|build_map_from_poses
+failures 0 mean/max ms 82.59577886522145 379.5104478485882
+
+ succeeded in 51350ms:
+exec
+/bin/bash -lc 'tail -7 results/loc/run.log; tail -7 results/loc/map_resource_check.log' in /home/hong/SLAM
+ succeeded in 0ms:
+Robustness 20/200; level 0.5m/2.0deg, start 2: 10/10
+Robustness 30/200; level 0.5m/2.0deg, start 3: 10/10
+Robustness 40/200; level 0.5m/2.0deg, start 4: 10/10
+Robustness 50/200; level 0.5m/2.0deg, start 5: 10/10
+Robustness 60/200; level 1.0m/5.0deg, start 1: 10/10
+Robustness 70/200; level 1.0m/5.0deg, start 2: 10/10
+Robustness 80/200; level 1.0m/5.0deg, start 3: 10/10
+	File system inputs: 658336
+	File system outputs: 41952
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+
+codex
+기본 주행의 정합 실패는 0회였고, 스캔당 평균 처리시간은 약 82.6 ms로 10 Hz 기준을 충족했습니다. 강건성 평가는 80/200회까지 모두 수렴했습니다. 별도로 prior 맵을 다시 생성해 메모리 사용량과 재현성도 확인하고 있습니다.
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+import numpy as np,json
+from pathlib import Path
+with np.load('results/loc/prior_map.npz') as a,np.load('results/loc/prior_rebuild_check.npz') as b:
+ print(a['xyz'].shape,b['xyz'].shape)
+ np.testing.assert_array_equal(a['xyz'],b['xyz'])
+ Path('results/loc/prior_reproducibility.json').write_text(json.dumps({'exact_xyz_match':True,'points':len(a['xyz']),'metadata':json.loads(str(a['metadata']))},indent=2))
+PY
+rg 'Maximum resident|Elapsed' results/loc/map_resource_check.log; tail -5 results/loc/run.log" in /home/hong/SLAM
+ succeeded in 412ms:
+(676030, 3) (676030, 3)
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:51.37
+	Maximum resident set size (kbytes): 346944
+Robustness 70/200; level 1.0m/5.0deg, start 2: 10/10
+Robustness 80/200; level 1.0m/5.0deg, start 3: 10/10
+Robustness 90/200; level 1.0m/5.0deg, start 4: 10/10
+Robustness 100/200; level 1.0m/5.0deg, start 5: 10/10
+Robustness 110/200; level 2.0m/10.0deg, start 1: 10/10
+
+exec
+/bin/bash -lc "cat > logs/task05b.md <<'EOF'
+# TASK-05b — held-out fixed-map localization
+
+작업 환경: "'`/home/hong/SLAM`, `source env.sh`, `.venv/bin/python`.
+sudo 및 시스템 설치는 사용하지 않았다. 데이터와 기존 결과는 읽기 전용으로
+접근하며, 모든 실행 산출물은 `results/loc/` 아래에 기록한다.
+
+## 구현
+
+- `tools/loc/localize.py`: 고정 prior 대상의 Open3D GICP, 1.0→0.5 m 2단계,
+  스캔 범위 1–80 m 및 voxel 0.3 m, 등속/등각속 예측(실제 timestamp 간격),
+  실패 시 예측 유지, 연속 5회 실패 LOST. IMU/GNSS 입력은 없다.
+- `tools/loc/run_loc_eval.py`: 짝수 prior 생성(0.2 m), 전체 홀수 주행,
+  GNSS ATE(SE3/lever2D), 기본 even keyframe 기준선 및 공통 시각 기준선,
+  5 시작점×4 섭동×10 시드, CSV/JSON 체크포인트와 4개 그림.
+- `tools/loc/verify_loc.py`: 기본 실험 독립 검증. parity 및 시각 분리,
+  전 스캔 완주, 실패/성공 판정, 200개 조합, 메모리, 입력 보존,
+  실제 스캔 3개에 대한 공개 Open3D GICP API 교차검증.
+- `tools/tests/test_loc.py`: 알려진 변환 복원과 공개 API 일치, 실패 경계값,
+  LOST 예측 유지, 등속 예측, 보간 및 출력 경로 보호 테스트.
+- 추가 정리: `tools/tests/test_maps.py`의 보조 `map2d_nav2.yaml` 요구를 제거.
+  단일 `map2d.yaml`, `free_thresh=0.196`, unknown 205 보존을 검증한다.
+- `pytest.ini`: 프로젝트 전체인 `tools/` 아래 테스트를 수집한다.
+  기본 무제한 검색으로는 빌드되지 않은 vendored GTSAM Python binding의
+  자체 테스트 수집이 실패했다. third_party 테스트는 별도 빌드 환경의 대상이다.
+
+## 환경 정리 및 실행
+
+`.venv`는 system-site-packages가 켜져 있고 사용자 site의 numpy 2.x와
+matplotlib이 섞여 있었다. 사용자 site를 `PYTHONNOUSERSITE=1`로 제외하고
+필요한 의존성을 `.venv` 안에 설치했다. numpy 1.26.4, scipy 1.15.3,
+matplotlib 3.10.8, Open3D 0.20.0. 정확한 패키지 목록과 설치 로그는
+`results/loc/venv_packages.txt`, `dependencies*.log`에 보관했다.
+2D Agg 그림은 정상 생성되며, 시스템 mpl_toolkits와의 3D import 경고는
+이 작업의 2D 그림에 영향을 주지 않는다.
+
+```bash
+source env.sh
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 '"\\
+  .venv/bin/python -m tools.loc.run_loc_eval --resume
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \\
+  .venv/bin/python -m pytest -q
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \\
+  .venv/bin/python -m tools.loc.verify_loc
+"'```
+
+초기 별도 prior 생성에는 `tools.eval.build_map_from_poses` CLI를 썼고,
+`run_loc_eval --resume`가 동일한 prior를 재사용했다. 독립 재생성 결과
+676,030개 xyz가 비트 단위로 동일했다. `/usr/bin/time -v` 측정 prior
+생성 최대 RSS 346,944 KiB(339 MiB), 51.37초. 메타데이터와 검증 로그는
+`prior_reproducibility.json`, `map_resource_check.log`에 기록했다.
+
+## API 적응 및 근사/한계
+
+Open3D `registration_generalized_icp`는 호출마다 target tree를 다시 만들고
+반복 수를 반환하지 않는다. 이를 그대로 매 스캔 호출하면 고정 tree/실제
+반복 수 기록 조건을 만족시킬 수 없다. 따라서 동일한 Open3D
+`TransformationEstimationForGeneralizedICP.compute_transformation`을 호출하는
+ICP 외부 루프를 구현했다. target cKDTree와 20-NN normal 기반
+(planar epsilon/1/1) 공분산은 한 번 생성하고 재사용한다. 반복 중에는
+변환된 source 공분산만 회전한다. fitness와 RMSE는 유클리드 최근접 대응점
+기준이며, 두 지표 변화가 각각 1e-6 미만이면 수렴한다(단계당 최대 30회).
+공개 API와 동일한 합성 테스트 및 실제 스캔 교차검증으로 확인한다.
+
+근거: [Open3D GICP 소스](https://github.com/isl-org/Open3D/blob/main/cpp/open3d/pipelines/registration/GeneralizedICP.cpp),
+[공개 API](https://www.open3d.org/docs/release/python_api/open3d.pipelines.registration.registration_generalized_icp.html).
+
+- 문서의 GT 경로 `results/gt_gnss_enu_tum.txt`는 실제로 존재하지 않는다.
+  기존 결과를 이동하지 않고 `results/eval/gt_gnss_enu_tum.txt`를 읽었다.
+- 첫 최적화 keyframe이 첫 홀수 스캔보다 약 0.95 s 늦다. 초기 포즈는 첫
+  keyframe을 유지하는 시작 정지 가정으로 제공하여 1,089개 모두 처리한다.
+  강건성의 기준 포즈는 SLERP/선형보간 범위 안에서만 사용한다.
+- 동일 주행의 held-out(홀수) 스캔 → 진짜 재주행보다 낙관적.
+  맵은 IMU 기반 even 매핑 포즈를 사용하므로 간접적인 공통 오차는 남는다.
+  IMU를 위치추정 예측에 사용하지 않으며 GNSS는 평가 함수에서만 사용한다.
+- 디스큐 없음. 맵과 쿼리 스캔 모두 scan header pose 근사이다.
+- 5개 시작점은 가능한 30스캔 구간의 경로 누적거리 기준으로 균등 배치한다.
+  섭동은 수평 크기를 정확히 유지하고 방향을 uniform 샘플링, yaw 부호는
+  무작위로 선택한다. 시작점/시드가 같으면 수준 간 방향과 부호를 공유한다.
+- 강건성 성공은 맵 포즈 대비 마지막 3D 위치 <0.3 m 및 yaw <1°이며,
+  조기 LOST는 실패로 센다. GNSS 정확도나 참된 재주행 성공률을 뜻하지 않는다.
+- keyframe 기반 ATE와 dense scan ATE의 표본 차이가 있으므로 공통 시각
+  비교 표를 추가했다. GT 정렬/lever2D 피팅은 평가 단계의 in-sample 추정이다.
+EOF' in /home/hong/SLAM
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --help > results/loc/cli_help.txt 2>&1; tail -7 results/loc/run.log' in /home/hong/SLAM
+ succeeded in 859ms:
+Robustness 80/200; level 1.0m/5.0deg, start 3: 10/10
+Robustness 90/200; level 1.0m/5.0deg, start 4: 10/10
+Robustness 100/200; level 1.0m/5.0deg, start 5: 10/10
+Robustness 110/200; level 2.0m/10.0deg, start 1: 10/10
+Robustness 120/200; level 2.0m/10.0deg, start 2: 10/10
+Robustness 130/200; level 2.0m/10.0deg, start 3: 10/10
+Robustness 140/200; level 2.0m/10.0deg, start 4: 10/10
+
+codex
+강건성 실험은 140/200회까지 완료됐으며, 현재까지 모두 성공했습니다. prior 맵을 독립적으로 재생성한 결과 676,030개 점의 좌표가 정확히 일치했고, 생성 과정의 최대 메모리는 약 339 MiB였습니다. 남은 큰 섭동 실험과 그림 확인, 독립 검증을 이어가겠습니다.
+exec
+/bin/bash -lc 'tail -8 results/loc/run.log' in /home/hong/SLAM
+ succeeded in 0ms:
+Robustness 90/200; level 1.0m/5.0deg, start 4: 10/10
+Robustness 100/200; level 1.0m/5.0deg, start 5: 10/10
+Robustness 110/200; level 2.0m/10.0deg, start 1: 10/10
+Robustness 120/200; level 2.0m/10.0deg, start 2: 10/10
+Robustness 130/200; level 2.0m/10.0deg, start 3: 10/10
+Robustness 140/200; level 2.0m/10.0deg, start 4: 10/10
+Robustness 150/200; level 2.0m/10.0deg, start 5: 8/10
+Robustness 160/200; level 3.0m/15.0deg, start 1: 3/10
+
+exec
+/bin/bash -lc 'tail -6 results/loc/run.log; ls results/loc/figs 2>/dev/null' in /home/hong/SLAM
+ exited 2 in 0ms:
+Robustness 130/200; level 2.0m/10.0deg, start 3: 10/10
+Robustness 140/200; level 2.0m/10.0deg, start 4: 10/10
+Robustness 150/200; level 2.0m/10.0deg, start 5: 8/10
+Robustness 160/200; level 3.0m/15.0deg, start 1: 3/10
+Robustness 170/200; level 3.0m/15.0deg, start 2: 10/10
+Robustness 180/200; level 3.0m/15.0deg, start 3: 9/10
+
+codex
+큰 섭동에서 수렴 실패가 확인됐습니다. 2 m/10°는 50회 중 48회 성공했고, 3 m/15°는 시작 위치에 따라 성공률이 달랐습니다. 실패 시도도 모두 보존하고 있으며, 히트맵에 위치별 차이를 표시하겠습니다.
+ succeeded in 567831ms:
+exec
+/bin/bash -lc 'tail -12 results/loc/run.log; ls results/loc/figs 2>/dev/null' in /home/hong/SLAM
+ succeeded in 0ms:
+      1052
+    ],
+    "voxel_m": 0.2,
+    "scan_filter": "even",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  },
+  "target_points": 676030,
+  "peak_rss_mib": 525.0859375,
+  "wall_seconds": 566.9697298919782,
+  "open3d_version": "0.20.0"
+}
+fitness_vs_time.png
+loc_error_vs_time.png
+loc_traj_overlay.png
+robustness_heatmap.png
+
+exec
+/bin/bash -lc 'cat results/loc/run_stats.json; head -35 results/loc/summary.md; source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.verify_loc > results/loc/verify.log 2>&1' in /home/hong/SLAM
+ succeeded in 17466ms:
+{
+  "scans": 1089,
+  "lost": false,
+  "failures": 0,
+  "failure_rate": 0.0,
+  "mean_fitness": 0.9998320496368932,
+  "mean_ms": 82.59577886522145,
+  "max_ms": 379.5104478485882,
+  "p95_ms": 169.9802396818995,
+  "realtime_factor_10hz": 1.2107156246226396,
+  "compute_to_sensor_time_ratio": 0.8259577886522145,
+  "robustness_trials": 200,
+  "robustness_successes": 180,
+  "startup_endpoint_hold_s": 0.9498755931854248,
+  "scans_outside_map_pose_interval": 38,
+  "prior_metadata": {
+    "scans_read": 2178,
+    "scans_used": [
+      1052
+    ],
+    "voxel_m": 0.2,
+    "scan_filter": "even",
+    "deskew": false,
+    "relative_time": "voxel weighted mean of original scan-relative seconds"
+  },
+  "target_points": 676030,
+  "peak_rss_mib": 525.0859375,
+  "wall_seconds": 566.9697298919782,
+  "open3d_version": "0.20.0"
+}동일 주행의 held-out(홀수) 스캔 → 진짜 재주행보다 낙관적. 다른 날 주행 bag으로 같은 스크립트를 재사용 가능
+
+# TASK-05b — fixed-prior localization
+
+| Trajectory | 2D ATE SE3 RMSE (m) | 2D ATE SE3+lever2D RMSE (m) |
+|---|---:|---:|
+| Held-out localization (all scans) | 0.6893 | 0.2589 |
+| Even mapping (keyframes) | 0.6637 | 0.2396 |
+| Localization (common timestamps) | 0.6971 | 0.2586 |
+| Even mapping (common timestamps) | 0.7066 | 0.2586 |
+
+완주 1089/1089 scans, LOST=0; 실패 0 (0.00%).
+Fitness mean 0.9998. 처리 평균/최대 82.6/379.5 ms, p95 170.0 ms.
+10 Hz 기준 실시간 계수 = sensor budget / compute time = **1.21×** (1 이상이면 실시간).
+최대 RSS 525 MiB. Scan 시간은 전처리+예측+정합이며 bag I/O·초기 맵 구축·평가/그림은 제외한다.
+
+## Initial-pose robustness
+
+| Perturbation | Success / trials | Rate |
+|---|---:|---:|
+| 0.5 m / 2° | 50/50 | 100% |
+| 1 m / 5° | 50/50 | 100% |
+| 2 m / 10° | 48/50 | 96% |
+| 3 m / 15° | 32/50 | 64% |
+
+## Interpretation
+
+공통 시각의 lever2D ATE 기준 위치추정과 매핑 차이는 -0.0000 m (양수는 위치추정 개선)이다.
+홀수 스캔 1089개를 고정 prior에 정합했고 GNSS는 평가에만 사용했다. IMU 입력과 매핑 포즈의 매 스캔 재초기화는 없다.
+강건성 200회 중 180회가 30스캔 후 3D 위치 <0.3 m 및 yaw <1°를 만족했다. 실패 정합은 예측값 유지, 5회 연속 실패는 LOST 처리했다.
+
+## Method and limitations
+
+- Prior: data/lio_bag, even scans only, 0.2 m voxel, fixed even mapping final poses. Metadata: `{'scans_read': 2178, 'scans_used': [1052], 'voxel_m': 0.2, 'scan_filter': 'even', 'deskew': False, 'relative_time': 'voxel weighted mean of original scan-relative seconds'}`.
+- Query: 1–80 m, 0.3 m voxel, no deskew; constant world velocity/body angular velocity prediction from the last two output poses, actual timestamp intervals.
+
+codex
+200회 실험을 모두 완료했습니다. 섭동 수준별 성공률은 100%, 100%, 96%, 64%였고, 그림 4장도 직접 확인했습니다. 현재 입력 파일 보존과 실제 스캔 3개의 공개 GICP 교차검증을 실행 중입니다. 마무리 점검에서 별도 날짜용 기준 궤적을 지정했을 때의 비교 기준선 처리도 보완하겠습니다.
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+from pathlib import Path
+import json,hashlib
+out=Path('results/loc'); source=Path('tools/loc/run_loc_eval.py'); old=source.read_text()
+archive=out/'execution_source'; archive.mkdir(exist_ok=True)
+(archive/'run_loc_eval_initial.py').write_text(old)
+(archive/'configuration_initial.json').write_text((out/'configuration.json').read_text())
+(archive/'run_stats_initial.json').write_text((out/'run_stats.json').read_text())
+new=old.replace(\"baseline,baseline_data=evaluate(mapping,gt,out/'mapping_baseline')\", \"baseline,baseline_data=evaluate(reference,gt,out/'mapping_baseline')\")
+new=new.replace(\"improvement:+.4f\", \"improvement:+.7f\")
+new=new.replace(\"first_stamp=times[0]\", \"first_stamp=times[0]\")
+source.write_text(new)
+cfg=json.loads((out/'configuration.json').read_text()); previous=cfg['code_sha256'][str(source)]
+assert previous==hashlib.sha256(old.encode()).hexdigest()
+# Default reference is literally mapping. Neither kernel, trial generation nor
+# default outputs change; retain existing tracking checkpoints with provenance.
+current=hashlib.sha256(new.encode()).hexdigest(); cfg['code_sha256'][str(source)]=current
+(out/'configuration.json').write_text(json.dumps(cfg,indent=2,ensure_ascii=False))
+(out/'cache_migration.json').write_text(json.dumps(dict(
+ old_runner_sha256=previous,new_runner_sha256=current,
+ reason='Use supplied query-time reference for revisit baseline evaluation; display micro-scale ATE difference without negative zero.',
+ unchanged='localize.py, default args, map, baseline tracking, robustness generation and all 200 checkpoint trials',
+ initial_execution_wall_seconds=json.loads((archive/'run_stats_initial.json').read_text())['wall_seconds'],
+ default_equivalence='reference is mapping when --reference-traj is omitted',
+ archived_source='execution_source/run_loc_eval_initial.py'),indent=2))
+PY
+source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/resume.log 2>&1" in /home/hong/SLAM
+ exited 1 in 1105ms:
+Traceback (most recent call last):
+  File "<stdin>", line 12, in <module>
+KeyError: 'tools/loc/run_loc_eval.py'
+
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+from pathlib import Path
+import json,hashlib
+out=Path('results/loc'); source=Path('tools/loc/run_loc_eval.py'); archive=out/'execution_source'
+old=(archive/'run_loc_eval_initial.py').read_text(); new=source.read_text()
+cfg=json.loads((archive/'configuration_initial.json').read_text()); key=str(source.resolve()); previous=cfg['code_sha256'][key]
+assert previous==hashlib.sha256(old.encode()).hexdigest()
+current=hashlib.sha256(new.encode()).hexdigest(); cfg['code_sha256'][key]=current
+(out/'configuration.json').write_text(json.dumps(cfg,indent=2,ensure_ascii=False))
+(out/'cache_migration.json').write_text(json.dumps(dict(
+ old_runner_sha256=previous,new_runner_sha256=current,
+ reason='Use supplied query-time reference for revisit baseline evaluation; display micro-scale ATE difference without negative zero.',
+ unchanged='localize.py, default args, map, baseline tracking, robustness generation and all 200 checkpoint trials',
+ initial_execution_wall_seconds=json.loads((archive/'run_stats_initial.json').read_text())['wall_seconds'],
+ default_equivalence='reference is mapping when --reference-traj is omitted',
+ archived_source='execution_source/run_loc_eval_initial.py'),indent=2))
+PY
+source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.run_loc_eval --resume > results/loc/resume.log 2>&1" in /home/hong/SLAM
+exec
+/bin/bash -lc 'tail -8 results/loc/verify.log' in /home/hong/SLAM
+ succeeded in 0ms:
+      "scan": 1000,
+      "position_difference_m": 3.556181433338904e-15,
+      "rotation_difference_rad": 8.222150642936601e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 0.0
+    }
+  ]
+}
+
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m pytest -q > results/loc/pytest.log 2>&1; tail -3 results/loc/pytest.log; cat results/loc/verification.json; tail -6 results/loc/resume.log' in /home/hong/SLAM
+ succeeded in 1861ms:
+.......................................................................  [100%]
+71 passed in 1.28s
+{
+  "passed": true,
+  "input_files_unchanged": 894,
+  "input_protection_check": "file set + size + mtime_ns",
+  "even_scans": 1089,
+  "odd_scans": 1089,
+  "split_disjoint": true,
+  "baseline_scans": 1089,
+  "lost_count": 0,
+  "robustness_trials": 200,
+  "peak_rss_mib": 525.0859375,
+  "real_scan_public_api_crosschecks": [
+    {
+      "scan": 20,
+      "position_difference_m": 5.25801753760893e-15,
+      "rotation_difference_rad": 6.252766527953626e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 4.163336342344337e-17
+    },
+    {
+      "scan": 500,
+      "position_difference_m": 1.284840341712311e-14,
+      "rotation_difference_rad": 4.086360690296507e-16,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 1.1102230246251565e-16
+    },
+    {
+      "scan": 1000,
+      "position_difference_m": 3.556181433338904e-15,
+      "rotation_difference_rad": 8.222150642936601e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 0.0
+    }
+  ]
+}/home/hong/SLAM/.venv/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Prior target: 676030 points
+[INFO] [1793007797.517590431] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+[INFO] [1793007807.774844997] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+
+exec
+/bin/bash -lc 'tail -6 results/loc/resume.log; tail -3 results/loc/pytest.log; cat results/loc/verification.json' in /home/hong/SLAM
+ succeeded in 0ms:
+/home/hong/SLAM/.venv/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Prior target: 676030 points
+[INFO] [1793007797.517590431] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+[INFO] [1793007807.774844997] [rosbag2_storage]: Opened database 'data/lio_bag_odd/lio_bag_odd.0fls60vj_0.db3' for READ_ONLY.
+.......................................................................  [100%]
+71 passed in 1.28s
+{
+  "passed": true,
+  "input_files_unchanged": 894,
+  "input_protection_check": "file set + size + mtime_ns",
+  "even_scans": 1089,
+  "odd_scans": 1089,
+  "split_disjoint": true,
+  "baseline_scans": 1089,
+  "lost_count": 0,
+  "robustness_trials": 200,
+  "peak_rss_mib": 525.0859375,
+  "real_scan_public_api_crosschecks": [
+    {
+      "scan": 20,
+      "position_difference_m": 5.25801753760893e-15,
+      "rotation_difference_rad": 6.252766527953626e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 4.163336342344337e-17
+    },
+    {
+      "scan": 500,
+      "position_difference_m": 1.284840341712311e-14,
+      "rotation_difference_rad": 4.086360690296507e-16,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 1.1102230246251565e-16
+    },
+    {
+      "scan": 1000,
+      "position_difference_m": 3.556181433338904e-15,
+      "rotation_difference_rad": 8.222150642936601e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 0.0
+    }
+  ]
+}
+ succeeded in 23271ms:
+exec
+/bin/bash -lc "cat >> tools/loc/README.md <<'EOF'
+
+For a different-day revisit, "'`--initial-pose X Y Z QX QY QZ QW` supplies the
+known initial map-frame pose; `--reference-traj` supplies query-time map-frame
+poses for the 200-trial convergence reference. In that mode, the table and
+`mapping_baseline/` metrics refer to this supplied query reference. An independent
+query-time reference is necessary to score map-frame robustness on a new bag.
+For GNSS-only revisit evaluation without that reference, reuse the streaming
+tracker and evaluate its output separately:
+
+```bash
+# initial_map_frame_tum.txt: >=3 valid TUM rows covering the query start time;
+# only its interpolated pose at the first scan initializes tracking.
+PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 '"\\
+  .venv/bin/python -m tools.loc.localize \\
+  --prior results/loc/prior_map.npz --query-bag path/to/revisit_bag \\
+  --initial-traj initial_map_frame_tum.txt --out results/loc/revisit
+PYTHONNOUSERSITE=1 .venv/bin/python -m tools.eval.traj_eval \\
+  --traj results/loc/revisit/loc_traj_tum.txt --gt query_gnss_tum.txt \\
+  --out results/loc/revisit/eval
+"'```
+EOF' in /home/hong/SLAM
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'source env.sh && PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python -m tools.loc.verify_loc > results/loc/verify.log 2>&1' in /home/hong/SLAM
+exec
+/bin/bash -lc "source env.sh && PYTHONNOUSERSITE=1 .venv/bin/python - <<'PY'
+from pathlib import Path
+import json,csv
+out=Path('results/loc'); stats=json.loads((out/'run_stats.json').read_text()); old=json.loads((out/'execution_source/run_stats_initial.json').read_text())
+m=json.loads((out/'localization/metrics.json').read_text())
+with (out/'robustness.csv').open() as f: rows=list(csv.DictReader(f))
+lost=sum(r['lost']=='True' for r in rows)
+log=Path('logs/task05b.md')
+with log.open('a') as f:
+ f.write(f'''\\n## 직접 검증 결과\\n\\n- 기본 실험: 홀수 **1,089/1,089** scans 완주, 실패 0, LOST 0.\\n- ATE 2D RMSE: SE3 **{m['se3']['ate_2d_m']['rmse']:.6f} m**,\\n  SE3+lever2D **{m['se3_lever']['ate_2d_m']['rmse']:.6f} m**.\\n- 강건성 **200회 전부 실행**, 180회 성공. 수준별 50/50, 50/50,\\n  48/50, 32/50 = 100%, 100%, 96%, 64%. LOST 조기 종료 {lost}회는 실패로 포함.\\n- 스캔당 평균/최대 **82.60/379.51 ms**, p95 169.98 ms, 10 Hz 기준 평균\\n  실시간 계수 **1.21×**. 최대 지연은 100 ms를 넘으므로 매 스캔 deadline\\n  보장을 의미하지 않는다. 원래 전체 평가 wall time {old['wall_seconds']:.2f}초.\\n- 최대 RSS: 최초 실행 {old['peak_rss_mib']:.1f} MiB, 최종 resume 포함\\n  {max(old['peak_rss_mib'],stats['peak_rss_mib']):.1f} MiB. prior 생성 포함 모두 4 GiB 이하.\\n- **전체 pytest 71 passed, 0 failed** ("'`.venv/bin/python -m pytest -q`).'"\\n- 그림 4개를 직접 열어 확인: 궤적 좌표/축/범례, 오류 시계열, fitness/RMSE,\\n  4×5 히트맵의 값과 색이 정상이며 빈 그림/축 뒤집힘 없음.\\n- 실제 20/500/1000번째 홀수 스캔에서 공개 GICP와 cached GICP 교차검증:\\n  최대 위치 차이 약 1.3e-14 m, 회전 차이 약 4.1e-16 rad.\\n- 짝수/홀수 각각 1,089 scans, 원래 bag의 [::2]/[1::2]와 정확히 일치,\\n  timestamp 교집합 없음. 기존 data/results **894개 파일**의 집합/크기/mtime_ns 동일.\\n- "'`results/loc/verification.json`의 passed=true 확인.'"\\n\\n## 결과 해석 (3줄)\\n\\n1. 고정 even prior에 대해 홀수 스캔은 완주했지만 공통 시각 lever2D ATE는\\n   매핑과 둘 다 약 0.25857 m로, 정확도 개선의 근거는 없다.\\n2. 1 m/5°까지 100%, 2 m/10°에서 96%, 3 m/15°에서 64%로 초기 오차가\\n   커질수록 시작 위치에 따라 수렴 능력이 달라진다.\\n3. 동일 주행 split, 디스큐 생략, in-sample 정렬/lever 피팅을 포함한\\n   낙관적 평가이며 별도 날짜의 실제 재주행 성능을 보장하지 않는다.\\n\\n## 최종 재현성 정리\\n\\n별도 날짜의 --reference-traj 사용 시 원래 map-run 시각 대신 쿼리 시각의\\nreference로 기준선을 평가하도록 오케스트레이터를 수정했다. 기본 실험에서는\\nreference=mapping이므로 모든 정합/시드 결과가 동일하다. 원래 실행 소스와\\n설정, 통계는 results/loc/execution_source/에 보관했고 cache_migration.json에\\n변경 전후 hash 및 재사용 근거를 남겼다. localize.py와 설정은 변경하지 않았다.\\n기존 200회 체크포인트를 재사용해 평가/그림을 재생성하고 전체 pytest와\\n독립 검증을 다시 실행했다. 최종 --resume도 정상 종료했다.\\n''')
+p=Path('TASKS.md'); s=p.read_text(); marker='### [CODEX-TASK] TASK-05b:'; i=s.index(marker)
+s=s[:i]+s[i:].replace('- [ ]','- [x]')
+s+='\\n**TASK-05b 완료 (2026-10-26):** 홀수 1,089 scans LOST/실패 0, 2D ATE(SE3/lever2D) 0.6893/0.2589 m. 강건성 200회 완료(수준별 100/100/96/64%), 전체 pytest 71 passed. 그림 4장 직접 확인, 입력 894개 파일 보존 및 실제 스캔 공개 GICP 교차검증 PASS. 추가 지도 YAML 테스트 정리 완료. 상세: results/loc/summary.md, results/loc/verification.json, logs/task05b.md.\\n'
+p.write_text(s)
+PY" in /home/hong/SLAM
+ succeeded in 0ms:
+ succeeded in 16226ms:
+exec
+/bin/bash -lc "tail -6 results/loc/verify.log; rg -n 'passed|peak_rss' results/loc/verification.json; tail -18 TASKS.md; rg -n '차이는|최대 RSS' results/loc/summary.md" in /home/hong/SLAM
+ succeeded in 0ms:
+      "rotation_difference_rad": 8.845632651467477e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 0.0
+    }
+  ]
+}
+2:  "passed": true,
+11:  "peak_rss_mib": 523.140625,
+
+**구현 조건**
+- .venv Python. RAM 4 GB 이하. 매직 넘버는 상수/dataclass로 둔다
+- 기존 결과(results/<run>, results/eval, results/maps)는 읽기 전용이다
+- 공정성 문구를 summary 맨 위에 명시한다: "동일 주행의 held-out(홀수) 스캔 → 진짜 재주행보다 낙관적. 다른 날 주행 bag으로 같은 스크립트를 재사용 가능"
+- 다른 bag을 넣을 수 있도록 CLI 인자화(--map-run, --query-bag, --gt)
+
+**추가 정리**
+- tools/maps 테스트 중 제거된 보조 YAML(map2d_nav2.yaml)을 요구하는 낡은 테스트를 rev1 결정(단일 map2d.yaml, free_thresh 0.196)에 맞게 수정한다
+
+**완료 기준**
+- [x] 기본 실험 궤적이 LOST 없이 완주하고 ATE 표가 나온다
+- [x] 강건성 4×5×10 = 200회 시도, 성공률 히트맵
+- [x] 단위테스트: 합성 점군에 알려진 변환 → GICP 복원, 실패 판정 로직, 등속 예측
+- [x] **전체 pytest 0 실패**
+- [x] 그림 직접 확인, logs/task05b.md 작성
+
+**TASK-05b 완료 (2026-10-26):** 홀수 1,089 scans LOST/실패 0, 2D ATE(SE3/lever2D) 0.6893/0.2589 m. 강건성 200회 완료(수준별 100/100/96/64%), 전체 pytest 71 passed. 그림 4장 직접 확인, 입력 894개 파일 보존 및 실제 스캔 공개 GICP 교차검증 PASS. 추가 지도 YAML 테스트 정리 완료. 상세: results/loc/summary.md, results/loc/verification.json, logs/task05b.md.
+15:최대 RSS 523 MiB. Scan 시간은 전처리+예측+정합이며 bag I/O·초기 맵 구축·평가/그림은 제외한다.
+28:공통 시각의 lever2D ATE 기준 위치추정과 매핑 차이는 -0.0000028 m (양수는 위치추정 개선)이다.
+
+codex
+TASK-05b와 추가 YAML 테스트 정리를 완료하고 완료 기준을 직접 검증했습니다.
+
+- 홀수 1,089스캔 완주: 실패·LOST 0회
+- 2D ATE: SE3 **0.6893 m**, lever2D **0.2589 m**
+- 강건성 200회: 섭동 수준별 성공률 **100/100/96/64%**
+- 평균 처리시간 **82.6 ms**, 최대 메모리 약 **525 MiB**
+- 전체 pytest **71개 통과**, 그림 4장 직접 확인
+- `data/`와 기존 결과 파일 894개 변경 없음
+
+공통 시각 기준으로 매핑 대비 정확도 개선은 거의 없었습니다. 동일 주행 기반의 낙관적 평가라는 한계도 기록했습니다.
+
+[결과 요약](/home/hong/SLAM/results/loc/summary.md) · [독립 검증](/home/hong/SLAM/results/loc/verification.json) · [작업 로그](/home/hong/SLAM/logs/task05b.md)
+tokens used
+83,450
+TASK-05b와 추가 YAML 테스트 정리를 완료하고 완료 기준을 직접 검증했습니다.
+
+- 홀수 1,089스캔 완주: 실패·LOST 0회
+- 2D ATE: SE3 **0.6893 m**, lever2D **0.2589 m**
+- 강건성 200회: 섭동 수준별 성공률 **100/100/96/64%**
+- 평균 처리시간 **82.6 ms**, 최대 메모리 약 **525 MiB**
+- 전체 pytest **71개 통과**, 그림 4장 직접 확인
+- `data/`와 기존 결과 파일 894개 변경 없음
+
+공통 시각 기준으로 매핑 대비 정확도 개선은 거의 없었습니다. 동일 주행 기반의 낙관적 평가라는 한계도 기록했습니다.
+
+[결과 요약](/home/hong/SLAM/results/loc/summary.md) · [독립 검증](/home/hong/SLAM/results/loc/verification.json) · [작업 로그](/home/hong/SLAM/logs/task05b.md)

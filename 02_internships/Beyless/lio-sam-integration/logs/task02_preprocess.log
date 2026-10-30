@@ -1,0 +1,36 @@
+[INFO] [1792990936.891806283] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/synced_bag/synced_bag_0.db3' for READ_ONLY.
+[INFO] [1792990936.892960096] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag.6fza_bfx/lio_bag.6fza_bfx_0.db3' for READ_WRITE.
+Converted 250 scans
+Converted 500 scans
+Converted 750 scans
+Converted 1000 scans
+Converted 1250 scans
+Converted 1500 scans
+Converted 1750 scans
+Converted 2000 scans
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+{"/imu_raw": 10884, "/gps/fix": 3298, "/points_raw": 2178}
+	Command being timed: "/usr/bin/python3 tools/preprocess_bag.py --in data/synced_bag --out data/lio_bag"
+	User time (seconds): 48.62
+	System time (seconds): 4.70
+	Percent of CPU this job got: 96%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:55.11
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 157228
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 38
+	Minor (reclaiming a frame) page faults: 93524
+	Voluntary context switches: 22414
+	Involuntary context switches: 1549
+	Swaps: 0
+	File system inputs: 7791592
+	File system outputs: 3634928
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

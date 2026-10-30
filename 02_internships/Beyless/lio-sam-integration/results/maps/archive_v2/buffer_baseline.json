@@ -1,0 +1,16 @@
+{
+  "driving_region": {
+    "buffer_m": 30.0,
+    "cells": {
+      "occupied": 94895,
+      "free": 1078871,
+      "unknown": 4305654
+    },
+    "total_cells": 5479420,
+    "unknown_fraction": 0.7857864518507434,
+    "area_m2": 13698.550000000003,
+    "method": "cell centers within trajectory polyline buffer; sampling error <= resolution/4"
+  },
+  "trajectory_source": "results/archive_v3_preloop_pairs/loop_on_r2/keyframes_final_tum.txt",
+  "trajectory_sha256": "9f0e6a4503a2d7d60e4326876e8638059edff469e9c724fa9d5e5808ebf40c85"
+}

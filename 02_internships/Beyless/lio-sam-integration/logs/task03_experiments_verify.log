@@ -1,0 +1,40 @@
+# TASK-03+04 실험 검증
+
+최종 최적화 keyframe 궤적 기준. 처리시간은 기동·재생·drain·저장·종료를 포함한 wall time(초).
+
+| run | rate | 처리시간 s | keyframes | loop events | 누적거리 m | 시작–끝 m | 검증 |
+|---|---:|---:|---:|---:|---:|---:|---|
+| loop_on_r1 | 0.5 | 234.2 | 171 | 3 | 237.035 | 0.623 | PASS |
+| loop_on_r2 | 0.5 | 234.2 | 186 | 2 | 234.691 | 1.036 | PASS |
+| loop_on_r3 | 0.5 | 234.2 | 180 | 3 | 235.361 | 0.808 | PASS |
+| loop_off_r1 | 0.5 | 234.0 | 175 | 0 | 235.596 | 5.501 | PASS |
+| loop_off_r2 | 0.5 | 234.2 | 185 | 0 | 249.011 | 21.376 | PASS |
+| loop_off_r3 | 0.5 | 234.2 | 185 | 0 | 235.205 | 5.511 | PASS |
+| even_loop_on | 0.5 | 233.8 | 146 | 0 | 5740.663 | 986.064 | FAIL |
+
+ON/OFF 동일 반복 번호별 종점거리 감소: [True, True, True]
+
+전체 완료 기준: 미충족
+
+### 반복 분산 (표본 표준편차, n=3)
+
+- loop on distance_m: mean=235.695621, std=1.206873, variance=1.456543
+- loop on endpoint_m: mean=0.822371, std=0.206867, variance=0.042794
+- loop on keyframes: mean=179.000000, std=7.549834, variance=57.000000
+- loop on loop_events: mean=2.666667, std=0.577350, variance=0.333333
+- loop off distance_m: mean=239.937629, std=7.860414, variance=61.786108
+- loop off endpoint_m: mean=10.795813, std=9.162656, variance=83.954268
+- loop off keyframes: mean=181.666667, std=5.773503, variance=33.333333
+- loop off loop_events: mean=0.000000, std=0.000000, variance=0.000000
+
+미충족 원인: even_loop_on은 지정 설정/0.5배속으로 발산 및 loop=0. 같은 설정 재시도에서도 재현. 첫 실패 전체 결과는 even_loop_on_failed_attempt1/에 보존했다. 원본 bag ON/OFF 6회는 모두 통과했다.
+
+## 진단 파일럿
+
+| run | rate | keyframes | loops | 누적거리 m | 종점거리 m | 최대속도 m/s | 평균/최대 지연 s | 결과 |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| pilot_rate1 | 1.0 | 220 | 0 | 2088.579 | 592.214 | 253.927 | 미계측 / 미계측 | FAIL |
+| pilot_rate05 | 0.5 | 173 | 2 | 234.898 | 1.040 | 3.816 | 0.1291559517650861 / 0.4790613651275635 | PASS |
+
+지정 외부 파라미터 불일치 진단. 상세: [task03_04.md](../logs/task03_04.md), [imu_frame_diagnostic.json](imu_frame_diagnostic.json). 0.5배속 파일럿 통과 후 지정 행렬 그대로 본 실험 수행. 파일럿에서 TBB 크래시 없음.
+

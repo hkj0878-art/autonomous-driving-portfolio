@@ -1,0 +1,41 @@
+{
+  "args": {
+    "map_run": "results/even_loop_on",
+    "map_bag": "data/lio_bag",
+    "map_scan_filter": "even",
+    "query_bag": "data/lio_bag_odd",
+    "gt": "results/eval/gt_gnss_enu_tum.txt",
+    "initial_pose": null,
+    "reference_traj": null,
+    "out": "results/loc"
+  },
+  "config": {
+    "min_range_m": 1.0,
+    "max_range_m": 80.0,
+    "scan_voxel_m": 0.3,
+    "map_voxel_m": 0.2,
+    "correspondence_m": [
+      1.0,
+      0.5
+    ],
+    "max_iterations": 30,
+    "convergence_fitness": 1e-06,
+    "convergence_rmse": 1e-06,
+    "min_fitness": 0.3,
+    "max_rmse_m": 0.3,
+    "lost_failures": 5,
+    "covariance_knn": 20,
+    "covariance_epsilon": 0.001,
+    "robustness_scans": 30,
+    "success_position_m": 0.3,
+    "success_yaw_deg": 1.0
+  },
+  "input_sha256": {
+    "results/even_loop_on/keyframes_final_tum.txt": "6e0cf2db352b1d4fff057e68c5728016374ef3aea7741673a21ea8c90682a0de",
+    "results/eval/gt_gnss_enu_tum.txt": "8130f73f986f7602e525990481615e93b51ea76711f214cb202d6fb1b197fb1a"
+  },
+  "code_sha256": {
+    "/home/hong/SLAM/tools/loc/run_loc_eval.py": "0363d74222597827619fda27266dd8257cdeb4f8ae003dd61a0eab8a68b5fdef",
+    "/home/hong/SLAM/tools/loc/localize.py": "9b492766672c6d412290cf1b57309d9db6740edffd545ea05a616e5ca35b6d3a"
+  }
+}

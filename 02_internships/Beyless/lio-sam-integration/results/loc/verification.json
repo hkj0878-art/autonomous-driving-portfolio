@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "input_files_unchanged": 894,
+  "input_protection_check": "file set + size + mtime_ns",
+  "even_scans": 1089,
+  "odd_scans": 1089,
+  "split_disjoint": true,
+  "baseline_scans": 1089,
+  "lost_count": 0,
+  "robustness_trials": 200,
+  "peak_rss_mib": 523.140625,
+  "real_scan_public_api_crosschecks": [
+    {
+      "scan": 20,
+      "position_difference_m": 5.366014270677037e-15,
+      "rotation_difference_rad": 8.33124437622911e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 8.326672684688674e-17
+    },
+    {
+      "scan": 500,
+      "position_difference_m": 2.1644793739829734e-14,
+      "rotation_difference_rad": 2.9530338635889714e-16,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 8.326672684688674e-17
+    },
+    {
+      "scan": 1000,
+      "position_difference_m": 3.560078619640797e-15,
+      "rotation_difference_rad": 8.845632651467477e-17,
+      "fitness_difference": 0.0,
+      "rmse_difference_m": 0.0
+    }
+  ]
+}

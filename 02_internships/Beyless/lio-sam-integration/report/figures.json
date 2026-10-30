@@ -1,0 +1,38 @@
+{
+  "report/figs/gnss_traj.png": {
+    "source": "results/archive_v1_wrong_rpy/data_report/gnss_traj.png",
+    "sha256": "fa0110c852497e4039a91b78cc32f45f9844b31971df734d16b51deba94c9a56"
+  },
+  "report/figs/traj_on_vs_off.png": {
+    "source": "results/eval/figs/traj_on_vs_off.png",
+    "sha256": "00812e6921b95b40a268f3805680e955e06f181442c185ee8c1dd7a65f9a4921"
+  },
+  "report/figs/rpe_bar.png": {
+    "source": "results/eval/figs/rpe_bar.png",
+    "sha256": "ef5d98542059d168e8bb8123225257eda11c76758baa13b4d26591aee2c92257"
+  },
+  "report/figs/map_loop_overlap.png": {
+    "source": "results/maps/loop_on_r2/map_loop_overlap.png",
+    "sha256": "9e5f8062f96bbbf0337d34686526e445e00bbc582f34cb82c24ff7157f172080"
+  },
+  "report/figs/map_oblique.png": {
+    "source": "results/maps/loop_on_r2/map_oblique.png",
+    "sha256": "b4c8d7af6fa386eba6377426ee5a767d700463522d9f8daf3fbd85d40916da39"
+  },
+  "report/figs/map_top.png": {
+    "source": "results/maps/loop_on_r2/map_top.png",
+    "sha256": "756640503ee9ded152aade43d87dc3a54cf222b111282860ba6b9c493bf62a7a"
+  },
+  "report/figs/map2d.png": {
+    "source": "results/maps/loop_on_r2/map2d.png",
+    "sha256": "a886433cbab9e34067fd6f09eafdc16aed64aee42873a258ae409a84d228c8f1"
+  },
+  "report/figs/loc_traj_overlay.png": {
+    "source": "results/loc/figs/loc_traj_overlay.png",
+    "sha256": "1d7dea422f115b0ec00113184dc188b5223a498167dd3b4d7ef329c0fff5a09e"
+  },
+  "report/figs/robustness_heatmap.png": {
+    "source": "results/loc/figs/robustness_heatmap.png",
+    "sha256": "028b2480943667ba6af6cf588945249eef2af4d5da0383e4e7ccef5d7808ec81"
+  }
+}

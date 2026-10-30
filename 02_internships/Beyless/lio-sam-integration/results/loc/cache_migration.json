@@ -1,0 +1,9 @@
+{
+  "old_runner_sha256": "bcb367e0307664fd9f90258401959a3d7712c32bf3a9baa27eeb34a43d2aa488",
+  "new_runner_sha256": "0363d74222597827619fda27266dd8257cdeb4f8ae003dd61a0eab8a68b5fdef",
+  "reason": "Use supplied query-time reference for revisit baseline evaluation; display micro-scale ATE difference without negative zero.",
+  "unchanged": "localize.py, default args, map, baseline tracking, robustness generation and all 200 checkpoint trials",
+  "initial_execution_wall_seconds": 566.9697298919782,
+  "default_equivalence": "reference is mapping when --reference-traj is omitted",
+  "archived_source": "execution_source/run_loc_eval_initial.py"
+}

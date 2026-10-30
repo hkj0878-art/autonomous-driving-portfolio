@@ -1,0 +1,6 @@
+# 상위 .gitignore의 logs/ 규칙을 이 프로젝트에서는 해제 (실행 로그도 결과 근거로 공개)
+!logs/
+# 대용량 결과(PCD/PGM/NPZ)는 GitHub Release에 첨부
+*.pcd
+*.pgm
+*.npz

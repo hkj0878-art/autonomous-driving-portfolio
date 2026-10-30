@@ -1,0 +1,6 @@
+[INFO] [1793005057.237126618] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+loop_off_r1 [382288, 369492] 28.07849571108818 s 326.83203125 MiB
+[INFO] [1793005085.314824915] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+loop_off_r2 [355216, 366527] 27.76242604572326 s 339.8828125 MiB
+[INFO] [1793005149.111824081] [rosbag2_storage]: Opened database 'data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+loop_off_r3 [377380, 373737] 27.153291973285377 s 357.61328125 MiB

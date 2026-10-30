@@ -1,0 +1,29 @@
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+[INFO] [1793006432.348625676] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+GNSS: {'total': 3298, 'rejected_status': 0, 'rejected_covariance': 0, 'rejected_invalid': 0, 'accepted': 3298, 'origin_lla': [37.23651316666667, 126.77413183333333, 29.7], 'max_sigma_m': 0.05, 'sigma_axes': 'xy', 'vertical_sigma_m': {'count': 3298, 'min': 0.0512, 'max': 0.0584, 'mean': 0.05362037598544574}, 'orientation': 'placeholder identity; RPE derives yaw from GNSS tangent'}
+loop_on_r1: ATE 0.6724 m; evaluating map
+loop_on_r1: map complete, 231204 points
+loop_on_r2: ATE 0.7022 m; evaluating map
+loop_on_r2: map complete, 227994 points
+loop_on_r3: ATE 0.7855 m; evaluating map
+loop_on_r3: map complete, 236118 points
+loop_off_r1: ATE 0.7310 m; evaluating map
+loop_off_r1: map complete, 233936 points
+loop_off_r2: ATE 0.7226 m; evaluating map
+loop_off_r2: map complete, 224919 points
+loop_off_r3: ATE 0.9321 m; evaluating map
+loop_off_r3: map complete, 227146 points
+even_loop_on: ATE 0.6670 m; evaluating map
+even_loop_on: map complete, 238712 points
+{
+  "metrics_count": 14,
+  "map_count": 7,
+  "figure_count": 12,
+  "max_evo_difference_m": 5.329070518200751e-15,
+  "protected_sources_unchanged": true,
+  "wall_seconds": 10.044422388076782,
+  "peak_rss_mib": 309.26953125,
+  "loop_pair_validation": "PASS: all recorded pairs evaluated",
+  "representative_run": "loop_on_r2"
+}

@@ -1,0 +1,3 @@
+[INFO] [1793001149.880050055] [rclcpp]: [1;32m----> Image Projection Started.[0m
+[INFO] [1793001258.931386774] [lio_sam_imageProjection]: Waiting for IMU data ...
+[INFO] [1793001274.389066084] [rclcpp]: signal_handler(signum=2)

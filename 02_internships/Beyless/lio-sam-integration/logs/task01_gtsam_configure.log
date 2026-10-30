@@ -1,0 +1,122 @@
+-- The CXX compiler identification is GNU 11.4.0
+-- The C compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Performing Test COMPILER_HAS_WSUGGEST_OVERRIDE
+-- Performing Test COMPILER_HAS_WSUGGEST_OVERRIDE - Success
+-- Performing Test COMPILER_HAS_WMISSING_OVERRIDE
+-- Performing Test COMPILER_HAS_WMISSING_OVERRIDE - Failed
+-- GTSAM_POSE3_EXPMAP=ON, enabling GTSAM_ROT3_EXPMAP as well
+-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found suitable version "1.74.0", minimum required is "1.65") found components: serialization system filesystem thread program_options date_time timer chrono regex 
+-- Found Eigen3: /usr/include/eigen3 (Required is at least version "2.91.0") 
+-- Found Eigen version: 3.4.0
+-- Looking for execinfo.h
+-- Looking for execinfo.h - found
+-- Looking for getline
+-- Looking for getline - found
+-- checking for thread-local storage - found
+-- Could NOT find MKL (missing: MKL_INCLUDE_DIR MKL_LIBRARIES) 
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found TBB: /usr/include (found suitable version "2021.5", minimum required is "4.4") found components: tbb tbbmalloc 
+-- Building 3rdparty
+-- Could NOT find GeographicLib (missing: GeographicLib_LIBRARY_DIRS GeographicLib_LIBRARIES GeographicLib_INCLUDE_DIRS) 
+-- Building base
+-- Building basis
+-- Building geometry
+-- Building inference
+-- Building symbolic
+-- Building discrete
+-- Building linear
+-- Building nonlinear
+-- Building sam
+-- Building sfm
+-- Building slam
+-- Building navigation
+-- GTSAM Version: 4.1.1
+-- Install prefix: /home/hong/SLAM/third_party/install
+-- Building GTSAM - shared: ON
+-- Building base_unstable
+-- Building geometry_unstable
+-- Building linear_unstable
+-- Building discrete_unstable
+-- Building dynamics_unstable
+-- Building nonlinear_unstable
+-- Building slam_unstable
+-- Building partition_unstable
+-- GTSAM_UNSTABLE Version: 4.1.1
+-- Install prefix: /home/hong/SLAM/third_party/install
+-- Wrote /home/hong/SLAM/third_party/gtsam/build/GTSAMConfig.cmake
+-- Wrote /home/hong/SLAM/third_party/gtsam/build/GTSAM_UNSTABLEConfig.cmake
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- ===============================================================
+-- ================  Configuration Options  ======================
+--  CMAKE_CXX_COMPILER_ID type                       : GNU
+--  CMAKE_CXX_COMPILER_VERSION                       : 11.4.0
+--  CMake version                                    : 3.22.1
+--  CMake generator                                  : Unix Makefiles
+--  CMake build tool                                 : /usr/bin/gmake
+-- Build flags                                               
+--  Build Tests                                      : Disabled
+--  Build examples with 'make all'                   : Disabled
+--  Build timing scripts with 'make all'             : Disabled
+--  Build shared GTSAM libraries                     : Enabled
+--  Put build type in library name                   : Enabled
+--  Build libgtsam_unstable                          : Enabled
+--  Build GTSAM unstable Python                      : Enabled
+--  Build MATLAB Toolbox for unstable                : Disabled
+--  Build for native architecture                    : Disabled
+--  Build type                                       : Release
+--  C compilation flags                              :  -O3 -DNDEBUG
+--  C++ compilation flags                            :  -O3 -DNDEBUG
+--  GTSAM_COMPILE_FEATURES_PUBLIC                    : cxx_std_11
+--  GTSAM_COMPILE_OPTIONS_PUBLIC                     : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC                 : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_DEBUG               : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_DEBUG           : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_RELEASE             : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_RELEASE         : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_TIMING              : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_TIMING          : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_PROFILING           : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_PROFILING       : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_RELWITHDEBINFO      : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_RELWITHDEBINFO  : 
+--  GTSAM_COMPILE_OPTIONS_PUBLIC_MINSIZEREL          : 
+--  GTSAM_COMPILE_DEFINITIONS_PUBLIC_MINSIZEREL      : 
+--  Use System Eigen                                 : ON (Using version: 3.4.0)
+--  Use System Metis                                 : OFF
+--  Use Intel TBB                                    : Yes (Version: 2021.5)
+--  Eigen will use MKL                               : MKL not found
+--  Eigen will use MKL and OpenMP                    : OpenMP found but GTSAM_WITH_EIGEN_MKL is disabled
+--  Default allocator                                : TBB
+--  Cheirality exceptions enabled                    : YES
+--  Build with ccache                                : No
+-- Packaging flags
+--  CPack Source Generator                           : TGZ
+--  CPack Generator                                  : TGZ
+-- GTSAM flags                                               
+--  Quaternions as default Rot3                      : Disabled
+--  Runtime consistency checking                     : Disabled
+--  Rot3 retract is full ExpMap                      : Enabled
+--  Pose3 retract is full ExpMap                     : Enabled
+--  Allow features deprecated in GTSAM 4.1           : Enabled
+--  Metis-based Nested Dissection                    : Enabled
+--  Use tangent-space preintegration                 : Enabled
+-- MATLAB toolbox flags
+--  Install MATLAB toolbox                           : Disabled
+-- Python toolbox flags                                      
+--  Build Python module with pybind                  : Disabled
+-- ===============================================================
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/hong/SLAM/third_party/gtsam/build

@@ -1,0 +1,46 @@
+{
+  "counts": {
+    "/points_raw": 2178,
+    "/imu_raw": 10884,
+    "/gps/fix": 3298
+  },
+  "source_counts": {
+    "/points_raw": 2178,
+    "/imu_raw": 10884,
+    "/gps/fix": 3298
+  },
+  "max_bag_header_delta_ns": 0,
+  "all_clouds_checked": 2178,
+  "point_time_min_s": 0.0,
+  "point_time_max_s": 0.0254361629486084,
+  "unchanged_payload_sha256": {
+    "/imu_raw": "b6d88ddb7889c0e788c787b5df50105210379d0719ac150ff1e4265f70eaf6ec",
+    "/gps/fix": "ec9c04ce223382dc8cbc29691ed884bfb6f82a6c8e3941203c84621d2ef77b2b"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "input_points": 78336,
+      "output_points": 26489,
+      "time_min_s": 0.0,
+      "time_max_s": 0.025435209274291992,
+      "fields_order_values_header_preserved": true
+    },
+    {
+      "index": 1089,
+      "input_points": 78336,
+      "output_points": 39133,
+      "time_min_s": 0.0,
+      "time_max_s": 0.025434017181396484,
+      "fields_order_values_header_preserved": true
+    },
+    {
+      "index": 2177,
+      "input_points": 78336,
+      "output_points": 25720,
+      "time_min_s": 0.0,
+      "time_max_s": 0.02543497085571289,
+      "fields_order_values_header_preserved": true
+    }
+  ]
+}

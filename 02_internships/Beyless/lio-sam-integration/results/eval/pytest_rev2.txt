@@ -1,0 +1,36 @@
+..........................F.............................                 [100%]
+=================================== FAILURES ===================================
+_______________ test_nav2_roundtrip_and_spec_threshold_conflict ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0')
+
+    def test_nav2_roundtrip_and_spec_threshold_conflict(tmp_path):
+        fixture_grid(tmp_path)
+        requested = yaml.safe_load((tmp_path/'map2d.yaml').read_text())
+>       compatible = yaml.safe_load((tmp_path/'map2d_nav2.yaml').read_text())
+
+tools/tests/test_maps.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.10/pathlib.py:1134: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0/map2d_nav2.yaml')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-hong/pytest-73/test_nav2_roundtrip_and_spec_t0/map2d_nav2.yaml'
+
+/usr/lib/python3.10/pathlib.py:1119: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tools/tests/test_maps.py::test_nav2_roundtrip_and_spec_threshold_conflict
+1 failed, 55 passed in 1.43s

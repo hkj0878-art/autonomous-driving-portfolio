@@ -1,0 +1,124 @@
+Cloud 837082 -> 512892; grid [2712 2401]; raycasting...
+[INFO] [1793006232.257461526] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+[INFO] [1793006262.066064186] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+{
+  "run": "loop_on_r2",
+  "frame": "LIO-SAM map",
+  "config": {
+    "resolution": 0.05,
+    "voxel": 0.1,
+    "ground_cell": 2.0,
+    "ground_percentile": 10.0,
+    "obstacle_min": 0.3,
+    "obstacle_max": 2.0,
+    "ground_tolerance": 0.2,
+    "margin": 30.0,
+    "scan_stride": 2,
+    "angular_bin_deg": 0.5,
+    "ray_max_range": 60.0,
+    "log_hit": 0.85,
+    "log_miss": -0.4,
+    "prior_occupied": 2.0,
+    "log_limit": 5.0,
+    "occupied_thresh": 0.65,
+    "free_thresh": 0.196
+  },
+  "origin": [
+    -58.1,
+    -90.0
+  ],
+  "width_cells": 2712,
+  "height_cells": 2401,
+  "size_m": [
+    135.6,
+    120.05000000000001
+  ],
+  "cells": {
+    "occupied": 90226,
+    "free": 1369425,
+    "unknown": 5051861
+  },
+  "input_points": 837082,
+  "voxel_points": 579062,
+  "crop_points": 512892,
+  "obstacle_points": 150084,
+  "crop_bounds_xy": [
+    [
+      -58.068918228,
+      -89.95022964500001
+    ],
+    [
+      77.488521576,
+      30.000033491
+    ]
+  ],
+  "driving_region": {
+    "buffer_m": 30.0,
+    "cells": {
+      "occupied": 87946,
+      "free": 1355497,
+      "unknown": 4033094
+    },
+    "total_cells": 5476537,
+    "unknown_fraction": 0.7364314346821723,
+    "area_m2": 13691.342500000002,
+    "method": "cell centers within trajectory polyline buffer; sampling error <= resolution/4"
+  },
+  "stride10_baseline": {
+    "driving_region": {
+      "buffer_m": 30.0,
+      "cells": {
+        "occupied": 87946,
+        "free": 847810,
+        "unknown": 4540781
+      },
+      "total_cells": 5476537,
+      "unknown_fraction": 0.8291336295180696,
+      "area_m2": 13691.342500000002,
+      "method": "cell centers within trajectory polyline buffer; sampling error <= resolution/4"
+    },
+    "scans_total": 2178,
+    "scans_used": 212,
+    "scans_outside_pose_time": 6,
+    "rays": 51949
+  },
+  "overlap_sources": {
+    "loop_on_r2": {
+      "results/loop_on_r2/map/GlobalMap.pcd": "8e4f45a8b576803a219d54468e56d78dd5574df31a361e8d8ebaff7c921ca890",
+      "results/loop_on_r2/keyframes_final_tum.txt": "e6fa725ef82fdd8ef8338353f7a7173a2803a5dc388cd0de25942817d3abbdc7",
+      "results/eval/loop_on_r2/align_se3.json": "78579a61a81b8769588d4ba359102c0dab13ffe917aeb7e849da177626043b74"
+    },
+    "loop_off_r2": {
+      "results/loop_off_r2/map/GlobalMap.pcd": "14da69ce07e47f7718b3719eb7dc0f3e91ed370165060a8d16243e05141afe2b",
+      "results/loop_off_r2/keyframes_final_tum.txt": "970bce594b9488b8f2a94fd04635300b825eda90c9ca0e3462771e105ccefb9f",
+      "results/eval/loop_off_r2/align_se3.json": "3e284d128ec4c5df1e841577a1c97f4b1f9503a5750f5aa5f5ad20390879bd91"
+    }
+  },
+  "ground_height_range_m": [
+    -3.0053629875183105,
+    8.01595401763916
+  ],
+  "nav2_load_yaml": "map2d.yaml",
+  "nav2_threshold_note": "free_thresh=0.196 preserves PGM gray 205 as unknown.",
+  "alignment": "results/eval/loop_on_r2/align_se3.json",
+  "alignment_sha256": "78579a61a81b8769588d4ba359102c0dab13ffe917aeb7e849da177626043b74",
+  "rendering": {
+    "success": true,
+    "returncode": 0,
+    "diagnostic": "Using 'soft' CircularBuffer (12288 KiB)\nFEngine (64 bits) created at 0x5ddd250ab710 (threading is enabled)\nFEngine resolved backend: Vulkan\nVulkan device driver: radv Mesa 23.2.1-1ubuntu3.1~22.04.4\nSelected physical device 'AMD Unknown (RADV GFX1103_R1)' from 2 physical devices. (vendor 0x1002, device 0x1900, driver 0x5c02001, api 1.3)\nBackend feature level: 3\nFEngine feature level: 1\n"
+  },
+  "source_sha256": {
+    "results/loop_on_r2/map/GlobalMap.pcd": "8e4f45a8b576803a219d54468e56d78dd5574df31a361e8d8ebaff7c921ca890",
+    "results/loop_on_r2/keyframes_final_tum.txt": "e6fa725ef82fdd8ef8338353f7a7173a2803a5dc388cd0de25942817d3abbdc7"
+  },
+  "approximations": [
+    "No per-point deskew; scans use final-keyframe interpolated pose.",
+    "Local ground percentile can fail on slopes, vegetation and sparse cells.",
+    "Raw bag obstacle-height slice only; nearest azimuth endpoint. Static global obstacle prior blocks rays.",
+    "2D projection omits overhanging obstacles above 2 m; no robot footprint inflation."
+  ],
+  "scans_total": 2178,
+  "scans_used": 1059,
+  "scans_outside_pose_time": 30,
+  "rays": 259204
+}

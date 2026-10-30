@@ -1,0 +1,15 @@
+/home/hong/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+[INFO] [1793003983.561467828] [rosbag2_storage]: Opened database '/home/hong/SLAM/data/lio_bag/lio_bag.6fza_bfx_0.db3' for READ_ONLY.
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/hong/SLAM/tools/eval/run_all_eval.py", line 176, in <module>
+    if __name__=='__main__':main()
+  File "/home/hong/SLAM/tools/eval/run_all_eval.py", line 56, in main
+    gt,gnss_stats=extract(args.bag,out)
+  File "/home/hong/SLAM/tools/eval/gnss_gt.py", line 67, in extract
+    raise ValueError('Insufficient or nonmonotonic GNSS fixes')
+ValueError: Insufficient or nonmonotonic GNSS fixes

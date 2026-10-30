@@ -1,0 +1,6 @@
+{
+  "time_eligible_keyframes": 134,
+  "keyframes_with_candidate_within_15m": 17,
+  "final_nearest_time_eligible_distance_m": 6.3888293729310215,
+  "note": "Saved final trajectory post-hoc test; ICP fitness/convergence and feature cloud sizes are not logged by upstream."
+}

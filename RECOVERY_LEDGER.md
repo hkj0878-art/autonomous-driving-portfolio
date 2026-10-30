@@ -7,7 +7,8 @@
 | GADIS 자율주차 | 대화 기반 재구성 | 주차 목표점, Hybrid A*/Bézier, 상태 전환 기록 | Python 8개 통과, ROS 빌드 미확인 |
 | GADIS Local Path | 대화 기반 재구성 | 경로 선택 로직, Pure Pursuit, U-turn 처리 기록 | Python 4개 통과, ROS 빌드 미확인 |
 | Capstone 혼잡도 예측 | 원본 확인 후 개정 | [팀 저장소 Jongp](https://github.com/ahffkrmsidQKffl/Jongp) ai/src/train.py, score.py | Python 8개 통과, 실제 데이터 검증 미완료 |
-| MORAI·Beyless 인턴 | 문서만 | 이력서와 과거 개발 기록 | 소스 미등록 |
+| Beyless 인턴 — LIO-SAM | 실제 작업 원본 | 매핑·평가 코드, 실행 로그, 결과 지표 (rosbag 제외) | Python 77개 통과, 리포트 수치 78개 출처 검증, ROS 2 Humble 실행 |
+| MORAI·Beyless 인턴 (그 외) | 문서만 | 이력서와 과거 개발 기록 | 소스 미등록 |
 | Beyless 정규직 | 폴더만 | 프로젝트 분류 | 소스 미등록 |
 | 기타 경진대회 | 폴더만 | 참가 내역 | 자료 추가 전 |
 

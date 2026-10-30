@@ -1,0 +1,89 @@
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_base.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_on_r1']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_on_r1", "params_sha256": "f0a10a01ae108fd26ccfe6b4ae7938d937f9ae96c66226fab84cf5d9b7b0dc34", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": true, "destination": "/SLAM/results/loop_on_r1/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.18030726583675, "drain_seconds": 15.011526262853295, "online_count": 447, "loop_events": 2, "first_stamp": 1762852140.8710477, "last_stamp": 1762852248.7711248, "last_receive_wall": 1793001133.1411288, "max_sim_lag_s": 0.22104167938232422, "mean_sim_lag_s": 0.13504643994956475, "keyframes": 173, "distance_m": 234.50694679662044, "endpoint_m": 0.2987387041640967, "max_speed_mps": 3.8081357822996327, "final_keyframe_stamp": 1762852246.5211666, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_base.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_on_r2']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_on_r2", "params_sha256": "f0a10a01ae108fd26ccfe6b4ae7938d937f9ae96c66226fab84cf5d9b7b0dc34", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": true, "destination": "/SLAM/results/loop_on_r2/map", "success": false, "gps_publishers": 0, "playback_wall_seconds": 109.18056532973424, "drain_seconds": 15.013042133301497, "online_count": 457, "loop_events": 0, "first_stamp": 1762852141.1211817, "last_stamp": 1762852249.171074, "last_receive_wall": 1793001258.8145096, "max_sim_lag_s": 0.2741661071777344, "mean_sim_lag_s": 0.14085322970634478, "keyframes": 175, "distance_m": 236.07412342627603, "endpoint_m": 8.78359711495149, "max_speed_mps": 7.235453613120178, "final_keyframe_stamp": 1762852246.6210299, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_base.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_on_r3']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_on_r3", "params_sha256": "f0a10a01ae108fd26ccfe6b4ae7938d937f9ae96c66226fab84cf5d9b7b0dc34", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": true, "destination": "/SLAM/results/loop_on_r3/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.18342312378809, "drain_seconds": 15.013120457995683, "online_count": 454, "loop_events": 2, "first_stamp": 1762852140.9710767, "last_stamp": 1762852249.171074, "last_receive_wall": 1793001384.2054126, "max_sim_lag_s": 0.29271745681762695, "mean_sim_lag_s": 0.1423495955404206, "keyframes": 175, "distance_m": 238.7891039156851, "endpoint_m": 0.9206612932141787, "max_speed_mps": 21.082818884418643, "final_keyframe_stamp": 1762852246.6711888, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_loop_off.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_off_r1']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_off_r1", "params_sha256": "4f546cf89621918e581547563ecc2ffb65642453c54c81aa91d747fc4471db41", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": false, "destination": "/SLAM/results/loop_off_r1/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.1811090069823, "drain_seconds": 15.013355410192162, "online_count": 554, "loop_events": 0, "first_stamp": 1762852140.9710767, "last_stamp": 1762852249.171074, "last_receive_wall": 1793001509.8403041, "max_sim_lag_s": 0.3459763526916504, "mean_sim_lag_s": 0.1387539495199596, "keyframes": 189, "distance_m": 235.2853300497559, "endpoint_m": 0.30618901124489056, "max_speed_mps": 3.8122655256926046, "final_keyframe_stamp": 1762852247.0211859, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_loop_off.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_off_r2']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_off_r2", "params_sha256": "4f546cf89621918e581547563ecc2ffb65642453c54c81aa91d747fc4471db41", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": false, "destination": "/SLAM/results/loop_off_r2/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.18496285798028, "drain_seconds": 15.010518999304622, "online_count": 415, "loop_events": 0, "first_stamp": 1762852140.9211247, "last_stamp": 1762852249.0711699, "last_receive_wall": 1793001635.0045688, "max_sim_lag_s": 0.3825221061706543, "mean_sim_lag_s": 0.14425531065607644, "keyframes": 169, "distance_m": 235.48820021716853, "endpoint_m": 0.45612967294717144, "max_speed_mps": 3.791840227067279, "final_keyframe_stamp": 1762852247.3211868, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_loop_off.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/loop_off_r3']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "loop_off_r3", "params_sha256": "4f546cf89621918e581547563ecc2ffb65642453c54c81aa91d747fc4471db41", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag", "rate": 1.0, "loop_enabled": false, "destination": "/SLAM/results/loop_off_r3/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.16610203217715, "drain_seconds": 15.00965880183503, "online_count": 565, "loop_events": 0, "first_stamp": 1762852140.9710767, "last_stamp": 1762852249.2711427, "last_receive_wall": 1793001760.5756238, "max_sim_lag_s": 0.20319366455078125, "mean_sim_lag_s": 0.1372649475536515, "keyframes": 190, "distance_m": 235.3848926089707, "endpoint_m": 0.3703284884024233, "max_speed_mps": 3.836728632545341, "final_keyframe_stamp": 1762852247.2210338, "sanity_pass": true}
+COMMAND ['ros2', 'launch', '/home/hong/SLAM/launch/lio_sam_nox.launch.py', 'params_file:=/home/hong/SLAM/config/params_base.yaml', 'use_sim_time:=true', 'rviz:=false']
+COMMAND ['/usr/bin/python3', '/home/hong/SLAM/tools/record_traj.py', '/home/hong/SLAM/results/even_loop_on']
+GPS factor disabled: /odometry/gps publishers = 0; bag play restricts topics to points/IMU (GNSS excluded).
+COMMAND ['ros2', 'bag', 'play', '/home/hong/SLAM/data/lio_bag_even', '--clock', '100', '--rate', '1.0', '--topics', '/points_raw', '/imu_raw', '--disable-keyboard-controls']
+RESULT {"run": "even_loop_on", "params_sha256": "f0a10a01ae108fd26ccfe6b4ae7938d937f9ae96c66226fab84cf5d9b7b0dc34", "git_commit": "08af3f32f01725372d4269838dc44c19c6d9e76b", "bag": "/home/hong/SLAM/data/lio_bag_even", "rate": 1.0, "loop_enabled": true, "destination": "/SLAM/results/even_loop_on/map", "success": true, "gps_publishers": 0, "playback_wall_seconds": 109.18567793024704, "drain_seconds": 15.00948666408658, "online_count": 408, "loop_events": 2, "first_stamp": 1762852141.7211869, "last_stamp": 1762852248.9710999, "last_receive_wall": 1793001885.9808912, "max_sim_lag_s": 0.35356712341308594, "mean_sim_lag_s": 0.24105369401913063, "keyframes": 166, "distance_m": 234.8169899052118, "endpoint_m": 0.13627570102818778, "max_speed_mps": 3.764404099416371, "final_keyframe_stamp": 1762852246.771052, "sanity_pass": true}
+# TASK-03+04 실험 검증
+
+최종 최적화 keyframe 궤적 기준. 처리시간은 기동·재생·drain·저장·종료를 포함한 wall time(초).
+
+| run | rate | 처리시간 s | keyframes | loop events | 누적거리 m | 시작–끝 m | 검증 |
+|---|---:|---:|---:|---:|---:|---:|---|
+| loop_on_r1 | 1.0 | 125.0 | 173 | 2 | 234.507 | 0.299 | PASS |
+| loop_on_r2 | 1.0 | 125.0 | 175 | 0 | 236.074 | 8.784 | FAIL |
+| loop_on_r3 | 1.0 | 125.0 | 175 | 2 | 238.789 | 0.921 | PASS |
+| loop_off_r1 | 1.0 | 125.2 | 189 | 0 | 235.285 | 0.306 | PASS |
+| loop_off_r2 | 1.0 | 125.0 | 169 | 0 | 235.488 | 0.456 | PASS |
+| loop_off_r3 | 1.0 | 125.0 | 190 | 0 | 235.385 | 0.370 | PASS |
+| even_loop_on | 1.0 | 125.2 | 166 | 2 | 234.817 | 0.136 | PASS |
+
+ON/OFF 동일 반복 번호별 종점거리 감소: [True, False, False]
+
+전체 완료 기준: 미충족
+
+### 반복 분산 (표본 표준편차, n=3)
+
+- loop on distance_m: mean=236.456725, std=2.166565, variance=4.694005
+- loop on endpoint_m: mean=3.334332, std=4.729436, variance=22.367562
+- loop on keyframes: mean=174.333333, std=1.154701, variance=1.333333
+- loop on loop_events: mean=1.333333, std=1.154701, variance=1.333333
+- loop off distance_m: mean=235.386141, std=0.101441, variance=0.010290
+- loop off endpoint_m: mean=0.377549, std=0.075231, variance=0.005660
+- loop off keyframes: mean=182.666667, std=11.846237, variance=140.333333
+- loop off loop_events: mean=0.000000, std=0.000000, variance=0.000000
+
+미충족 run은 위 표와 각 run_meta.json 및 logs/task03_04.md의 v2 분석을 참조한다.
+
+## 진단 파일럿
+
+| run | rate | keyframes | loops | 누적거리 m | 종점거리 m | 최대속도 m/s | 평균/최대 지연 s | 결과 |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| pilot_rate1 | 1.0 | 176 | 2 | 236.368 | 0.293 | 7.701 | 0.13676980599729371 / 0.23416566848754883 | PASS |
+| pilot_rate05 | 0.5 | 164 | 3 | 235.926 | 1.233 | 4.746 | 0.12036244744994208 / 0.22022581100463867 | PASS |
+
+승인된 v2: extrinsicRot=R.T, extrinsicRPY=R. 중력축 진단: [imu_frame_diagnostic.json](imu_frame_diagnostic.json). 상세: [task03_04.md](../logs/task03_04.md). 파일럿 지연은 /clock − odometry header stamp(시뮬레이션 초)이다.
+
+## v1 / v2 비교
+
+v1은 잘못된 RPY 설정이며 archive_v1_wrong_rpy에 보존했다. 발산은 거리/최대속도 sanity 실패를 뜻한다.
+
+| run | v1 종점 m | v2 종점 m | v1 발산 | v2 발산 |
+|---|---:|---:|---|---|
+| loop_on_r1 | 0.623 | 0.299 | 아니오 | 아니오 |
+| loop_on_r2 | 1.036 | 8.784 | 아니오 | 아니오 |
+| loop_on_r3 | 0.808 | 0.921 | 아니오 | 아니오 |
+| loop_off_r1 | 5.501 | 0.306 | 아니오 | 아니오 |
+| loop_off_r2 | 21.376 | 0.456 | 아니오 | 아니오 |
+| loop_off_r3 | 5.511 | 0.370 | 아니오 | 아니오 |
+| even_loop_on | 986.064 | 0.136 | 예 | 아니오 |
+

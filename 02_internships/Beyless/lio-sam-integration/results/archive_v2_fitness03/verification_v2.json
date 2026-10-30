@@ -1,0 +1,67 @@
+{
+  "all_pass": false,
+  "runs": [
+    {
+      "run": "loop_on_r1",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 234.50694679662044,
+      "endpoint_m": 0.2987387041640967
+    },
+    {
+      "run": "loop_on_r2",
+      "sanity_pass": true,
+      "all_run_checks_pass": false,
+      "error": "AssertionError('Loop event criterion failed')",
+      "distance_m": 236.07412342627603,
+      "endpoint_m": 8.78359711495149
+    },
+    {
+      "run": "loop_on_r3",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 238.7891039156851,
+      "endpoint_m": 0.9206612932141787
+    },
+    {
+      "run": "loop_off_r1",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.2853300497559,
+      "endpoint_m": 0.30618901124489056
+    },
+    {
+      "run": "loop_off_r2",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.48820021716853,
+      "endpoint_m": 0.45612967294717144
+    },
+    {
+      "run": "loop_off_r3",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.3848926089707,
+      "endpoint_m": 0.3703284884024233
+    },
+    {
+      "run": "even_loop_on",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 234.8169899052118,
+      "endpoint_m": 0.13627570102818778
+    }
+  ],
+  "endpoint_comparisons": [
+    true,
+    false,
+    false
+  ],
+  "gravity_tilt_deg": 0.09526445504224819
+}

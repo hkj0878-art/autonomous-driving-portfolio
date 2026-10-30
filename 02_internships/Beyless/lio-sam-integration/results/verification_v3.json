@@ -1,0 +1,73 @@
+{
+  "all_pass": true,
+  "runs": [
+    {
+      "run": "loop_on_r1",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.07651808659153,
+      "endpoint_m": 0.2912859338111555
+    },
+    {
+      "run": "loop_on_r2",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 234.68473315299562,
+      "endpoint_m": 0.1197665990736142
+    },
+    {
+      "run": "loop_on_r3",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.5778009713917,
+      "endpoint_m": 0.22142749393607267
+    },
+    {
+      "run": "loop_off_r1",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.40340610163148,
+      "endpoint_m": 0.7007363373271693
+    },
+    {
+      "run": "loop_off_r2",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 235.64830209721157,
+      "endpoint_m": 0.5637029291303328
+    },
+    {
+      "run": "loop_off_r3",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 236.90908224177613,
+      "endpoint_m": 0.2854170840072515
+    },
+    {
+      "run": "even_loop_on",
+      "sanity_pass": true,
+      "all_run_checks_pass": true,
+      "error": null,
+      "distance_m": 234.7135706614947,
+      "endpoint_m": 0.16466908708851322
+    }
+  ],
+  "endpoint_comparisons": [
+    true,
+    true,
+    true
+  ],
+  "gravity_tilt_deg": 0.09526445504224819,
+  "revision": "v3",
+  "first_batch_exit": 1,
+  "even_failed_attempts": 2,
+  "final_verifier_exit": 0,
+  "even_startup_delay_s": 3.0,
+  "disclosure": "Canonical even is a disclosed startup-readiness retry, not a first-attempt 7/7 robustness result."
+}

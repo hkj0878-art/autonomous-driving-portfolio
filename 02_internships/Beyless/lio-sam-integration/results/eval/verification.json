@@ -1,0 +1,11 @@
+{
+  "metrics_count": 14,
+  "map_count": 7,
+  "figure_count": 12,
+  "max_evo_difference_m": 5.329070518200751e-15,
+  "protected_sources_unchanged": true,
+  "wall_seconds": 10.044422388076782,
+  "peak_rss_mib": 309.26953125,
+  "loop_pair_validation": "PASS: all recorded pairs evaluated",
+  "representative_run": "loop_on_r2"
+}

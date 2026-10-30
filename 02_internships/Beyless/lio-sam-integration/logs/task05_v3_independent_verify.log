@@ -1,0 +1,59 @@
+{
+  "fourteen_metrics_and_seven_maps": true,
+  "twelve_nonempty_figures": {
+    "loop_overlap_on.png": [
+      1400,
+      1600
+    ],
+    "ate_vs_time.png": [
+      800,
+      1800
+    ],
+    "traj_overlay_loop_off_r3.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r3.png": [
+      1200,
+      1400
+    ],
+    "loop_overlap_off.png": [
+      1400,
+      1600
+    ],
+    "rpe_bar.png": [
+      800,
+      2200
+    ],
+    "traj_overlay_loop_off_r1.png": [
+      1200,
+      1400
+    ],
+    "traj_on_vs_off.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_off_r2.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_even_loop_on.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r1.png": [
+      1200,
+      1400
+    ],
+    "traj_overlay_loop_on_r2.png": [
+      1200,
+      1400
+    ]
+  },
+  "protected_sources_unchanged": true,
+  "horizontal_gnss_filter_verified": true,
+  "representative_run": "loop_on_r2",
+  "actual_loop_pairs_verified": true,
+  "loop_pair_count": 9,
+  "overall_completion": "PASS"
+}

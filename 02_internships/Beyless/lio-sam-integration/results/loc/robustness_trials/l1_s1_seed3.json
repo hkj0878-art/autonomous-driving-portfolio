@@ -1,0 +1,18 @@
+{
+  "level": 1,
+  "start": 1,
+  "seed": 3,
+  "start_index": 300,
+  "start_timestamp": 1762852170.6710968,
+  "perturbation_m": 1.0,
+  "perturbation_deg": 5.0,
+  "direction_rad": -3.053196789134342,
+  "yaw_sign": 1,
+  "completed_scans": 30,
+  "lost": false,
+  "position_error_m": 0.017038189013163868,
+  "yaw_error_deg": 0.1117007424618252,
+  "success": true,
+  "rejected_scans": 0,
+  "total_ms": 2120.2773172408342
+}

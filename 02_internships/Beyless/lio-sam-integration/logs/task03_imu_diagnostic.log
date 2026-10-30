@@ -1,0 +1,15 @@
+{
+  "first_100_imu_mean_world_acc_original": [
+    -0.0006440291077107134,
+    0.016296935038141475,
+    9.805687280545381
+  ],
+  "first_100_imu_mean_world_acc_configured": [
+    -3.1194096040403805,
+    -0.13971319060866952,
+    9.295239669671984
+  ],
+  "configured_gravity_tilt_deg": 18.568672226171653,
+  "formula": "q_final=q_from*extQRPY; acc_out=extRot*acc; world_acc=R(q_from)*extrinsicRPY*extrinsicRot*acc",
+  "note": "Diagnostic only; prescribed config unchanged."
+}

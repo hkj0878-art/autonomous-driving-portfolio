@@ -1,0 +1,30 @@
+{
+  "lio_bag_even": {
+    "/points_raw": {
+      "count": 1089,
+      "sha256": "741c982811d6012b04b8dbdaa13861b83337136b41d820012597358efc308849"
+    },
+    "/imu_raw": {
+      "count": 10884,
+      "sha256": "b6d88ddb7889c0e788c787b5df50105210379d0719ac150ff1e4265f70eaf6ec"
+    },
+    "/gps/fix": {
+      "count": 3298,
+      "sha256": "ec9c04ce223382dc8cbc29691ed884bfb6f82a6c8e3941203c84621d2ef77b2b"
+    }
+  },
+  "lio_bag_odd": {
+    "/points_raw": {
+      "count": 1089,
+      "sha256": "44e5263a3d72b90b13fdf9efe3a7295a69744cb7962953addc80c58f2b7327b5"
+    },
+    "/imu_raw": {
+      "count": 10884,
+      "sha256": "b6d88ddb7889c0e788c787b5df50105210379d0719ac150ff1e4265f70eaf6ec"
+    },
+    "/gps/fix": {
+      "count": 3298,
+      "sha256": "ec9c04ce223382dc8cbc29691ed884bfb6f82a6c8e3941203c84621d2ef77b2b"
+    }
+  }
+}
