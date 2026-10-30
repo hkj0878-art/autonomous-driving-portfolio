@@ -1,0 +1,12 @@
+{
+  "rideflux_score": 0.98606,
+  "elapsed_ms": 1037324,
+  "runtime": { "pull_mode": true, "num_inflight": 1, "want": 3, "pull_interval_sec": 10 },
+  "result_dir": "motion_planning_results_l3xztl6v",
+  "summary": {
+    "rideflux_score": 0.98606, "progress_ratio": 0.99693, "comfort": 0.99759,
+    "overlap": 0.01149, "offroad_in_box": 0.00036, "error": 0.00000,
+    "scenarios": 50395, "elapsed_s": 1029.8, "per_scenario_s": 0.02, "errors": 0
+  },
+  "_note": "제출 #4 (v146=c01). zip sha256 1db6e02e478b18c7e188c59fa3aa41a018c2a5a8c11bf41e8a18c5413b668c81. v108 과 지표 동일 — 원인은 eval_test_official_50395.txt 참조. 주최측 확인: 새 제출물 정상 반영."
+}

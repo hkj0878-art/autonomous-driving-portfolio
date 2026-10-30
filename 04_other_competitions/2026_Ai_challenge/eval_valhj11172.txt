@@ -1,0 +1,13 @@
+==================================================
+DX challenge evaluation - 11200 scenarios (val hanam+jeju)
+==================================================
+rideflux_score      0.96371
+progress_ratio      0.99690
+comfort             0.99410
+overlap             0.03321
+offroad_in_box      0.00259
+error               0.00000
+
+주) COUNT=11172 를 주어도 평가기가 batch 64 단위로 마무리하므로 실제 출력은 11200 행이다.
+    정확히 인덱스 0..11171 로 자른 값은 score 0.96363 / 게이트 실패 384건이며,
+    아래 판정표와 clustered bootstrap 은 모두 이 11,172 집합 기준이다.

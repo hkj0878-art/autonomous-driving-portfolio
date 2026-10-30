@@ -11,7 +11,7 @@
 | MORAI OpenSCENARIO | 대화 기반 재구성 | 2025.02 대화의 이벤트·파라미터 구조, OpenSCENARIO 예제 | XML·로컬 참조 검사, Python 12개 통과, XSD/ScenarioRunner 미검증 |
 | Beyless 인턴 — 논문 리뷰 | 공개 논문/코드 검토 기록 | MTR, MTR++, HiVT, DistillDrive 논문·공식 저장소와 인턴 업무 기록 | 문서 6개, 공식 코드 경로 확인. 모델 재학습·성능 재현은 하지 않음 |
 | Beyless 정규직 | 폴더만 | 프로젝트 분류 | 소스 미등록 |
-| 기타 경진대회 | 폴더만 | 참가 내역 | 자료 추가 전 |
+| 2026 자율주행 AI 챌린지 | 실제 제출 원본 | 제출 zip 안의 actor.py(SHA256 일치), 주최측 채점 결과 JSON, 자체 검증 기록 | 공식 test 채점 0.98606(오류 0건). 저장소용 단위 테스트는 없음, 제출 검증 스크립트·학습 데이터는 미포함 |
 
 캡스톤의 기존 랜덤 분할, 초기 점유율 70% 가정, 미래 시각 입·출차량 사용 문제는 그대로 가져오지 않았다. 수정 내용은 [Capstone README](01_university/Capstone/parking-congestion-prediction/README.md)에 적었다.
 

@@ -1,0 +1,3 @@
+# v146 (c01) analytic planner: 기본 평가 환경(waymax + jax 스택) 외 추가 패키지 없음.
+# actor.py 의 import 는 jax / jax.numpy / waymax.{datatypes,agents.actor_core,utils.geometry} 뿐.
+# 공식 예시 submission_example_const_vel 도 빈 requirements.txt 를 포함하므로 형식을 맞춘다.
