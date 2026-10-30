@@ -29,4 +29,4 @@ python -m pip install pytest
 PYTHONPATH=. python -m pytest -q tests
 ```
 
-Python 3.9+ 환경에서 실행을 확인했습니다. ROS1 Noetic + catkin이 설치된 별도 시스템에서 `cd ros1_ws && catkin_make`를 사용해 빌드 검증이 필요합니다. 실제 차량 제어 출력으로 사용해서는 안 됩니다.
+Python 3.13.5에서 오프라인 테스트를 수행했습니다. 코드 문법은 Python 3.9+를 대상으로 합니다. ROS1 Noetic + catkin이 설치된 별도 시스템에서 `cd ros1_ws && catkin_make`를 사용해 빌드 검증이 필요합니다. 실제 차량 제어 출력으로 사용해서는 안 됩니다.
