@@ -1,7 +1,7 @@
-# LIO-SAM Integration
+# LIO-SAM — Mapping / Localization
 
-**구분:** Beyless 인턴십
+LiDAR, IMU, GNSS 데이터를 LIO-SAM에 연결하며 발생했던 문제를 정리하는 폴더다.
 
-LiDAR–IMU–GNSS Mapping/Localization, ROS1/ROS2, 시간 및 좌표계 정합, PointCloud 전처리, GPS factor 검증 작업을 정리합니다.
+PointCloud 필드와 Timestamp, 센서 Extrinsic, GPS factor, ROS1/ROS2 환경 차이 등을 주로 다뤘다.
 
-**상태:** 문서만 생성했습니다. 회사 내부 rosbag/PCD/코드 및 상세 센서 설정은 업로드하지 않았습니다.
+현재는 설명만 남겨 둔 상태다. 실제 코드, rosbag, PCD 맵은 아직 추가하지 않았다.
