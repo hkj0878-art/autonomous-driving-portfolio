@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="0" date="2025-02-05T00:00:00" author="portfolio example" description="Ego speed sweep 20-100 km/h, stored as m/s" />
+  <ParameterValueDistribution>
+    <ScenarioFile filepath="ego_lane_change_then_stop.xosc" />
+    <Deterministic>
+      <DeterministicSingleParameterDistribution parameterName="egoSpeed">
+        <DistributionSet>
+          <Element value="5.555555556" />
+          <Element value="6.944444444" />
+          <Element value="8.333333333" />
+          <Element value="9.722222222" />
+          <Element value="11.111111111" />
+          <Element value="12.500000000" />
+          <Element value="13.888888889" />
+          <Element value="15.277777778" />
+          <Element value="16.666666667" />
+          <Element value="18.055555556" />
+          <Element value="19.444444444" />
+          <Element value="20.833333333" />
+          <Element value="22.222222222" />
+          <Element value="23.611111111" />
+          <Element value="25.000000000" />
+          <Element value="26.388888889" />
+          <Element value="27.777777778" />
+        </DistributionSet>
+      </DeterministicSingleParameterDistribution>
+    </Deterministic>
+  </ParameterValueDistribution>
+</OpenSCENARIO>
