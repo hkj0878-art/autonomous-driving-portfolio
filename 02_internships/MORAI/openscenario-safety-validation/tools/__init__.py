@@ -1,0 +1,1 @@
+"""Local scenario sanity checks."""
