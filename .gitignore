@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+# ROS
+build/
+devel/
+install/
+log/
+logs/
+# Data / secrets
+.env
+.env.*
+*.bag
+*.db3
+*.pcd
+*.plan
+*.onnx
+*.pth
+*.pt
+*.ckpt
