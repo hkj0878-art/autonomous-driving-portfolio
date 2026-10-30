@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(gadis_parking_planner)
+add_compile_options(-std=c++14 -Wall -Wextra)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs nav_msgs geometry_msgs tf2 tf2_geometry_msgs)
+catkin_package()
+include_directories(${catkin_INCLUDE_DIRS})
+add_executable(parking_path_planner_tf src/parking_path_planner_tf.cpp)
+target_link_libraries(parking_path_planner_tf ${catkin_LIBRARIES})
